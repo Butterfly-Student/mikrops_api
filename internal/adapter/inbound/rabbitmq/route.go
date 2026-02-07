@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 
-	"prabogo/internal/model"
-	inbound_port "prabogo/internal/port/inbound"
-	"prabogo/utils/log"
-	"prabogo/utils/rabbitmq"
+	"mikrops/internal/model"
+	inbound_port "mikrops/internal/port/inbound"
+	"mikrops/utils/log"
+	"mikrops/utils/rabbitmq"
 )
 
 func InitRoute(

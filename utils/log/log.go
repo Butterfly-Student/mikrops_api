@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"prabogo/utils/activity"
+	"mikrops/utils/activity"
 )
 
 const (

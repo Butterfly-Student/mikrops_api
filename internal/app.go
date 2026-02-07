@@ -6,33 +6,33 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	joonix "github.com/joonix/log"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 
-	command_inbound_adapter "prabogo/internal/adapter/inbound/command"
-	fiber_inbound_adapter "prabogo/internal/adapter/inbound/fiber"
-	rabbitmq_inbound_adapter "prabogo/internal/adapter/inbound/rabbitmq"
-	temporal_inbound_adapter "prabogo/internal/adapter/inbound/temporal"
-	postgres_outbound_adapter "prabogo/internal/adapter/outbound/postgres"
-	rabbitmq_outbound_adapter "prabogo/internal/adapter/outbound/rabbitmq"
-	redis_outbound_adapter "prabogo/internal/adapter/outbound/redis"
-	temporal_outbound_adapter "prabogo/internal/adapter/outbound/temporal"
-	"prabogo/internal/domain"
-	_ "prabogo/internal/migration/postgres"
-	outbound_port "prabogo/internal/port/outbound"
-	"prabogo/utils"
-	"prabogo/utils/activity"
-	"prabogo/utils/database"
-	"prabogo/utils/log"
-	"prabogo/utils/rabbitmq"
-	"prabogo/utils/redis"
+	command_inbound_adapter "mikrops/internal/adapter/inbound/command"
+	gin_inbound_adapter "mikrops/internal/adapter/inbound/gin"
+	rabbitmq_inbound_adapter "mikrops/internal/adapter/inbound/rabbitmq"
+	temporal_inbound_adapter "mikrops/internal/adapter/inbound/temporal"
+	postgres_outbound_adapter "mikrops/internal/adapter/outbound/postgres"
+	rabbitmq_outbound_adapter "mikrops/internal/adapter/outbound/rabbitmq"
+	redis_outbound_adapter "mikrops/internal/adapter/outbound/redis"
+	temporal_outbound_adapter "mikrops/internal/adapter/outbound/temporal"
+	"mikrops/internal/domain"
+	_ "mikrops/internal/migration/postgres"
+	outbound_port "mikrops/internal/port/outbound"
+	"mikrops/utils"
+	"mikrops/utils/activity"
+	"mikrops/utils/database"
+	"mikrops/utils/log"
+	"mikrops/utils/rabbitmq"
+	"mikrops/utils/redis"
 )
 
 var databaseDriverList = []string{"postgres"}
-var httpDriverList = []string{"fiber"}
+var httpDriverList = []string{"gin"}
 var messageDriverList = []string{"rabbitmq"}
 var workflowDriverList = []string{"temporal"}
 var outboundDatabaseDriver string
@@ -91,10 +91,10 @@ func databaseOutbound(ctx context.Context) outbound_port.DatabasePort {
 		log.WithContext(ctx).Fatal("database driver is not supported")
 		os.Exit(1)
 	}
-	db := database.InitDatabase(ctx, outboundDatabaseDriver)
 
 	switch outboundDatabaseDriver {
 	case "postgres":
+		db := database.InitGormDatabase(ctx, outboundDatabaseDriver)
 		return postgres_outbound_adapter.NewAdapter(db)
 	}
 	return nil
@@ -151,12 +151,12 @@ func (a *App) httpInbound() {
 	}
 
 	switch inboundHttpDriver {
-	case "fiber":
-		app := fiber.New()
-		inboundHttpAdapter := fiber_inbound_adapter.NewAdapter(a.domain)
-		fiber_inbound_adapter.InitRoute(ctx, app, inboundHttpAdapter)
+	case "gin":
+		router := gin.Default()
+		inboundHttpAdapter := gin_inbound_adapter.NewAdapter(a.domain)
+		gin_inbound_adapter.InitRoute(ctx, router, inboundHttpAdapter)
 		go func() {
-			if err := app.Listen(":" + os.Getenv("SERVER_PORT")); err != nil {
+			if err := router.Run(":" + os.Getenv("SERVER_PORT")); err != nil {
 				log.WithContext(ctx).Fatalf("failed to listen and serve: %+v", err)
 			}
 		}()

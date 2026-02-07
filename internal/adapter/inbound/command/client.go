@@ -3,11 +3,11 @@ package command_inbound_adapter
 import (
 	"context"
 
-	"prabogo/internal/domain"
-	"prabogo/internal/model"
-	inbound_port "prabogo/internal/port/inbound"
-	"prabogo/utils/activity"
-	"prabogo/utils/log"
+	"mikrops/internal/domain"
+	"mikrops/internal/model"
+	inbound_port "mikrops/internal/port/inbound"
+	"mikrops/utils/activity"
+	"mikrops/utils/log"
 )
 
 type clientAdapter struct {

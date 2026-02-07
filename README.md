@@ -1,8 +1,8 @@
-# Prabogo
+# MikrOps
 
-![Alt text](./design-docs/images/icon.png "Prabogo Icon")
+![Alt text](./design-docs/images/icon.png "MikrOps Icon")
 
-**Prabogo** is a Go framework designed to simplify project development by providing an interactive command interface and built-in instructions for AI assistance. This framework streamlines common engineering tasks, making it easier for software engineers to scaffold, generate, and manage project components efficiently. With Prabogo, developers benefit from automation and intelligent guidance, accelerating the software development process.
+**MikrOps** is a Go framework designed to simplify project development by providing an interactive command interface and built-in instructions for AI assistance. This framework streamlines common engineering tasks, making it easier for software engineers to scaffold, generate, and manage project components efficiently. With MikrOps, developers benefit from automation and intelligent guidance, accelerating the software development process.
 
 ## Design Docs
 
@@ -10,9 +10,9 @@
 
 ## AI Agents
 
-![Clarifier](./design-docs/images/clarifier.png "Prabogo Clarifier")
-![Task Designer](./design-docs/images/task-designer.png "Prabogo Task Designer")
-![Executor](./design-docs/images/executor.png "Prabogo Executor")
+![Clarifier](./design-docs/images/clarifier.png "MikrOps Clarifier")
+![Task Designer](./design-docs/images/task-designer.png "MikrOps Task Designer")
+![Executor](./design-docs/images/executor.png "MikrOps Executor")
 
 [AI Agents for Development](./design-docs/ai-agents.md)
 
@@ -124,9 +124,28 @@ To install `fzf` (optional):
   make migration-postgres VAL=name
   ```
 
-- `inbound-http-fiber`: Creates HTTP handlers using Fiber framework (requires VAL parameter)
+- `inbound-http-gin`: Creates HTTP handlers using Gin framework (requires VAL parameter)
   ```sh
-  make inbound-http-fiber VAL=name
+  make inbound-http-gin VAL=name
+  ```
+
+### Database Migration Targets
+
+- `migration-up`: Run all pending Goose migrations (up)
+  ```sh
+  make migration-up
+  # With custom directory:
+  make migration-up DIR=internal/migration/postgres
+  ```
+
+- `migration-down`: Rollback one Goose migration (down)
+  ```sh
+  make migration-down
+  ```
+
+- `migration-status`: Show Goose migration status
+  ```sh
+  make migration-status
   ```
 
 - `inbound-message-rabbitmq`: Creates RabbitMQ message consumers (requires VAL parameter)

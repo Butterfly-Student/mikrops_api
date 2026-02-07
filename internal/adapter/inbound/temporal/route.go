@@ -3,8 +3,8 @@ package temporal_inbound_adapter
 import (
 	"context"
 
-	inbound_port "prabogo/internal/port/inbound"
-	"prabogo/utils/log"
+	inbound_port "mikrops/internal/port/inbound"
+	"mikrops/utils/log"
 )
 
 func InitRoute(

@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"prabogo/utils"
+	"mikrops/utils"
 )
 
 const (
@@ -12,15 +12,19 @@ const (
 )
 
 type Client struct {
-	ID int `json:"id" db:"id"`
+	ID int `json:"id" gorm:"primaryKey;autoIncrement"`
 	ClientInput
 }
 
+func (Client) TableName() string {
+	return "clients"
+}
+
 type ClientInput struct {
-	Name      string    `json:"name" db:"name"`
-	BearerKey string    `json:"bearer_key,omitempty" db:"bearer_key"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	Name      string    `json:"name" gorm:"column:name;type:varchar(100)"`
+	BearerKey string    `json:"bearer_key,omitempty" gorm:"column:bearer_key;type:varchar(255);uniqueIndex"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"`
 }
 
 type ClientFilter struct {

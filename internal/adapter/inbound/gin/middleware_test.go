@@ -1,4 +1,4 @@
-package fiber_inbound_adapter_test
+package gin_inbound_adapter_test
 
 import (
 	"net/http"
@@ -7,15 +7,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/redis/go-redis/v9"
 	. "github.com/smartystreets/goconvey/convey"
 
-	fiber_inbound_adapter "prabogo/internal/adapter/inbound/fiber"
-	"prabogo/internal/domain"
-	"prabogo/internal/model"
-	mock_outbound_port "prabogo/tests/mocks/port"
+	gin_inbound_adapter "mikrops/internal/adapter/inbound/gin"
+	"mikrops/internal/domain"
+	"mikrops/internal/model"
+	mock_outbound_port "mikrops/tests/mocks/port"
 )
 
 func TestMiddlewareAdapter(t *testing.T) {
@@ -39,32 +39,34 @@ func TestMiddlewareAdapter(t *testing.T) {
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
 		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort)
-		adapter := fiber_inbound_adapter.NewAdapter(dom)
+		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		Convey("InternalAuth", func() {
-			app := fiber.New()
-			app.Use(func(c *fiber.Ctx) error {
-				return adapter.Middleware().InternalAuth(c)
+			router := gin.New()
+			router.Use(func(c *gin.Context) {
+				adapter.Middleware().InternalAuth(c)
 			})
-			app.Get("/test", func(c *fiber.Ctx) error {
-				return c.SendString("OK")
+			router.GET("/test", func(c *gin.Context) {
+				c.String(http.StatusOK, "OK")
 			})
 
 			Convey("Missing Authorization header", func() {
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusUnauthorized)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 
 			Convey("Empty bearer token", func() {
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Bearer ")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusUnauthorized)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 
 			Convey("Invalid bearer token", func() {
@@ -73,10 +75,11 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Bearer invalid-key")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusUnauthorized)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 
 			Convey("Valid bearer token", func() {
@@ -85,29 +88,31 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Bearer valid-key")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusOK)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusOK)
 			})
 
 			Convey("Malformed authorization header", func() {
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Basic abc123")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusUnauthorized)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 		})
 
 		Convey("ClientAuth", func() {
-			app := fiber.New()
-			app.Use(func(c *fiber.Ctx) error {
-				return adapter.Middleware().ClientAuth(c)
+			router := gin.New()
+			router.Use(func(c *gin.Context) {
+				adapter.Middleware().ClientAuth(c)
 			})
-			app.Get("/test", func(c *fiber.Ctx) error {
-				return c.SendString("OK")
+			router.GET("/test", func(c *gin.Context) {
+				c.String(http.StatusOK, "OK")
 			})
 
 			clientOutput := model.Client{
@@ -122,10 +127,11 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 			Convey("Missing Authorization header", func() {
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusUnauthorized)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 
 			Convey("Client exists in cache", func() {
@@ -133,10 +139,11 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Bearer valid-client-key")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusOK)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusOK)
 			})
 
 			Convey("Client exists in database (cache miss)", func() {
@@ -147,10 +154,11 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Bearer valid-client-key")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusOK)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusOK)
 			})
 
 			Convey("Client does not exist", func() {
@@ -159,10 +167,11 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
 				req.Header.Set("Authorization", "Bearer nonexistent-key")
-				resp, err := app.Test(req)
-				So(err, ShouldBeNil)
-				defer resp.Body.Close()
-				So(resp.StatusCode, ShouldEqual, http.StatusUnauthorized)
+				w := httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 		})
 	})

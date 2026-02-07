@@ -21,11 +21,11 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ~/apps/prabogo:/var/lib/postgresql/data
+      - ~/apps/mikrops:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - POSTGRES_USER=${POSTGRES_USER:-prabogo}
-      - POSTGRES_DB=${POSTGRES_DB:-prabogo}
+      - POSTGRES_USER=${POSTGRES_USER:-mikrops}
+      - POSTGRES_DB=${POSTGRES_DB:-mikrops}
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -33,7 +33,7 @@ services:
       - 5672:5672
       - 15672:15672
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-prabogo}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-mikrops}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-changeme}
 
 volumes:

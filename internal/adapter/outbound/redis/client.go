@@ -6,9 +6,9 @@ import (
 
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
 
-	"prabogo/internal/model"
-	outbound_port "prabogo/internal/port/outbound"
-	"prabogo/utils/redis"
+	"mikrops/internal/model"
+	outbound_port "mikrops/internal/port/outbound"
+	"mikrops/utils/redis"
 )
 
 type clientAdapter struct{}

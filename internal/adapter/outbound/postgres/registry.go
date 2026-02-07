@@ -1,72 +1,75 @@
 package postgres_outbound_adapter
 
 import (
-	"database/sql"
-
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 
-	outbound_port "prabogo/internal/port/outbound"
+	outbound_port "mikrops/internal/port/outbound"
 )
 
 type adapter struct {
-	db         *sql.DB
-	dbexecutor outbound_port.DatabaseExecutor
+	db *gorm.DB
+	tx *gorm.DB
 }
 
-func NewAdapter(db *sql.DB) outbound_port.DatabasePort {
+func NewAdapter(db *gorm.DB) outbound_port.DatabasePort {
 	return &adapter{
 		db: db,
 	}
 }
 
+func (s *adapter) getDB() *gorm.DB {
+	if s.tx != nil {
+		return s.tx
+	}
+	return s.db
+}
+
 func (s *adapter) DoInTransaction(txFunc outbound_port.InTransaction) (out interface{}, err error) {
-	var tx *sql.Tx
-	reg := s
-	if s.dbexecutor == nil {
-		tx, err = s.db.Begin()
-		if err != nil {
-			return
-		}
-		defer func() {
-			if p := recover(); p != nil {
-				_ = tx.Rollback()
-				switch x := p.(type) {
-				case string:
-					err = errors.New(x)
-				case error:
-					err = x
-				default:
-					// Fallback err (per specs, error strings should be lowercase w/o punctuation
-					err = errors.New("unknown panic")
-				}
-			} else if err != nil {
-				xerr := tx.Rollback() // err is non-nil; don't change it
-				if xerr != nil {
-					err = errors.Wrap(err, xerr.Error())
-				}
-			} else {
-				err = tx.Commit() // err is nil; if Commit returns error update err
+	if s.tx != nil {
+		return txFunc(s)
+	}
+
+	tx := s.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			switch x := p.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = errors.New("unknown panic")
 			}
-		}()
-		reg = &adapter{
-			db:         s.db,
-			dbexecutor: tx,
+		} else if err != nil {
+			xerr := tx.Rollback().Error
+			if xerr != nil {
+				err = errors.Wrap(err, xerr.Error())
+			}
+		} else {
+			err = tx.Commit().Error
 		}
+	}()
+
+	reg := &adapter{
+		db: s.db,
+		tx: tx,
 	}
 	out, err = txFunc(reg)
 	if err != nil {
 		if out != nil {
 			return out, err
 		}
-
 		return nil, err
 	}
 	return
 }
 
 func (s *adapter) Client() outbound_port.ClientDatabasePort {
-	if s.dbexecutor != nil {
-		return NewClientAdapter(s.dbexecutor)
-	}
-	return NewClientAdapter(s.db)
+	return NewClientAdapter(s.getDB())
 }

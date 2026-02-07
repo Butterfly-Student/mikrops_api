@@ -1,8 +1,8 @@
-package fiber_inbound_adapter
+package gin_inbound_adapter
 
 import (
-	"prabogo/internal/domain"
-	inbound_port "prabogo/internal/port/inbound"
+	"mikrops/internal/domain"
+	inbound_port "mikrops/internal/port/inbound"
 )
 
 type adapter struct {

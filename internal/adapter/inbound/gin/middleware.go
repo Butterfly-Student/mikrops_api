@@ -1,14 +1,15 @@
-package fiber_inbound_adapter
+package gin_inbound_adapter
 
 import (
+	"net/http"
 	"os"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 
-	"prabogo/internal/domain"
-	"prabogo/internal/model"
-	"prabogo/utils/activity"
-	"prabogo/utils/jwt"
+	"mikrops/internal/domain"
+	"mikrops/internal/model"
+	"mikrops/utils/activity"
+	"mikrops/utils/jwt"
 )
 
 const (
@@ -35,42 +36,49 @@ func NewMiddlewareAdapter(
 }
 
 func (h *middlewareAdapter) InternalAuth(a any) error {
-	c := a.(*fiber.Ctx)
-	authHeader := c.Get(authorizationHeader)
+	c := a.(*gin.Context)
+	authHeader := c.GetHeader(authorizationHeader)
 	var bearerToken string
 	if len(authHeader) > bearerPrefixLen && authHeader[:bearerPrefixLen] == bearerPrefix {
 		bearerToken = authHeader[bearerPrefixLen:]
 	}
 
 	if bearerToken == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized",
 		})
+		c.Abort()
+		return nil
 	}
 
 	if bearerToken != os.Getenv("INTERNAL_KEY") {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized",
 		})
+		c.Abort()
+		return nil
 	}
 
-	return c.Next()
+	c.Next()
+	return nil
 }
 
 func (h *middlewareAdapter) ClientAuth(a any) error {
-	c := a.(*fiber.Ctx)
+	c := a.(*gin.Context)
 	ctx := activity.NewContext("http_client_auth")
-	authHeader := c.Get(authorizationHeader)
+	authHeader := c.GetHeader(authorizationHeader)
 	var bearerToken string
 	if len(authHeader) > bearerPrefixLen && authHeader[:bearerPrefixLen] == bearerPrefix {
 		bearerToken = authHeader[bearerPrefixLen:]
 	}
 
 	if bearerToken == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(model.Response{
+		c.JSON(http.StatusUnauthorized, model.Response{
 			Success: false,
 			Error:   "Unauthorized",
 		})
+		c.Abort()
+		return nil
 	}
 
 	authDriver := os.Getenv("AUTH_DRIVER")
@@ -79,27 +87,34 @@ func (h *middlewareAdapter) ClientAuth(a any) error {
 
 		_, err := jwt.ValidateJWTWithURL(bearerToken, jwksURL)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(model.Response{
+			c.JSON(http.StatusUnauthorized, model.Response{
 				Success: false,
 				Error:   "Unauthorized: " + err.Error(),
 			})
+			c.Abort()
+			return nil
 		}
 	} else {
 		exists, err := h.domain.Client().IsExists(ctx, bearerToken)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(model.Response{
+			c.JSON(http.StatusInternalServerError, model.Response{
 				Success: false,
 				Error:   err.Error(),
 			})
+			c.Abort()
+			return nil
 		}
 
 		if !exists {
-			return c.Status(fiber.StatusUnauthorized).JSON(model.Response{
+			c.JSON(http.StatusUnauthorized, model.Response{
 				Success: false,
 				Error:   "Unauthorized",
 			})
+			c.Abort()
+			return nil
 		}
 	}
 
-	return c.Next()
+	c.Next()
+	return nil
 }

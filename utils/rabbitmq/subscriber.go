@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	"prabogo/utils/log"
+	"mikrops/utils/log"
 )
 
 type ExchangeKind string

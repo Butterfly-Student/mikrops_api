@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"prabogo/internal"
+	"mikrops/internal"
 )
 
 func main() {

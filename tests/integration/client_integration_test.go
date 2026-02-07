@@ -5,7 +5,6 @@ package integration_test
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -14,9 +13,11 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
+	gormpostgres "gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
-	postgres_outbound_adapter "prabogo/internal/adapter/outbound/postgres"
-	"prabogo/internal/model"
+	postgres_outbound_adapter "mikrops/internal/adapter/outbound/postgres"
+	"mikrops/internal/model"
 )
 
 func TestClientIntegration(t *testing.T) {
@@ -46,13 +47,18 @@ func TestClientIntegration(t *testing.T) {
 		t.Fatalf("Failed to get connection string: %v", err)
 	}
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open(gormpostgres.Open(connStr), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer db.Close()
 
-	_, err = db.Exec(`
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatalf("Failed to get sql.DB: %v", err)
+	}
+	defer sqlDB.Close()
+
+	_, err = sqlDB.Exec(`
 		CREATE TABLE IF NOT EXISTS clients (
 			id SERIAL PRIMARY KEY,
 			name VARCHAR(255) NOT NULL,

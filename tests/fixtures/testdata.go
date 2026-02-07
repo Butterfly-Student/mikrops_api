@@ -3,7 +3,7 @@ package fixtures
 import (
 	"time"
 
-	"prabogo/internal/model"
+	"mikrops/internal/model"
 )
 
 type ClientTestData struct{}

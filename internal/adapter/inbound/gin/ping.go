@@ -1,13 +1,14 @@
-package fiber_inbound_adapter
+package gin_inbound_adapter
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 
-	inbound_port "prabogo/internal/port/inbound"
-	"prabogo/utils"
+	inbound_port "mikrops/internal/port/inbound"
+	"mikrops/utils"
 )
 
 type pingAdapter struct{}
@@ -17,7 +18,7 @@ func NewPingAdapter() inbound_port.PingHttpPort {
 }
 
 func (h *pingAdapter) GetResource(a any) error {
-	c := a.(*fiber.Ctx)
+	c := a.(*gin.Context)
 	idle0, total0 := utils.GetCPUSample()
 	time.Sleep(1 * time.Second)
 	idle1, total1 := utils.GetCPUSample()
@@ -29,19 +30,19 @@ func (h *pingAdapter) GetResource(a any) error {
 	total, free, buffers, cached := utils.GetMemorySample()
 	coreCount := utils.GetCoreSample()
 
-	return c.JSON(fiber.Map{
+	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",
-		"core": []fiber.Map{
+		"core": []gin.H{
 			{"core": fmt.Sprintf("%d Core", coreCount)},
 		},
-		"cpu": []fiber.Map{
+		"cpu": []gin.H{
 			{
 				"usage": fmt.Sprintf("%f %%", cpuUsage),
 				"busy":  fmt.Sprintf("%f %%", totalTicks-idleTicks),
 				"total": fmt.Sprintf("%f %%", totalTicks),
 			},
 		},
-		"memory": []fiber.Map{
+		"memory": []gin.H{
 			{
 				"usage":  fmt.Sprintf("%f %%", 100*(1-float64(free)/float64(total))),
 				"total":  fmt.Sprintf("%f MB", float64(total)/1024),
@@ -51,4 +52,5 @@ func (h *pingAdapter) GetResource(a any) error {
 			},
 		},
 	})
+	return nil
 }

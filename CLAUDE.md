@@ -1,16 +1,16 @@
-# Prabogo Project Instructions for AI Assistants
+# MikrOps Project Instructions for AI Assistants
 
-This file contains instructions for AI coding assistants working with the Prabogo project.
+This file contains instructions for AI coding assistants working with the MikrOps project.
 
 ## Project Information
 
-- **Project Name**: Prabogo
+- **Project Name**: MikrOps
 - **Author**: Moch Dieqy Dzulqaidar
 - **License**: MIT License
 - **Go Version**: >= go1.24.0
 
 ## Project Structure
-Prabogo uses a hexagonal architecture (ports and adapters) with the following structure:
+MikrOps uses a hexagonal architecture (ports and adapters) with the following structure:
 - `cmd/`: Application entry point
   - `main.go`: Main application entrypoint
 - `internal/`: Internal implementations
@@ -18,7 +18,7 @@ Prabogo uses a hexagonal architecture (ports and adapters) with the following st
   - `adapter/`: Adapters (inbound and outbound)
     - `inbound/`: Input adapters
       - `command/`: CLI command handlers
-      - `fiber/`: HTTP server using Fiber framework
+      - `gin/`: HTTP server using Gin framework
       - `rabbitmq/`: Message consumers for RabbitMQ
     - `outbound/`: Output adapters
       - `http/`: HTTP clients

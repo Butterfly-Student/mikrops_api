@@ -3,9 +3,9 @@ package rabbitmq_outbound_adapter
 import (
 	"context"
 
-	"prabogo/internal/model"
-	outbound_port "prabogo/internal/port/outbound"
-	"prabogo/utils/rabbitmq"
+	"mikrops/internal/model"
+	outbound_port "mikrops/internal/port/outbound"
+	"mikrops/utils/rabbitmq"
 )
 
 type clientAdapter struct{}

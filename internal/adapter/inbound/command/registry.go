@@ -1,8 +1,8 @@
 package command_inbound_adapter
 
 import (
-	"prabogo/internal/domain"
-	inbound_port "prabogo/internal/port/inbound"
+	"mikrops/internal/domain"
+	inbound_port "mikrops/internal/port/inbound"
 )
 
 type adapter struct {

@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"prabogo/internal/domain/client"
-	outbound_port "prabogo/internal/port/outbound"
+	"mikrops/internal/domain/client"
+	outbound_port "mikrops/internal/port/outbound"
 )
 
 type Domain interface {

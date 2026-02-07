@@ -5,7 +5,7 @@
 package mock_outbound_port
 
 import (
-	model "prabogo/internal/model"
+	model "mikrops/internal/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

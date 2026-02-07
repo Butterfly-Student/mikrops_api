@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	"prabogo/internal/model"
-	outbound_port "prabogo/internal/port/outbound"
-	"prabogo/utils/temporal"
+	"mikrops/internal/model"
+	outbound_port "mikrops/internal/port/outbound"
+	"mikrops/utils/temporal"
 )
 
 type clientWorkflowAdapter struct{}
