@@ -5,7 +5,6 @@
 package mock_outbound_port
 
 import (
-	sql "database/sql"
 	outbound_port "mikrops/internal/port/outbound"
 	reflect "reflect"
 
@@ -49,6 +48,20 @@ func (mr *MockDatabasePortMockRecorder) Client() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Client", reflect.TypeOf((*MockDatabasePort)(nil).Client))
 }
 
+// Customer mocks base method.
+func (m *MockDatabasePort) Customer() outbound_port.CustomerDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Customer")
+	ret0, _ := ret[0].(outbound_port.CustomerDatabasePort)
+	return ret0
+}
+
+// Customer indicates an expected call of Customer.
+func (mr *MockDatabasePortMockRecorder) Customer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Customer", reflect.TypeOf((*MockDatabasePort)(nil).Customer))
+}
+
 // DoInTransaction mocks base method.
 func (m *MockDatabasePort) DoInTransaction(txFunc outbound_port.InTransaction) (interface{}, error) {
 	m.ctrl.T.Helper()
@@ -64,99 +77,156 @@ func (mr *MockDatabasePortMockRecorder) DoInTransaction(txFunc interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DoInTransaction", reflect.TypeOf((*MockDatabasePort)(nil).DoInTransaction), txFunc)
 }
 
-// MockDatabaseExecutor is a mock of DatabaseExecutor interface.
-type MockDatabaseExecutor struct {
-	ctrl     *gomock.Controller
-	recorder *MockDatabaseExecutorMockRecorder
-}
-
-// MockDatabaseExecutorMockRecorder is the mock recorder for MockDatabaseExecutor.
-type MockDatabaseExecutorMockRecorder struct {
-	mock *MockDatabaseExecutor
-}
-
-// NewMockDatabaseExecutor creates a new mock instance.
-func NewMockDatabaseExecutor(ctrl *gomock.Controller) *MockDatabaseExecutor {
-	mock := &MockDatabaseExecutor{ctrl: ctrl}
-	mock.recorder = &MockDatabaseExecutorMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockDatabaseExecutor) EXPECT() *MockDatabaseExecutorMockRecorder {
-	return m.recorder
-}
-
-// Exec mocks base method.
-func (m *MockDatabaseExecutor) Exec(query string, args ...interface{}) (sql.Result, error) {
+// InternetPackage mocks base method.
+func (m *MockDatabasePort) InternetPackage() outbound_port.InternetPackageDatabasePort {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{query}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Exec", varargs...)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Exec indicates an expected call of Exec.
-func (mr *MockDatabaseExecutorMockRecorder) Exec(query interface{}, args ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{query}, args...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDatabaseExecutor)(nil).Exec), varargs...)
-}
-
-// Prepare mocks base method.
-func (m *MockDatabaseExecutor) Prepare(arg0 string) (*sql.Stmt, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Prepare", arg0)
-	ret0, _ := ret[0].(*sql.Stmt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Prepare indicates an expected call of Prepare.
-func (mr *MockDatabaseExecutorMockRecorder) Prepare(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Prepare", reflect.TypeOf((*MockDatabaseExecutor)(nil).Prepare), arg0)
-}
-
-// Query mocks base method.
-func (m *MockDatabaseExecutor) Query(arg0 string, arg1 ...interface{}) (*sql.Rows, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Query", varargs...)
-	ret0, _ := ret[0].(*sql.Rows)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Query indicates an expected call of Query.
-func (mr *MockDatabaseExecutorMockRecorder) Query(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockDatabaseExecutor)(nil).Query), varargs...)
-}
-
-// QueryRow mocks base method.
-func (m *MockDatabaseExecutor) QueryRow(arg0 string, arg1 ...interface{}) *sql.Row {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "QueryRow", varargs...)
-	ret0, _ := ret[0].(*sql.Row)
+	ret := m.ctrl.Call(m, "InternetPackage")
+	ret0, _ := ret[0].(outbound_port.InternetPackageDatabasePort)
 	return ret0
 }
 
-// QueryRow indicates an expected call of QueryRow.
-func (mr *MockDatabaseExecutorMockRecorder) QueryRow(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+// InternetPackage indicates an expected call of InternetPackage.
+func (mr *MockDatabasePortMockRecorder) InternetPackage() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryRow", reflect.TypeOf((*MockDatabaseExecutor)(nil).QueryRow), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InternetPackage", reflect.TypeOf((*MockDatabasePort)(nil).InternetPackage))
+}
+
+// Invoice mocks base method.
+func (m *MockDatabasePort) Invoice() outbound_port.InvoiceDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Invoice")
+	ret0, _ := ret[0].(outbound_port.InvoiceDatabasePort)
+	return ret0
+}
+
+// Invoice indicates an expected call of Invoice.
+func (mr *MockDatabasePortMockRecorder) Invoice() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Invoice", reflect.TypeOf((*MockDatabasePort)(nil).Invoice))
+}
+
+// Nas mocks base method.
+func (m *MockDatabasePort) Nas() outbound_port.NasDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Nas")
+	ret0, _ := ret[0].(outbound_port.NasDatabasePort)
+	return ret0
+}
+
+// Nas indicates an expected call of Nas.
+func (mr *MockDatabasePortMockRecorder) Nas() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Nas", reflect.TypeOf((*MockDatabasePort)(nil).Nas))
+}
+
+// Payment mocks base method.
+func (m *MockDatabasePort) Payment() outbound_port.PaymentDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Payment")
+	ret0, _ := ret[0].(outbound_port.PaymentDatabasePort)
+	return ret0
+}
+
+// Payment indicates an expected call of Payment.
+func (mr *MockDatabasePortMockRecorder) Payment() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Payment", reflect.TypeOf((*MockDatabasePort)(nil).Payment))
+}
+
+// PaymentMethod mocks base method.
+func (m *MockDatabasePort) PaymentMethod() outbound_port.PaymentMethodDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PaymentMethod")
+	ret0, _ := ret[0].(outbound_port.PaymentMethodDatabasePort)
+	return ret0
+}
+
+// PaymentMethod indicates an expected call of PaymentMethod.
+func (mr *MockDatabasePortMockRecorder) PaymentMethod() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PaymentMethod", reflect.TypeOf((*MockDatabasePort)(nil).PaymentMethod))
+}
+
+// Permission mocks base method.
+func (m *MockDatabasePort) Permission() outbound_port.PermissionDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Permission")
+	ret0, _ := ret[0].(outbound_port.PermissionDatabasePort)
+	return ret0
+}
+
+// Permission indicates an expected call of Permission.
+func (mr *MockDatabasePortMockRecorder) Permission() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Permission", reflect.TypeOf((*MockDatabasePort)(nil).Permission))
+}
+
+// Role mocks base method.
+func (m *MockDatabasePort) Role() outbound_port.RoleDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Role")
+	ret0, _ := ret[0].(outbound_port.RoleDatabasePort)
+	return ret0
+}
+
+// Role indicates an expected call of Role.
+func (mr *MockDatabasePortMockRecorder) Role() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Role", reflect.TypeOf((*MockDatabasePort)(nil).Role))
+}
+
+// Staff mocks base method.
+func (m *MockDatabasePort) Staff() outbound_port.StaffDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Staff")
+	ret0, _ := ret[0].(outbound_port.StaffDatabasePort)
+	return ret0
+}
+
+// Staff indicates an expected call of Staff.
+func (mr *MockDatabasePortMockRecorder) Staff() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Staff", reflect.TypeOf((*MockDatabasePort)(nil).Staff))
+}
+
+// Subscription mocks base method.
+func (m *MockDatabasePort) Subscription() outbound_port.SubscriptionDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Subscription")
+	ret0, _ := ret[0].(outbound_port.SubscriptionDatabasePort)
+	return ret0
+}
+
+// Subscription indicates an expected call of Subscription.
+func (mr *MockDatabasePortMockRecorder) Subscription() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscription", reflect.TypeOf((*MockDatabasePort)(nil).Subscription))
+}
+
+// Tenant mocks base method.
+func (m *MockDatabasePort) Tenant() outbound_port.TenantDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Tenant")
+	ret0, _ := ret[0].(outbound_port.TenantDatabasePort)
+	return ret0
+}
+
+// Tenant indicates an expected call of Tenant.
+func (mr *MockDatabasePortMockRecorder) Tenant() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tenant", reflect.TypeOf((*MockDatabasePort)(nil).Tenant))
+}
+
+// WithTenantScope mocks base method.
+func (m *MockDatabasePort) WithTenantScope(tenantID string) outbound_port.DatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTenantScope", tenantID)
+	ret0, _ := ret[0].(outbound_port.DatabasePort)
+	return ret0
+}
+
+// WithTenantScope indicates an expected call of WithTenantScope.
+func (mr *MockDatabasePortMockRecorder) WithTenantScope(tenantID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTenantScope", reflect.TypeOf((*MockDatabasePort)(nil).WithTenantScope), tenantID)
 }

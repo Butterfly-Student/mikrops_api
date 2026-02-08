@@ -61,7 +61,7 @@ MikrOps uses a hexagonal architecture (ports and adapters) with the following st
 - PostgreSQL for database
 - RabbitMQ for message queue
 - Redis for caching
-- Fiber for HTTP server
+- Gin for HTTP server
 
 ## Development Patterns
 - Use Makefile for common operations (see README.md for details)

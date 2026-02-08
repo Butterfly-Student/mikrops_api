@@ -14,3 +14,11 @@ func NewAdapter() outbound_port.CachePort {
 func (s *adapter) Client() outbound_port.ClientCachePort {
 	return NewClientAdapter()
 }
+
+func (s *adapter) Staff() outbound_port.StaffCachePort {
+	return NewStaffAdapter()
+}
+
+func (s *adapter) Customer() outbound_port.CustomerCachePort {
+	return NewCustomerAdapter()
+}

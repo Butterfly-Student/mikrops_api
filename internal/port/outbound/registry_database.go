@@ -5,5 +5,18 @@ type InTransaction func(repoRegistry DatabasePort) (interface{}, error)
 
 type DatabasePort interface {
 	Client() ClientDatabasePort
+	Tenant() TenantDatabasePort
+	Role() RoleDatabasePort
+	Permission() PermissionDatabasePort
+	Staff() StaffDatabasePort
+	Nas() NasDatabasePort
+	InternetPackage() InternetPackageDatabasePort
+	Customer() CustomerDatabasePort
+	Subscription() SubscriptionDatabasePort
+	PaymentMethod() PaymentMethodDatabasePort
+	Invoice() InvoiceDatabasePort
+	Payment() PaymentDatabasePort
+
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
+	WithTenantScope(tenantID string) DatabasePort
 }

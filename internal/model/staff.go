@@ -27,10 +27,13 @@ type StaffInput struct {
 }
 
 type StaffFilter struct {
-	IDs       []string `json:"ids"`
-	TenantIDs []string `json:"tenant_ids"`
-	Emails    []string `json:"emails"`
-	RoleIDs   []int    `json:"role_ids"`
+	IDs        []string `json:"ids"`
+	TenantIDs  []string `json:"tenant_ids"`
+	Emails     []string `json:"emails"`
+	RoleIDs    []int    `json:"role_ids"`
+	IsActive   *bool    `json:"is_active,omitempty"`
+	WithRole   bool     `json:"-"`
+	WithTenant bool     `json:"-"`
 }
 
 func (f StaffFilter) IsEmpty() bool {

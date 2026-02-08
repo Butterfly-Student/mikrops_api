@@ -40,12 +40,15 @@ type InvoiceInput struct {
 }
 
 type InvoiceFilter struct {
-	IDs             []string `json:"ids"`
-	TenantIDs       []string `json:"tenant_ids"`
-	CustomerIDs     []string `json:"customer_ids"`
-	SubscriptionIDs []string `json:"subscription_ids"`
-	Statuses        []string `json:"statuses"`
-	InvoiceNumbers  []string `json:"invoice_numbers"`
+	IDs              []string `json:"ids"`
+	TenantIDs        []string `json:"tenant_ids"`
+	CustomerIDs      []string `json:"customer_ids"`
+	SubscriptionIDs  []string `json:"subscription_ids"`
+	Statuses         []string `json:"statuses"`
+	InvoiceNumbers   []string `json:"invoice_numbers"`
+	WithTenant       bool     `json:"-"`
+	WithCustomer     bool     `json:"-"`
+	WithSubscription bool     `json:"-"`
 }
 
 func (f InvoiceFilter) IsEmpty() bool {

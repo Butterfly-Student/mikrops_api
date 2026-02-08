@@ -58,13 +58,13 @@ type MikrotikHotspotUserInput struct {
 }
 
 type MikrotikSimpleQueue struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Target    string `json:"target"`
-	MaxLimit  string `json:"max_limit"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Target     string `json:"target"`
+	MaxLimit   string `json:"max_limit"`
 	BurstLimit string `json:"burst_limit"`
-	Disabled  string `json:"disabled"`
-	Comment   string `json:"comment"`
+	Disabled   string `json:"disabled"`
+	Comment    string `json:"comment"`
 }
 
 type MikrotikSimpleQueueInput struct {

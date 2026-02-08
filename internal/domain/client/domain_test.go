@@ -25,6 +25,7 @@ func TestClient(t *testing.T) {
 		mockMessagePort := mock_outbound_port.NewMockMessagePort(mockCtrl)
 		mockCachePort := mock_outbound_port.NewMockCachePort(mockCtrl)
 		mockWorkflowPort := mock_outbound_port.NewMockWorkflowPort(mockCtrl)
+		mockHttpPort := mock_outbound_port.NewMockHttpPort(mockCtrl)
 
 		mockClientDatabasePort := mock_outbound_port.NewMockClientDatabasePort(mockCtrl)
 		mockClientMessagePort := mock_outbound_port.NewMockClientMessagePort(mockCtrl)
@@ -36,7 +37,7 @@ func TestClient(t *testing.T) {
 		mockCachePort.EXPECT().Client().Return(mockClientCachePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		clientDomain := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort)
+		clientDomain := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, mockHttpPort)
 
 		inputs := []model.ClientInput{
 			{

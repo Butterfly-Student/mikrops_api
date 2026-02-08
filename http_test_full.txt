@@ -1,0 +1,1499 @@
+﻿=== RUN   TestAuthAdapter
+
+  Test Auth HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+    StaffLogin 
+      Success .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+      Staff not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+    StaffRefresh 
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+    CustomerLogin 
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+      Tenant not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /auth/staff/login         --> mikrops/tests/http_test.TestAuthAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /auth/staff/refresh       --> mikrops/tests/http_test.TestAuthAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /auth/customer/login      --> mikrops/tests/http_test.TestAuthAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /auth/customer/refresh    --> mikrops/tests/http_test.TestAuthAdapter.func1.4 (1 handlers)
+
+    CustomerRefresh 
+      Invalid JSON .
+
+
+7 total assertions
+
+--- PASS: TestAuthAdapter (0.00s)
+=== RUN   TestClientAdapter
+
+  Test Client HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+    Upsert 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+    Find 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+    Delete 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /client-upsert            --> mikrops/tests/http_test.TestClientAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /client-find              --> mikrops/tests/http_test.TestClientAdapter.func1.2 (1 handlers)
+[GIN-debug] POST   /client-delete            --> mikrops/tests/http_test.TestClientAdapter.func1.3 (1 handlers)
+
+      Domain error .
+
+
+19 total assertions
+
+--- PASS: TestClientAdapter (0.00s)
+=== RUN   TestCustomerAdapter
+
+  Test Customer HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+    Create 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+    Delete 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/customers         --> mikrops/tests/http_test.TestCustomerAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/customers/:id     --> mikrops/tests/http_test.TestCustomerAdapter.func1.5 (1 handlers)
+
+      Domain error .
+
+
+35 total assertions
+
+--- PASS: TestCustomerAdapter (0.00s)
+=== RUN   TestInternetPackageAdapter
+
+  Test Internet Package HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+    Create 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+    Delete 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/packages          --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/packages/:id      --> mikrops/tests/http_test.TestInternetPackageAdapter.func1.5 (1 handlers)
+
+      Domain error .
+
+
+51 total assertions
+
+--- PASS: TestInternetPackageAdapter (0.00s)
+=== RUN   TestInvoiceAdapter
+
+  Test Invoice HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+    Create 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+    GenerateBulk 
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices          --> mikrops/tests/http_test.TestInvoiceAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/invoices/:id      --> mikrops/tests/http_test.TestInvoiceAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/invoices/generate --> mikrops/tests/http_test.TestInvoiceAdapter.func1.5 (1 handlers)
+
+      Success .
+
+
+66 total assertions
+
+--- PASS: TestInvoiceAdapter (0.00s)
+=== RUN   TestMikrotikAdapter
+
+  Test Mikrotik HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+    ListPPPoESecrets 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+      NAS not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+    CreatePPPoESecret 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+    ListSimpleQueues 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+    CreateSimpleQueue 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+    GetActiveConnections 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/pppoe/secrets --> mikrops/tests/http_test.TestMikrotikAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/queues    --> mikrops/tests/http_test.TestMikrotikAdapter.func1.4 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id/connections --> mikrops/tests/http_test.TestMikrotikAdapter.func1.5 (1 handlers)
+
+      NAS not found .
+
+
+79 total assertions
+
+--- PASS: TestMikrotikAdapter (0.00s)
+=== RUN   TestNasAdapter
+
+  Test NAS HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+    Create 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+    Delete 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/nas               --> mikrops/tests/http_test.TestNasAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/nas/:id           --> mikrops/tests/http_test.TestNasAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/nas/:id/test      --> mikrops/tests/http_test.TestNasAdapter.func1.6 (1 handlers)
+
+    TestConnection 
+      NAS not found .
+
+
+95 total assertions
+
+--- PASS: TestNasAdapter (0.00s)
+=== RUN   TestPaymentMethodAdapter
+
+  Test Payment Method HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+    Create 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+    Delete 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/payment-methods   --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/payment-methods/:id --> mikrops/tests/http_test.TestPaymentMethodAdapter.func1.5 (1 handlers)
+
+      Domain error .
+
+
+111 total assertions
+
+--- PASS: TestPaymentMethodAdapter (0.00s)
+=== RUN   TestPaymentAdapter
+
+  Test Payment HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payments          --> mikrops/tests/http_test.TestPaymentAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payments/:id      --> mikrops/tests/http_test.TestPaymentAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/verify --> mikrops/tests/http_test.TestPaymentAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/reject --> mikrops/tests/http_test.TestPaymentAdapter.func1.5 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payments          --> mikrops/tests/http_test.TestPaymentAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payments/:id      --> mikrops/tests/http_test.TestPaymentAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/verify --> mikrops/tests/http_test.TestPaymentAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/reject --> mikrops/tests/http_test.TestPaymentAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payments          --> mikrops/tests/http_test.TestPaymentAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payments/:id      --> mikrops/tests/http_test.TestPaymentAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/verify --> mikrops/tests/http_test.TestPaymentAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/reject --> mikrops/tests/http_test.TestPaymentAdapter.func1.5 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payments          --> mikrops/tests/http_test.TestPaymentAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payments/:id      --> mikrops/tests/http_test.TestPaymentAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/verify --> mikrops/tests/http_test.TestPaymentAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/reject --> mikrops/tests/http_test.TestPaymentAdapter.func1.5 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payments          --> mikrops/tests/http_test.TestPaymentAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payments/:id      --> mikrops/tests/http_test.TestPaymentAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/verify --> mikrops/tests/http_test.TestPaymentAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/reject --> mikrops/tests/http_test.TestPaymentAdapter.func1.5 (1 handlers)
+
+    Verify 
+      Success E[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/payments          --> mikrops/tests/http_test.TestPaymentAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/payments/:id      --> mikrops/tests/http_test.TestPaymentAdapter.func1.3 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/verify --> mikrops/tests/http_test.TestPaymentAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/payments/:id/reject --> mikrops/tests/http_test.TestPaymentAdapter.func1.5 (1 handlers)
+
+      Domain error E    controller.go:269: missing call(s) to *mock_outbound_port.MockPaymentDatabasePort.FindByID(is anything) C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:150
+    controller.go:269: aborting test due to missing call(s)
+
+
+
+Errors:
+
+  * C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go 
+  Line 68: - reflect: Call using outbound_port.InTransaction as type func() error 
+  goroutine 20 [running]:
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/reporting/reports.go:150 +0x3c
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/reporting/reports.go:123 +0x5f
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:253 +0xc5
+  panic({0x7ff74856df60?, 0xc000046c10?})
+  	C:/Program Files/Go/src/runtime/panic.go:783 +0x132
+  reflect.Value.call({0x7ff74857fae0?, 0x7ff748718d50?, 0x7ff747ba37cc?}, {0x7ff7486c822e, 0x4}, {0xc00004abe0, 0x1, 0x7ff747a5b334?})
+  	C:/Program Files/Go/src/reflect/value.go:437 +0x1bc6
+  reflect.Value.Call({0x7ff74857fae0?, 0x7ff748718d50?, 0xc00004ab60?}, {0xc00004abe0?, 0x7ff747abc545?, 0x20?})
+  	C:/Program Files/Go/src/reflect/value.go:365 +0xb9
+  github.com/golang/mock/gomock.(*Call).DoAndReturn.func1({0xc000046c00, 0x1, 0xc000445ee0?})
+  	C:/Users/masji/go/pkg/mod/github.com/golang/mock@v1.6.0/gomock/call.go:132 +0x46a
+  github.com/golang/mock/gomock.(*Controller).Call(0xc000220840, {0x7ff74867b840, 0xc000445ee0}, {0x7ff7486d9ac1, 0xf}, {0xc000046c00, 0x1, 0x1})
+  	C:/Users/masji/go/pkg/mod/github.com/golang/mock@v1.6.0/gomock/controller.go:251 +0xee
+  mikrops/tests/mocks/port.(*MockDatabasePort).DoInTransaction(0xc000445ee0, 0xc000590120)
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/mocks/port/mock_registry_database.go:68 +0x92
+  mikrops/internal/domain/payment.(*paymentDomain).Verify(0xc000093cc0, {0x7ff74856df60?, 0x7ff7488aae60?}, {0xc000091ed6, 0x7}, {0x7ff7486d3c6e, 0x9})
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/internal/domain/payment/domain.go:119 +0x104
+  mikrops/internal/adapter/inbound/gin.(*paymentAdapter).Verify(0xc00004ae60, {0x7ff7486c0d40?, 0xc0002ff400})
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/internal/adapter/inbound/gin/payment.go:70 +0x18f
+  mikrops/tests/http_test.TestPaymentAdapter.func1.4(0xc0002ff400)
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:68 +0x85
+  github.com/gin-gonic/gin.(*Context).Next(0xc0002ff400)
+  	C:/Users/masji/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/context.go:192 +0x4e
+  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest(0xc0005afba0, 0xc0002ff400)
+  	C:/Users/masji/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/gin.go:689 +0x435
+  github.com/gin-gonic/gin.(*Engine).ServeHTTP(0xc0005afba0, {0x7ff7488b5e10, 0xc000093c80}, 0xc000234b40)
+  	C:/Users/masji/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/gin.go:643 +0x1ad
+  mikrops/tests/http_test.TestPaymentAdapter.func1.8.1()
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:140 +0x273
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/discovery.go:89 +0x13
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:279 +0x132
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:166 +0x26
+  github.com/jtolds/gls.(*ContextManager).SetValues.func1(0x0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:97 +0x47b
+  github.com/jtolds/gls.EnsureGoroutineId(0xc000220c90)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:19 +0xdc
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc000046bd0, 0xc000220b40, 0xc0005997d0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:63 +0x15d
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:165 +0x319
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/doc.go:78 +0x6b
+  mikrops/tests/http_test.TestPaymentAdapter.func1.8()
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:132 +0xe5
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/discovery.go:89 +0x13
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:279 +0x132
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:166 +0x26
+  github.com/jtolds/gls.(*ContextManager).SetValues.func1(0x0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:97 +0x47b
+  github.com/jtolds/gls.EnsureGoroutineId(0xc000220a50)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:19 +0xdc
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc000046bd0, 0xc000220930, 0xc0005997a0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:63 +0x15d
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:165 +0x319
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/doc.go:78 +0x6b
+  mikrops/tests/http_test.TestPaymentAdapter.func1()
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:131 +0xcde
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/discovery.go:89 +0x13
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:279 +0x132
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:112 +0xca
+  github.com/jtolds/gls.(*ContextManager).SetValues.func1(0x0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:97 +0x47b
+  github.com/jtolds/gls.EnsureGoroutineId.func1()
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:24 +0x1b
+  github.com/jtolds/gls._m(0x7ff748625a00?, 0xc000469d01?)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/stack_tags.go:108 +0x1b
+  github.com/jtolds/gls.github_com_jtolds_gls_markS(0x7ff748661860?, 0xc000589bf0?)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/stack_tags.go:56 +0x13
+  github.com/jtolds/gls.addStackTag(...)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/stack_tags.go:49
+  github.com/jtolds/gls.EnsureGoroutineId(0xc000589c20)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:24 +0xbd
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc000046bd0, 0xc000589bc0, 0xc000443580)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:63 +0x15d
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:107 +0x26b
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/doc.go:76 +0x85
+  mikrops/tests/http_test.TestPaymentAdapter(0xc0000861c0)
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:23 +0x9d
+  testing.tRunner(0xc0000861c0, 0x7ff748718be8)
+  	C:/Program Files/Go/src/testing/testing.go:1934 +0xc3
+  created by testing.(*T).Run in goroutine 1
+  	C:/Program Files/Go/src/testing/testing.go:1997 +0x44b
+  
+  goroutine 1 [chan receive]:
+  testing.(*T).Run(0xc0000036c0, {0x7ff7486dc7be?, 0x7ffc928b3fb0?}, 0x7ff748718be8)
+  	C:/Program Files/Go/src/testing/testing.go:2005 +0x469
+  testing.runTests.func1(0xc0000036c0)
+  	C:/Program Files/Go/src/testing/testing.go:2477 +0x37
+  testing.tRunner(0xc0000036c0, 0xc0001adc70)
+  	C:/Program Files/Go/src/testing/testing.go:1934 +0xc3
+  testing.runTests(0xc000008df8, {0x7ff748ff4840, 0xc, 0xc}, {0x7?, 0xc000208080?, 0x7ff749003540?})
+  	C:/Program Files/Go/src/testing/testing.go:2475 +0x4b4
+  testing.(*M).Run(0xc0001a4f00)
+  	C:/Program Files/Go/src/testing/testing.go:2337 +0x63a
+  main.main()
+  	_testmain.go:67 +0x9b
+  
+
+  * C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go 
+  Line 68: - reflect: Call using outbound_port.InTransaction as type func() error 
+  goroutine 20 [running]:
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/reporting/reports.go:150 +0x3c
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/reporting/reports.go:123 +0x5f
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:253 +0xc5
+  panic({0x7ff74856df60?, 0xc0000473d0?})
+  	C:/Program Files/Go/src/runtime/panic.go:783 +0x132
+  reflect.Value.call({0x7ff74857fae0?, 0x7ff748718d50?, 0x7ff747ba37cc?}, {0x7ff7486c822e, 0x4}, {0xc00004ac00, 0x1, 0x7ff747a5b334?})
+  	C:/Program Files/Go/src/reflect/value.go:437 +0x1bc6
+  reflect.Value.Call({0x7ff74857fae0?, 0x7ff748718d50?, 0xc00004ab80?}, {0xc00004ac00?, 0x7ff747abc545?, 0x20?})
+  	C:/Program Files/Go/src/reflect/value.go:365 +0xb9
+  github.com/golang/mock/gomock.(*Call).DoAndReturn.func1({0xc0000473c0, 0x1, 0xc000046d30?})
+  	C:/Users/masji/go/pkg/mod/github.com/golang/mock@v1.6.0/gomock/call.go:132 +0x46a
+  github.com/golang/mock/gomock.(*Controller).Call(0xc000221020, {0x7ff74867b840, 0xc000046d30}, {0x7ff7486d9ac1, 0xf}, {0xc0000473c0, 0x1, 0x1})
+  	C:/Users/masji/go/pkg/mod/github.com/golang/mock@v1.6.0/gomock/controller.go:251 +0xee
+  mikrops/tests/mocks/port.(*MockDatabasePort).DoInTransaction(0xc000046d30, 0xc0005902e0)
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/mocks/port/mock_registry_database.go:68 +0x92
+  mikrops/internal/domain/payment.(*paymentDomain).Verify(0xc000093e80, {0x7ff74856df60?, 0x7ff7488aae60?}, {0xc0005960d6, 0x7}, {0x7ff7486d3c6e, 0x9})
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/internal/domain/payment/domain.go:119 +0x104
+  mikrops/internal/adapter/inbound/gin.(*paymentAdapter).Verify(0xc00004ae80, {0x7ff7486c0d40?, 0xc0002ff700})
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/internal/adapter/inbound/gin/payment.go:70 +0x18f
+  mikrops/tests/http_test.TestPaymentAdapter.func1.4(0xc0002ff700)
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:68 +0x85
+  github.com/gin-gonic/gin.(*Context).Next(0xc0002ff700)
+  	C:/Users/masji/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/context.go:192 +0x4e
+  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest(0xc0005afd40, 0xc0002ff700)
+  	C:/Users/masji/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/gin.go:689 +0x435
+  github.com/gin-gonic/gin.(*Engine).ServeHTTP(0xc0005afd40, {0x7ff7488b5e10, 0xc000093e40}, 0xc000234f00)
+  	C:/Users/masji/go/pkg/mod/github.com/gin-gonic/gin@v1.11.0/gin.go:643 +0x1ad
+  mikrops/tests/http_test.TestPaymentAdapter.func1.8.2()
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:155 +0x194
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/discovery.go:89 +0x13
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:279 +0x132
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:166 +0x26
+  github.com/jtolds/gls.(*ContextManager).SetValues.func1(0x0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:97 +0x47b
+  github.com/jtolds/gls.EnsureGoroutineId(0xc000221350)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:19 +0xdc
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc000046bd0, 0xc0002212f0, 0xc000599980)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:63 +0x15d
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:165 +0x319
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/doc.go:78 +0x6b
+  mikrops/tests/http_test.TestPaymentAdapter.func1.8()
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:149 +0x169
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/discovery.go:89 +0x13
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:279 +0x132
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:166 +0x26
+  github.com/jtolds/gls.(*ContextManager).SetValues.func1(0x0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:97 +0x47b
+  github.com/jtolds/gls.EnsureGoroutineId(0xc000221260)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:19 +0xdc
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc000046bd0, 0xc000221200, 0xc000599938)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:63 +0x15d
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:165 +0x319
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/doc.go:78 +0x6b
+  mikrops/tests/http_test.TestPaymentAdapter.func1()
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:131 +0xcde
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/discovery.go:89 +0x13
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:279 +0x132
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:112 +0xca
+  github.com/jtolds/gls.(*ContextManager).SetValues.func1(0x0)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:97 +0x47b
+  github.com/jtolds/gls.EnsureGoroutineId.func1()
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:24 +0x1b
+  github.com/jtolds/gls._m(0x7ff748625a00?, 0xc000469d01?)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/stack_tags.go:108 +0x1b
+  github.com/jtolds/gls.github_com_jtolds_gls_markS(0x7ff748661860?, 0xc000589bf0?)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/stack_tags.go:56 +0x13
+  github.com/jtolds/gls.addStackTag(...)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/stack_tags.go:49
+  github.com/jtolds/gls.EnsureGoroutineId(0xc000589c20)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/gid.go:24 +0xbd
+  github.com/jtolds/gls.(*ContextManager).SetValues(0xc000046bd0, 0xc000589bc0, 0xc000443580)
+  	C:/Users/masji/go/pkg/mod/github.com/jtolds/gls@v4.20.0+incompatible/context.go:63 +0x15d
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/context.go:107 +0x26b
+  	C:/Users/masji/go/pkg/mod/github.com/smartystreets/goconvey@v1.8.1/convey/doc.go:76 +0x85
+  mikrops/tests/http_test.TestPaymentAdapter(0xc0000861c0)
+  	C:/Users/masji/web/MikroBill-TA/mikops_api/tests/http/payment_test.go:23 +0x9d
+  testing.tRunner(0xc0000861c0, 0x7ff748718be8)
+  	C:/Program Files/Go/src/testing/testing.go:1934 +0xc3
+  created by testing.(*T).Run in goroutine 1
+  	C:/Program Files/Go/src/testing/testing.go:1997 +0x44b
+  
+  goroutine 1 [chan receive]:
+  testing.(*T).Run(0xc0000036c0, {0x7ff7486dc7be?, 0x7ffc928b3fb0?}, 0x7ff748718be8)
+  	C:/Program Files/Go/src/testing/testing.go:2005 +0x469
+  testing.runTests.func1(0xc0000036c0)
+  	C:/Program Files/Go/src/testing/testing.go:2477 +0x37
+  testing.tRunner(0xc0000036c0, 0xc0001adc70)
+  	C:/Program Files/Go/src/testing/testing.go:1934 +0xc3
+  testing.runTests(0xc000008df8, {0x7ff748ff4840, 0xc, 0xc}, {0x7?, 0xc000208080?, 0x7ff749003540?})
+  	C:/Program Files/Go/src/testing/testing.go:2475 +0x4b4
+  testing.(*M).Run(0xc0001a4f00)
+  	C:/Program Files/Go/src/testing/testing.go:2337 +0x63a
+  main.main()
+  	_testmain.go:67 +0x9b
+  
+
+
+119 total assertions
+
+--- FAIL: TestPaymentAdapter (0.01s)
+=== RUN   TestStaffAdapter
+
+  Test Staff HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+    Create 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+    Delete 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/staffs            --> mikrops/tests/http_test.TestStaffAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.4 (1 handlers)
+[GIN-debug] DELETE /api/v1/staffs/:id        --> mikrops/tests/http_test.TestStaffAdapter.func1.5 (1 handlers)
+
+      Domain error .
+
+
+136 total assertions
+
+--- PASS: TestStaffAdapter (0.15s)
+=== RUN   TestSubscriptionAdapter
+
+  Test Subscription HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    List 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    Create 
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+      Domain error - customer not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+      Not found .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    Update 
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    Suspend 
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    Activate 
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    Cancel 
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.1 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions     --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.2 (1 handlers)
+[GIN-debug] GET    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.3 (1 handlers)
+[GIN-debug] PUT    /api/v1/subscriptions/:id --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.4 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/suspend --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.5 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/activate --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.6 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/cancel --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.7 (1 handlers)
+[GIN-debug] POST   /api/v1/subscriptions/:id/vacation --> mikrops/tests/http_test.TestSubscriptionAdapter.func1.8 (1 handlers)
+
+    SetVacation 
+      Invalid JSON .
+
+
+151 total assertions
+
+--- PASS: TestSubscriptionAdapter (0.00s)
+=== RUN   TestTenantAdapter
+
+  Test Tenant HTTP Adapter [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.1 (1 handlers)
+[GIN-debug] PUT    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.2 (1 handlers)
+
+    Get 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.1 (1 handlers)
+[GIN-debug] PUT    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.2 (1 handlers)
+
+      Domain error .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.1 (1 handlers)
+[GIN-debug] PUT    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.2 (1 handlers)
+
+    Update 
+      Success ..[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.1 (1 handlers)
+[GIN-debug] PUT    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.2 (1 handlers)
+
+      Invalid JSON .[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.1 (1 handlers)
+[GIN-debug] PUT    /api/v1/tenant            --> mikrops/tests/http_test.TestTenantAdapter.func1.2 (1 handlers)
+
+      Domain error .
+
+
+158 total assertions
+
+--- PASS: TestTenantAdapter (0.00s)
+FAIL
+FAIL	mikrops/tests/http	0.365s
+FAIL

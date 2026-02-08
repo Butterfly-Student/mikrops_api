@@ -25,9 +25,11 @@ type PaymentMethodInput struct {
 }
 
 type PaymentMethodFilter struct {
-	IDs       []string `json:"ids"`
-	TenantIDs []string `json:"tenant_ids"`
-	Types     []string `json:"types"`
+	IDs        []string `json:"ids"`
+	TenantIDs  []string `json:"tenant_ids"`
+	Types      []string `json:"types"`
+	IsActive   *bool    `json:"is_active,omitempty"`
+	WithTenant bool     `json:"-"`
 }
 
 func (f PaymentMethodFilter) IsEmpty() bool {

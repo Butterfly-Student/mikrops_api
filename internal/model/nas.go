@@ -30,9 +30,11 @@ type NasInput struct {
 }
 
 type NasFilter struct {
-	IDs       []string `json:"ids"`
-	TenantIDs []string `json:"tenant_ids"`
-	Hosts     []string `json:"hosts"`
+	IDs        []string `json:"ids"`
+	TenantIDs  []string `json:"tenant_ids"`
+	Hosts      []string `json:"hosts"`
+	IsActive   *bool    `json:"is_active,omitempty"`
+	WithTenant bool     `json:"-"`
 }
 
 func (f NasFilter) IsEmpty() bool {

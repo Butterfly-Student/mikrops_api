@@ -29,10 +29,13 @@ type InternetPackageInput struct {
 }
 
 type InternetPackageFilter struct {
-	IDs       []string `json:"ids"`
-	TenantIDs []string `json:"tenant_ids"`
-	Types     []string `json:"types"`
-	Names     []string `json:"names"`
+	IDs           []string `json:"ids"`
+	TenantIDs     []string `json:"tenant_ids"`
+	Types         []string `json:"types"`
+	Names         []string `json:"names"`
+	BillingCycles []string `json:"billing_cycles"`
+	IsActive      *bool    `json:"is_active,omitempty"`
+	WithTenant    bool     `json:"-"`
 }
 
 func (f InternetPackageFilter) IsEmpty() bool {

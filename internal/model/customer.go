@@ -38,6 +38,9 @@ type CustomerFilter struct {
 	Usernames      []string `json:"usernames"`
 	PppoeUsernames []string `json:"pppoe_usernames"`
 	NasIDs         []string `json:"nas_ids"`
+	IsActive       *bool    `json:"is_active,omitempty"`
+	WithTenant     bool     `json:"-"`
+	WithNas        bool     `json:"-"`
 }
 
 func (f CustomerFilter) IsEmpty() bool {

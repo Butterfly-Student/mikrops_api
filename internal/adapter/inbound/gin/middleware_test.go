@@ -27,6 +27,7 @@ func TestMiddlewareAdapter(t *testing.T) {
 		mockMessagePort := mock_outbound_port.NewMockMessagePort(mockCtrl)
 		mockCachePort := mock_outbound_port.NewMockCachePort(mockCtrl)
 		mockWorkflowPort := mock_outbound_port.NewMockWorkflowPort(mockCtrl)
+		mockHttpPort := mock_outbound_port.NewMockHttpPort(mockCtrl)
 
 		mockClientDatabasePort := mock_outbound_port.NewMockClientDatabasePort(mockCtrl)
 		mockClientMessagePort := mock_outbound_port.NewMockClientMessagePort(mockCtrl)
@@ -38,8 +39,8 @@ func TestMiddlewareAdapter(t *testing.T) {
 		mockMessagePort.EXPECT().Client().Return(mockClientMessagePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort)
-		adapter := gin_inbound_adapter.NewAdapter(dom)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, mockHttpPort)
+		adapter := gin_inbound_adapter.NewAdapter(dom, mockHttpPort)
 
 		Convey("InternalAuth", func() {
 			router := gin.New()

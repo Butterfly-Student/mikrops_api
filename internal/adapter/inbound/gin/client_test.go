@@ -28,6 +28,7 @@ func TestClientAdapter(t *testing.T) {
 		mockMessagePort := mock_outbound_port.NewMockMessagePort(mockCtrl)
 		mockCachePort := mock_outbound_port.NewMockCachePort(mockCtrl)
 		mockWorkflowPort := mock_outbound_port.NewMockWorkflowPort(mockCtrl)
+		mockHttpPort := mock_outbound_port.NewMockHttpPort(mockCtrl)
 
 		mockClientDatabasePort := mock_outbound_port.NewMockClientDatabasePort(mockCtrl)
 		mockClientCachePort := mock_outbound_port.NewMockClientCachePort(mockCtrl)
@@ -38,8 +39,8 @@ func TestClientAdapter(t *testing.T) {
 		mockCachePort.EXPECT().Client().Return(mockClientCachePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort)
-		adapter := gin_inbound_adapter.NewAdapter(dom)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, mockHttpPort)
+		adapter := gin_inbound_adapter.NewAdapter(dom, mockHttpPort)
 
 		router := gin.New()
 		router.POST("/client-upsert", func(c *gin.Context) {

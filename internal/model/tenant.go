@@ -27,9 +27,11 @@ type TenantInput struct {
 }
 
 type TenantFilter struct {
-	IDs    []string `json:"ids"`
-	Slugs  []string `json:"slugs"`
-	Emails []string `json:"emails"`
+	IDs               []string `json:"ids"`
+	Slugs             []string `json:"slugs"`
+	Emails            []string `json:"emails"`
+	IsActive          *bool    `json:"is_active,omitempty"`
+	SubscriptionPlans []string `json:"subscription_plans"`
 }
 
 func TenantPrepare(v *TenantInput) {

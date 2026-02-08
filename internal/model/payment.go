@@ -35,11 +35,16 @@ type PaymentInput struct {
 }
 
 type PaymentFilter struct {
-	IDs              []string `json:"ids"`
-	TenantIDs        []string `json:"tenant_ids"`
-	InvoiceIDs       []string `json:"invoice_ids"`
-	PaymentMethodIDs []string `json:"payment_method_ids"`
-	Statuses         []string `json:"statuses"`
+	IDs               []string `json:"ids"`
+	TenantIDs         []string `json:"tenant_ids"`
+	InvoiceIDs        []string `json:"invoice_ids"`
+	PaymentMethodIDs  []string `json:"payment_method_ids"`
+	Statuses          []string `json:"statuses"`
+	VerifiedByIDs     []string `json:"verified_by_ids"`
+	WithTenant        bool     `json:"-"`
+	WithInvoice       bool     `json:"-"`
+	WithPaymentMethod bool     `json:"-"`
+	WithVerifiedBy    bool     `json:"-"`
 }
 
 func (f PaymentFilter) IsEmpty() bool {

@@ -5,6 +5,9 @@
 package mock_outbound_port
 
 import (
+	outbound_port "mikrops/internal/port/outbound"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -29,4 +32,18 @@ func NewMockHttpPort(ctrl *gomock.Controller) *MockHttpPort {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockHttpPort) EXPECT() *MockHttpPortMockRecorder {
 	return m.recorder
+}
+
+// Mikrotik mocks base method.
+func (m *MockHttpPort) Mikrotik() outbound_port.MikrotikPort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Mikrotik")
+	ret0, _ := ret[0].(outbound_port.MikrotikPort)
+	return ret0
+}
+
+// Mikrotik indicates an expected call of Mikrotik.
+func (mr *MockHttpPortMockRecorder) Mikrotik() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mikrotik", reflect.TypeOf((*MockHttpPort)(nil).Mikrotik))
 }

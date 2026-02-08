@@ -47,3 +47,31 @@ func (mr *MockCachePortMockRecorder) Client() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Client", reflect.TypeOf((*MockCachePort)(nil).Client))
 }
+
+// Customer mocks base method.
+func (m *MockCachePort) Customer() outbound_port.CustomerCachePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Customer")
+	ret0, _ := ret[0].(outbound_port.CustomerCachePort)
+	return ret0
+}
+
+// Customer indicates an expected call of Customer.
+func (mr *MockCachePortMockRecorder) Customer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Customer", reflect.TypeOf((*MockCachePort)(nil).Customer))
+}
+
+// Staff mocks base method.
+func (m *MockCachePort) Staff() outbound_port.StaffCachePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Staff")
+	ret0, _ := ret[0].(outbound_port.StaffCachePort)
+	return ret0
+}
+
+// Staff indicates an expected call of Staff.
+func (mr *MockCachePortMockRecorder) Staff() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Staff", reflect.TypeOf((*MockCachePort)(nil).Staff))
+}

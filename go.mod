@@ -7,6 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-routeros/routeros/v3 v3.0.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
@@ -25,6 +26,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
 	go.temporal.io/api v1.60.0
 	go.temporal.io/sdk v1.39.0
+	golang.org/x/crypto v0.45.0
 	google.golang.org/api v0.234.0
 	google.golang.org/protobuf v1.36.9
 	gorm.io/driver/postgres v1.6.0
@@ -130,7 +132,6 @@ require (
 	go.uber.org/mock v0.5.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.20.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/mod v0.29.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect

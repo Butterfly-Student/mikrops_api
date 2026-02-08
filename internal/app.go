@@ -16,6 +16,7 @@ import (
 	gin_inbound_adapter "mikrops/internal/adapter/inbound/gin"
 	rabbitmq_inbound_adapter "mikrops/internal/adapter/inbound/rabbitmq"
 	temporal_inbound_adapter "mikrops/internal/adapter/inbound/temporal"
+	http_outbound_adapter "mikrops/internal/adapter/outbound/http"
 	postgres_outbound_adapter "mikrops/internal/adapter/outbound/postgres"
 	rabbitmq_outbound_adapter "mikrops/internal/adapter/outbound/rabbitmq"
 	redis_outbound_adapter "mikrops/internal/adapter/outbound/redis"
@@ -44,8 +45,9 @@ var inboundMessageDriver string
 var inboundWorkflowDriver string
 
 type App struct {
-	ctx    context.Context
-	domain domain.Domain
+	ctx      context.Context
+	domain   domain.Domain
+	httpPort outbound_port.HttpPort
 }
 
 func NewApp() *App {
@@ -60,16 +62,19 @@ func NewApp() *App {
 	inboundHttpDriver = os.Getenv("INBOUND_HTTP_DRIVER")
 	inboundMessageDriver = os.Getenv("INBOUND_MESSAGE_DRIVER")
 	inboundWorkflowDriver = os.Getenv("INBOUND_WORKFLOW_DRIVER")
+	hp := httpOutbound()
 	domain := domain.NewDomain(
 		databaseOutbound(ctx),
 		messageOutbound(ctx),
 		cacheOutbound(ctx),
 		workflowOutbound(ctx),
+		hp,
 	)
 
 	return &App{
-		ctx:    ctx,
-		domain: domain,
+		ctx:      ctx,
+		domain:   domain,
+		httpPort: hp,
 	}
 }
 
@@ -143,6 +148,10 @@ func workflowOutbound(ctx context.Context) outbound_port.WorkflowPort {
 	return nil
 }
 
+func httpOutbound() outbound_port.HttpPort {
+	return http_outbound_adapter.NewAdapter()
+}
+
 func (a *App) httpInbound() {
 	ctx := a.ctx
 	if !utils.IsInList(httpDriverList, inboundHttpDriver) {
@@ -153,7 +162,7 @@ func (a *App) httpInbound() {
 	switch inboundHttpDriver {
 	case "gin":
 		router := gin.Default()
-		inboundHttpAdapter := gin_inbound_adapter.NewAdapter(a.domain)
+		inboundHttpAdapter := gin_inbound_adapter.NewAdapter(a.domain, a.httpPort)
 		gin_inbound_adapter.InitRoute(ctx, router, inboundHttpAdapter)
 		go func() {
 			if err := router.Run(":" + os.Getenv("SERVER_PORT")); err != nil {
