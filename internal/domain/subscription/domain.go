@@ -62,7 +62,19 @@ func (d *subscriptionDomain) getNasCredentials(nasID string) (model.Nas, string,
 	return nas, password, nil
 }
 
-func (d *subscriptionDomain) syncToMikrotik(subscription model.Subscription, customer model.Customer, pkg model.InternetPackage) error {
+func (d *subscriptionDomain) getPppoeUsername(subscription model.Subscription) string {
+	// Try to get PPPoE username from linked PPPoE account
+	if subscription.PppoeAccountID != nil && *subscription.PppoeAccountID != "" {
+		account, err := d.databasePort.PppoeAccount().FindByID(*subscription.PppoeAccountID)
+		if err == nil {
+			return account.Username
+		}
+	}
+	// Fallback to MikrotikSecretName
+	return subscription.MikrotikSecretName
+}
+
+func (d *subscriptionDomain) syncToMikrotik(subscription model.Subscription, pppoeUsername string, pppoePassword string, pkg model.InternetPackage) error {
 	nas, password, err := d.getNasCredentials(subscription.NasID)
 	if err != nil {
 		return err
@@ -70,13 +82,19 @@ func (d *subscriptionDomain) syncToMikrotik(subscription model.Subscription, cus
 
 	mikrotikPort := d.httpPort.Mikrotik()
 
+	// Determine profile name
+	profileName := pkg.Name
+	if pkg.ProfileName != "" {
+		profileName = pkg.ProfileName
+	}
+
 	// Create/update PPPoE secret
 	secretInput := model.MikrotikPPPoESecretInput{
-		Name:     customer.PppoeUsername,
-		Password: customer.PppoePassword,
+		Name:     pppoeUsername,
+		Password: pppoePassword,
 		Service:  "pppoe",
-		Profile:  pkg.Name,
-		Comment:  fmt.Sprintf("sub:%s cust:%s", subscription.ID, customer.ID),
+		Profile:  profileName,
+		Comment:  fmt.Sprintf("sub:%s", subscription.ID),
 	}
 	err = mikrotikPort.CreatePPPoESecret(nas.Host, nas.RestPort, nas.Username, password, nas.UseSSL, secretInput)
 	if err != nil {
@@ -91,7 +109,7 @@ func (d *subscriptionDomain) syncToMikrotik(subscription model.Subscription, cus
 	}
 	queueInput := model.MikrotikSimpleQueueInput{
 		Name:       subscription.MikrotikQueueName,
-		Target:     fmt.Sprintf("<pppoe-%s>", customer.PppoeUsername),
+		Target:     fmt.Sprintf("<pppoe-%s>", pppoeUsername),
 		MaxLimit:   maxLimit,
 		BurstLimit: burstLimit,
 		Comment:    fmt.Sprintf("sub:%s", subscription.ID),
@@ -162,24 +180,33 @@ func (d *subscriptionDomain) removeFromMikrotik(subscription model.Subscription)
 }
 
 func (d *subscriptionDomain) Create(ctx context.Context, input model.SubscriptionInput) (model.Subscription, error) {
-	// Get customer for PPPoE credentials
-	customer, err := d.databasePort.Customer().FindByID(input.CustomerID)
-	if err != nil {
-		return model.Subscription{}, stacktrace.Propagate(err, "failed to find customer")
-	}
-
 	// Get internet package for queue configuration
 	pkg, err := d.databasePort.InternetPackage().FindByID(input.PackageID)
 	if err != nil {
 		return model.Subscription{}, stacktrace.Propagate(err, "failed to find internet package")
 	}
 
-	// Set default status and generate MikroTik names
+	// Set default status
 	if input.Status == "" {
 		input.Status = model.SubscriptionStatusActive
 	}
-	input.MikrotikSecretName = customer.PppoeUsername
-	input.MikrotikQueueName = fmt.Sprintf("queue_%s", customer.PppoeUsername)
+
+	// Get PPPoE credentials from pppoe_accounts if linked
+	var pppoeUsername, pppoePassword string
+	if input.PppoeAccountID != nil && *input.PppoeAccountID != "" {
+		account, err := d.databasePort.PppoeAccount().FindByID(*input.PppoeAccountID)
+		if err != nil {
+			return model.Subscription{}, stacktrace.Propagate(err, "failed to find pppoe account")
+		}
+		pppoeUsername = account.Username
+		pppoePassword = account.PasswordEncrypted
+		input.MikrotikSecretName = account.Username
+		input.MikrotikQueueName = fmt.Sprintf("queue_%s", account.Username)
+	} else {
+		// Fallback: use subscription ID-based names
+		input.MikrotikSecretName = fmt.Sprintf("sub_%s", input.CustomerID[:8])
+		input.MikrotikQueueName = fmt.Sprintf("queue_sub_%s", input.CustomerID[:8])
+	}
 
 	// Create subscription
 	subscription, err := d.databasePort.Subscription().Create(input)
@@ -187,9 +214,11 @@ func (d *subscriptionDomain) Create(ctx context.Context, input model.Subscriptio
 		return model.Subscription{}, stacktrace.Propagate(err, "failed to create subscription")
 	}
 
-	// Sync to MikroTik (create PPPoE secret + simple queue)
-	if err := d.syncToMikrotik(subscription, customer, pkg); err != nil {
-		return subscription, stacktrace.Propagate(err, "failed to sync subscription to MikroTik")
+	// Sync to MikroTik if we have PPPoE credentials
+	if pppoeUsername != "" {
+		if err := d.syncToMikrotik(subscription, pppoeUsername, pppoePassword, pkg); err != nil {
+			return subscription, stacktrace.Propagate(err, "failed to sync subscription to MikroTik")
+		}
 	}
 
 	return subscription, nil

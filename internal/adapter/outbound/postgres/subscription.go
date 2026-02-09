@@ -39,6 +39,9 @@ func (a *subscriptionAdapter) FindByFilter(filter model.SubscriptionFilter) ([]m
 	if filter.WithNas {
 		query = query.Preload("Nas")
 	}
+	if filter.WithPppoeAccount {
+		query = query.Preload("PppoeAccount")
+	}
 
 	result := query.Find(&subscriptions)
 	return subscriptions, result.Error
@@ -94,6 +97,9 @@ func applySubscriptionFilter(query *gorm.DB, filter model.SubscriptionFilter) *g
 	}
 	if len(filter.Statuses) > 0 {
 		query = query.Where("status IN ?", filter.Statuses)
+	}
+	if len(filter.PppoeAccountIDs) > 0 {
+		query = query.Where("pppoe_account_id IN ?", filter.PppoeAccountIDs)
 	}
 	if filter.AutoRenew != nil {
 		query = query.Where("auto_renew = ?", *filter.AutoRenew)

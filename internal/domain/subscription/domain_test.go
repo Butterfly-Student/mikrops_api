@@ -31,14 +31,14 @@ func TestSubscription(t *testing.T) {
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
 
 		mockSubscriptionDatabasePort := mock_outbound_port.NewMockSubscriptionDatabasePort(mockCtrl)
-		mockCustomerDatabasePort := mock_outbound_port.NewMockCustomerDatabasePort(mockCtrl)
 		mockInternetPackageDatabasePort := mock_outbound_port.NewMockInternetPackageDatabasePort(mockCtrl)
 		mockNasDatabasePort := mock_outbound_port.NewMockNasDatabasePort(mockCtrl)
+		mockPppoeAccountDatabasePort := mock_outbound_port.NewMockPppoeAccountDatabasePort(mockCtrl)
 
 		mockDatabasePort.EXPECT().Subscription().Return(mockSubscriptionDatabasePort).AnyTimes()
-		mockDatabasePort.EXPECT().Customer().Return(mockCustomerDatabasePort).AnyTimes()
 		mockDatabasePort.EXPECT().InternetPackage().Return(mockInternetPackageDatabasePort).AnyTimes()
 		mockDatabasePort.EXPECT().Nas().Return(mockNasDatabasePort).AnyTimes()
+		mockDatabasePort.EXPECT().PppoeAccount().Return(mockPppoeAccountDatabasePort).AnyTimes()
 		mockHttpPort.EXPECT().Mikrotik().Return(mockMikrotikPort).AnyTimes()
 
 		subscriptionDomain := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, mockHttpPort)
@@ -57,11 +57,13 @@ func TestSubscription(t *testing.T) {
 			},
 		}
 
-		customer := model.Customer{
-			ID: "customer-123",
-			CustomerInput: model.CustomerInput{
-				PppoeUsername: "pppoe_abc123",
-				PppoePassword: "password123",
+		pppoeAccountID := "pppoe-account-123"
+
+		pppoeAccount := model.PppoeAccount{
+			ID: pppoeAccountID,
+			PppoeAccountInput: model.PppoeAccountInput{
+				Username:          "pppoe_abc123",
+				PasswordEncrypted: "encrypted_password",
 			},
 		}
 
@@ -75,13 +77,14 @@ func TestSubscription(t *testing.T) {
 		}
 
 		input := model.SubscriptionInput{
-			TenantID:   "tenant-123",
-			CustomerID: "customer-123",
-			PackageID:  "package-123",
-			NasID:      "nas-123",
-			StartDate:  time.Now(),
-			EndDate:    time.Now().AddDate(0, 1, 0),
-			Status:     model.SubscriptionStatusActive,
+			TenantID:       "tenant-123",
+			CustomerID:     "customer-123",
+			PackageID:      "package-123",
+			NasID:          "nas-123",
+			PppoeAccountID: &pppoeAccountID,
+			StartDate:      time.Now(),
+			EndDate:        time.Now().AddDate(0, 1, 0),
+			Status:         model.SubscriptionStatusActive,
 		}
 
 		output := model.Subscription{
@@ -101,7 +104,7 @@ func TestSubscription(t *testing.T) {
 
 		Convey("Create", func() {
 			Convey("Success with MikroTik sync", func() {
-				mockCustomerDatabasePort.EXPECT().FindByID(gomock.Any()).Return(customer, nil).Times(1)
+				mockPppoeAccountDatabasePort.EXPECT().FindByID(pppoeAccountID).Return(pppoeAccount, nil).Times(1)
 				mockInternetPackageDatabasePort.EXPECT().FindByID(gomock.Any()).Return(pkg, nil).Times(1)
 				mockSubscriptionDatabasePort.EXPECT().Create(gomock.Any()).DoAndReturn(
 					func(data model.SubscriptionInput) (model.Subscription, error) {
@@ -119,8 +122,9 @@ func TestSubscription(t *testing.T) {
 				So(result.MikrotikSecretName, ShouldEqual, "pppoe_abc123")
 			})
 
-			Convey("Customer not found", func() {
-				mockCustomerDatabasePort.EXPECT().FindByID(gomock.Any()).Return(model.Customer{}, errors.New("not found")).Times(1)
+			Convey("PPPoE account not found", func() {
+				mockInternetPackageDatabasePort.EXPECT().FindByID(gomock.Any()).Return(pkg, nil).Times(1)
+				mockPppoeAccountDatabasePort.EXPECT().FindByID(pppoeAccountID).Return(model.PppoeAccount{}, errors.New("not found")).Times(1)
 
 				_, err := subscriptionDomain.Subscription().Create(context.Background(), input)
 				So(err, ShouldNotBeNil)

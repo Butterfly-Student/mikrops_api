@@ -16,6 +16,11 @@ type DatabasePort interface {
 	PaymentMethod() PaymentMethodDatabasePort
 	Invoice() InvoiceDatabasePort
 	Payment() PaymentDatabasePort
+	TenantSetting() TenantSettingDatabasePort
+	CustomerRegistration() CustomerRegistrationDatabasePort
+	PppoeAccount() PppoeAccountDatabasePort
+	ActivityLog() ActivityLogDatabasePort
+	MikrotikSyncLog() MikrotikSyncLogDatabasePort
 
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 	WithTenantScope(tenantID string) DatabasePort

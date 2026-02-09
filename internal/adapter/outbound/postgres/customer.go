@@ -73,11 +73,11 @@ func applyCustomerFilter(query *gorm.DB, filter model.CustomerFilter) *gorm.DB {
 	if len(filter.Usernames) > 0 {
 		query = query.Where("username IN ?", filter.Usernames)
 	}
-	if len(filter.PppoeUsernames) > 0 {
-		query = query.Where("pppoe_username IN ?", filter.PppoeUsernames)
-	}
 	if filter.IsActive != nil {
 		query = query.Where("is_active = ?", *filter.IsActive)
+	}
+	if filter.AutoCutoff != nil {
+		query = query.Where("auto_cutoff = ?", *filter.AutoCutoff)
 	}
 	return query
 }

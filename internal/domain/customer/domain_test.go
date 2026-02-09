@@ -42,26 +42,21 @@ func TestCustomer(t *testing.T) {
 		output := model.Customer{
 			ID: "customer-123",
 			CustomerInput: model.CustomerInput{
-				TenantID:      "tenant-123",
-				FullName:      "Test Customer",
-				Email:         "customer@example.com",
-				Phone:         "081234567890",
-				Address:       "Test Address",
-				PasswordHash:  "$2a$10$hashedpassword",
-				PppoeUsername: "pppoe_abc123",
-				PppoePassword: "randomhex",
-				IsActive:      true,
-				CreatedAt:     time.Now(),
+				TenantID:     "tenant-123",
+				FullName:     "Test Customer",
+				Email:        "customer@example.com",
+				Phone:        "081234567890",
+				Address:      "Test Address",
+				PasswordHash: "$2a$10$hashedpassword",
+				IsActive:     true,
+				CreatedAt:    time.Now(),
 			},
 		}
 
 		Convey("Create", func() {
-			Convey("Success with PPPoE credential generation", func() {
+			Convey("Success", func() {
 				mockCustomerDatabasePort.EXPECT().Create(gomock.Any()).DoAndReturn(
 					func(data model.CustomerInput) (model.Customer, error) {
-						// Verify PPPoE credentials were generated
-						So(data.PppoeUsername, ShouldNotBeEmpty)
-						So(data.PppoePassword, ShouldNotBeEmpty)
 						// Verify password was hashed
 						So(data.PasswordHash, ShouldNotBeEmpty)
 						So(data.Password, ShouldBeEmpty)

@@ -270,6 +270,92 @@ func InitRoute(
 		}
 	})
 
+	// Tenant Settings
+	api.GET("/tenant/settings", func(c *gin.Context) {
+		port.Middleware().RequirePermission("tenant", "manage")(c)
+		if !c.IsAborted() {
+			port.TenantSetting().Get(c)
+		}
+	})
+	api.PUT("/tenant/settings", func(c *gin.Context) {
+		port.Middleware().RequirePermission("tenant", "manage")(c)
+		if !c.IsAborted() {
+			port.TenantSetting().Upsert(c)
+		}
+	})
+
+	// Customer Registrations
+	registrations := api.Group("/registrations")
+	registrations.Use(func(c *gin.Context) { port.Middleware().RequirePermission("customer", "read")(c) })
+	registrations.GET("", func(c *gin.Context) { port.CustomerRegistration().List(c) })
+	registrations.GET("/:id", func(c *gin.Context) { port.CustomerRegistration().Get(c) })
+	registrations.POST("", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "create")(c)
+		if !c.IsAborted() {
+			port.CustomerRegistration().Create(c)
+		}
+	})
+	registrations.POST("/:id/approve", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "update")(c)
+		if !c.IsAborted() {
+			port.CustomerRegistration().Approve(c)
+		}
+	})
+	registrations.POST("/:id/reject", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "update")(c)
+		if !c.IsAborted() {
+			port.CustomerRegistration().Reject(c)
+		}
+	})
+
+	// PPPoE Accounts
+	pppoeAccounts := api.Group("/pppoe-accounts")
+	pppoeAccounts.Use(func(c *gin.Context) { port.Middleware().RequirePermission("customer", "read")(c) })
+	pppoeAccounts.GET("", func(c *gin.Context) { port.PppoeAccount().List(c) })
+	pppoeAccounts.GET("/:id", func(c *gin.Context) { port.PppoeAccount().Get(c) })
+	pppoeAccounts.POST("", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "create")(c)
+		if !c.IsAborted() {
+			port.PppoeAccount().Create(c)
+		}
+	})
+	pppoeAccounts.PUT("/:id", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "update")(c)
+		if !c.IsAborted() {
+			port.PppoeAccount().Update(c)
+		}
+	})
+	pppoeAccounts.DELETE("/:id", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "delete")(c)
+		if !c.IsAborted() {
+			port.PppoeAccount().Delete(c)
+		}
+	})
+	pppoeAccounts.POST("/:id/isolate", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "update")(c)
+		if !c.IsAborted() {
+			port.PppoeAccount().Isolate(c)
+		}
+	})
+	pppoeAccounts.POST("/:id/restore", func(c *gin.Context) {
+		port.Middleware().RequirePermission("customer", "update")(c)
+		if !c.IsAborted() {
+			port.PppoeAccount().Restore(c)
+		}
+	})
+
+	// Activity Logs
+	activityLogs := api.Group("/activity-logs")
+	activityLogs.Use(func(c *gin.Context) { port.Middleware().RequirePermission("tenant", "manage")(c) })
+	activityLogs.GET("", func(c *gin.Context) { port.ActivityLog().List(c) })
+	activityLogs.GET("/:id", func(c *gin.Context) { port.ActivityLog().Get(c) })
+
+	// MikroTik Sync Logs
+	syncLogs := api.Group("/sync-logs")
+	syncLogs.Use(func(c *gin.Context) { port.Middleware().RequirePermission("nas", "read")(c) })
+	syncLogs.GET("", func(c *gin.Context) { port.MikrotikSyncLog().List(c) })
+	syncLogs.GET("/:id", func(c *gin.Context) { port.MikrotikSyncLog().Get(c) })
+
 	// ========== Customer Portal (CustomerAuth) ==========
 	portal := router.Group("/portal/v1")
 	portal.Use(func(c *gin.Context) { port.Middleware().CustomerAuth(c) })

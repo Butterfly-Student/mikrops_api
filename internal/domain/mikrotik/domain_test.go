@@ -31,12 +31,10 @@ func TestMikrotik(t *testing.T) {
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
 
 		mockSubscriptionDatabasePort := mock_outbound_port.NewMockSubscriptionDatabasePort(mockCtrl)
-		mockCustomerDatabasePort := mock_outbound_port.NewMockCustomerDatabasePort(mockCtrl)
 		mockInternetPackageDatabasePort := mock_outbound_port.NewMockInternetPackageDatabasePort(mockCtrl)
 		mockNasDatabasePort := mock_outbound_port.NewMockNasDatabasePort(mockCtrl)
 
 		mockDatabasePort.EXPECT().Subscription().Return(mockSubscriptionDatabasePort).AnyTimes()
-		mockDatabasePort.EXPECT().Customer().Return(mockCustomerDatabasePort).AnyTimes()
 		mockDatabasePort.EXPECT().InternetPackage().Return(mockInternetPackageDatabasePort).AnyTimes()
 		mockDatabasePort.EXPECT().Nas().Return(mockNasDatabasePort).AnyTimes()
 		mockHttpPort.EXPECT().Mikrotik().Return(mockMikrotikPort).AnyTimes()
@@ -68,14 +66,6 @@ func TestMikrotik(t *testing.T) {
 			},
 		}
 
-		customer := model.Customer{
-			ID: "customer-123",
-			CustomerInput: model.CustomerInput{
-				PppoeUsername: "pppoe_abc123",
-				PppoePassword: "password123",
-			},
-		}
-
 		pkg := model.InternetPackage{
 			ID: "package-123",
 			InternetPackageInput: model.InternetPackageInput{
@@ -100,7 +90,6 @@ func TestMikrotik(t *testing.T) {
 
 			Convey("Success", func() {
 				mockSubscriptionDatabasePort.EXPECT().FindByID(gomock.Any()).Return(subscription, nil).Times(1)
-				mockCustomerDatabasePort.EXPECT().FindByID(gomock.Any()).Return(customer, nil).Times(1)
 				mockInternetPackageDatabasePort.EXPECT().FindByID(gomock.Any()).Return(pkg, nil).Times(1)
 				mockNasDatabasePort.EXPECT().FindByID("nas-123").Return(nas, nil).Times(1)
 				mockMikrotikPort.EXPECT().CreatePPPoESecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)

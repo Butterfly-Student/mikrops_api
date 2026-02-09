@@ -220,15 +220,20 @@ func (h *portalAdapter) GetConnectionStatus(a any) error {
 		return nil
 	}
 
-	// Find customer's connection by PPPoE username
-	customer, _ := h.domain.Customer().FindByID(ctx, cid)
+	// Find customer's connection by PPPoE username from pppoe_accounts
+	pppoeAccounts, _ := h.domain.PppoeAccount().FindByFilter(ctx, model.PppoeAccountFilter{
+		CustomerIDs: []string{cid},
+		Statuses:    []string{model.PppoeStatusActive},
+	})
 	for _, conn := range connections {
-		if conn.Name == customer.PppoeUsername {
-			c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{
-				"connected": true,
-				"connection": conn,
-			}})
-			return nil
+		for _, account := range pppoeAccounts {
+			if conn.Name == account.Username {
+				c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{
+					"connected":  true,
+					"connection": conn,
+				}})
+				return nil
+			}
 		}
 	}
 
@@ -255,8 +260,15 @@ func (h *portalAdapter) GetBandwidth(a any) error {
 		return nil
 	}
 
-	customer, _ := h.domain.Customer().FindByID(ctx, cid)
-	target := "<pppoe-" + customer.PppoeUsername + ">"
+	pppoeAccts, _ := h.domain.PppoeAccount().FindByFilter(ctx, model.PppoeAccountFilter{
+		CustomerIDs: []string{cid},
+		Statuses:    []string{model.PppoeStatusActive},
+	})
+	pppoeUser := ""
+	if len(pppoeAccts) > 0 {
+		pppoeUser = pppoeAccts[0].Username
+	}
+	target := "<pppoe-" + pppoeUser + ">"
 
 	bandwidth, err := h.domain.Mikrotik().GetBandwidth(ctx, subs[0].NasID, target)
 	if err != nil {
