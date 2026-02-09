@@ -13,6 +13,9 @@ func InitRoute(
 	router *gin.Engine,
 	port inbound_port.HttpPort,
 ) {
+	// ========== Public Registration (no middleware) ==========
+	router.POST("/register/:tenant_slug", func(c *gin.Context) { port.CustomerRegistration().PublicSubmit(c) })
+
 	// ========== Auth (no middleware) ==========
 	auth := router.Group("/auth")
 	auth.POST("/staff/login", func(c *gin.Context) { port.Auth().StaffLogin(c) })

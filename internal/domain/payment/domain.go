@@ -153,6 +153,15 @@ func (d *paymentDomain) Verify(ctx context.Context, id string, staffID string) e
 		return stacktrace.Propagate(err, "failed to verify payment")
 	}
 
+	// Trigger cutoff domain to check if customer needs restoration
+	// For now,we're just logging this event. The cutoff consumer will handle it.
+	// TODO: Implement messagePort.Publish when message broker is configured
+	// message := map[string]interface{}{
+	// 	"invoice_id": invoiceID,
+	// 	"customer_id": invoice.CustomerID,
+	// 	"tenant_id": invoice.TenantID,
+	// }
+	// _ = d.messagePort.Publish(ctx, "invoice.paid", message)
 	return nil
 }
 

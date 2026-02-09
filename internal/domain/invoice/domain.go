@@ -124,6 +124,16 @@ func (d *invoiceDomain) GenerateBulk(ctx context.Context, tenantID string, perio
 		return stacktrace.NewError("tenantID is empty")
 	}
 
+	// Fetch tenant settings to get cutoff_day
+	tenantSettings, err := d.databasePort.TenantSetting().FindByTenantID(tenantID)
+	var cutoffDay int
+	if err != nil {
+		// Fallback to default 7 days if tenant settings not found
+		cutoffDay = 0 // will use fallback logic below
+	} else {
+		cutoffDay = tenantSettings.CutoffDay
+	}
+
 	// Find all active subscriptions for this tenant
 	subscriptions, err := d.databasePort.Subscription().FindByFilter(model.SubscriptionFilter{
 		TenantIDs: []string{tenantID},
@@ -143,8 +153,26 @@ func (d *invoiceDomain) GenerateBulk(ctx context.Context, tenantID string, perio
 			continue
 		}
 
-		// Calculate due date (e.g., 7 days after period end)
-		dueDate := periodEnd.AddDate(0, 0, 7)
+		// Calculate due date based on cutoff_day
+		var dueDate time.Time
+		if cutoffDay > 0 && cutoffDay <= 28 {
+			// Use cutoff_day from tenant settings
+			now := time.Now()
+			currentDay := now.Day()
+			
+			// If current day < cutoff_day: due_date = current_month + cutoff_day
+			// If current day >= cutoff_day: due_date = next_month + cutoff_day
+			if currentDay < cutoffDay {
+				dueDate = time.Date(now.Year(), now.Month(), cutoffDay, 23, 59, 59, 0, now.Location())
+			} else {
+				// Next month
+				nextMonth := now.AddDate(0, 1, 0)
+				dueDate = time.Date(nextMonth.Year(), nextMonth.Month(), cutoffDay, 23, 59, 59, 0, nextMonth.Location())
+			}
+		} else {
+			// Fallback to default 7 days after period end
+			dueDate = periodEnd.AddDate(0, 0, 7)
+		}
 
 		// Generate invoice
 		invoiceInput := model.InvoiceInput{

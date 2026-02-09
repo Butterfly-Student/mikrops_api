@@ -6,4 +6,5 @@ type CustomerRegistrationHttpPort interface {
 	Create(a any) error
 	Approve(a any) error
 	Reject(a any) error
+	PublicSubmit(a any) error // Public registration endpoint without authentication
 }

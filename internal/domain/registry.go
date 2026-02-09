@@ -4,6 +4,7 @@ import (
 	"mikrops/internal/domain/activity_log"
 	"mikrops/internal/domain/auth"
 	"mikrops/internal/domain/client"
+	"mikrops/internal/domain/cutoff"
 	"mikrops/internal/domain/customer"
 	"mikrops/internal/domain/customer_registration"
 	"mikrops/internal/domain/internet_package"
@@ -39,6 +40,7 @@ type Domain interface {
 	PppoeAccount() pppoe_account.PppoeAccountDomain
 	ActivityLog() activity_log.ActivityLogDomain
 	MikrotikSyncLog() mikrotik_sync_log.MikrotikSyncLogDomain
+	Cutoff() cutoff.CutoffDomain
 }
 
 type domain struct {
@@ -131,4 +133,8 @@ func (d *domain) ActivityLog() activity_log.ActivityLogDomain {
 
 func (d *domain) MikrotikSyncLog() mikrotik_sync_log.MikrotikSyncLogDomain {
 	return mikrotik_sync_log.NewMikrotikSyncLogDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
+}
+
+func (d *domain) Cutoff() cutoff.CutoffDomain {
+	return cutoff.NewCutoffDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
 }

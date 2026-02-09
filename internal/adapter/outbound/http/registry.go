@@ -1,16 +1,28 @@
 package http_outbound_adapter
 
 import (
-	mikrotik_outbound_adapter "mikrops/internal/adapter/outbound/mikrotik"
 	outbound_port "mikrops/internal/port/outbound"
+
+	mikrotik_adapter "mikrops/internal/adapter/outbound/mikrotik"
+	"mikrops/internal/adapter/outbound/whatsapp"
 )
 
-type adapter struct{}
-
-func NewAdapter() outbound_port.HttpPort {
-	return &adapter{}
+type adapter struct {
+	mikrotikClient outbound_port.MikrotikPort
+	whatsappClient outbound_port.WhatsappPort
 }
 
-func (s *adapter) Mikrotik() outbound_port.MikrotikPort {
-	return mikrotik_outbound_adapter.NewRegistry()
+func NewAdapter() outbound_port.HttpPort {
+	return &adapter{
+		mikrotikClient: mikrotik_adapter.NewAdapter(),
+		whatsappClient: whatsapp.NewWhatsappClient(),
+	}
+}
+
+func (a *adapter) Mikrotik() outbound_port.MikrotikPort {
+	return a.mikrotikClient
+}
+
+func (a *adapter) Whatsapp() outbound_port.WhatsappPort {
+	return a.whatsappClient
 }
