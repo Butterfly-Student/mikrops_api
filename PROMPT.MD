@@ -2,7 +2,7 @@ Analisis proyek ini dengan menjadikan PLANING.md sebagai referensi awal dan deng
 
 Tugasmu adalah bertindak sebagai software engineer yang langsung memperbaiki proyek, bukan sebagai reviewer.
 
-Lakukan langkah-langkah berikut secara berurutan:
+Lakukan langkah-langkah berikut secara berurutan tahap demi tahap:
 
 Validasi kesesuaian proyek terhadap PLANING.md
 Periksa struktur direktori, pembagian domain, dan arsitektur.
