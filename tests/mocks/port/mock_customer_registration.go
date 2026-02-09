@@ -49,6 +49,20 @@ func (mr *MockCustomerRegistrationDatabasePortMockRecorder) Create(data interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCustomerRegistrationDatabasePort)(nil).Create), data)
 }
 
+// Delete mocks base method.
+func (m *MockCustomerRegistrationDatabasePort) Delete(id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockCustomerRegistrationDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCustomerRegistrationDatabasePort)(nil).Delete), id)
+}
+
 // FindByFilter mocks base method.
 func (m *MockCustomerRegistrationDatabasePort) FindByFilter(filter model.CustomerRegistrationFilter) ([]model.CustomerRegistration, error) {
 	m.ctrl.T.Helper()
@@ -91,18 +105,4 @@ func (m *MockCustomerRegistrationDatabasePort) Update(id string, data model.Cust
 func (mr *MockCustomerRegistrationDatabasePortMockRecorder) Update(id, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCustomerRegistrationDatabasePort)(nil).Update), id, data)
-}
-
-// Delete mocks base method.
-func (m *MockCustomerRegistrationDatabasePort) Delete(id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete.
-func (mr *MockCustomerRegistrationDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCustomerRegistrationDatabasePort)(nil).Delete), id)
 }

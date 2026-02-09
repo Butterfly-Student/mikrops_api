@@ -1,638 +1,958 @@
- Phase 0: GORM Foundation
+MikrOps Enhancement Plan: ISP Billing & Auto-Cutoff System
+
+Context
+
+MikrOps sudah memiliki fondasi yang solid (13 model, 14 migrasi, 12 domain service, routes lengkap admin+portal). Plan ini menambahkan fitur ISP billing yang belum ada: tenant settings, customer self-registration, PPPoE
+account management terpisah, auto-cutoff/isolir, payment-triggered restore, dan audit logging. Hotspot voucher dan WebSocket monitoring dikeluarkan ke fase berikutnya.
+
+---
+BAGIAN 1: DATABASE DESIGN
+
+1.1 Tabel Baru
+
+A. tenant_settings (pengaturan billing per tenant)
+
+- id              UUID (PK, auto)
+- tenant_id       UUID (FK -> tenants, unique)
+- cutoff_day      INT (1-28, default: 1) -- tanggal cutoff bulanan
+- grace_period    INT (default: 3) -- hari toleransi sebelum isolir
+- isolir_profile_name VARCHAR(100, default: 'ISOLIR_MIKROPS')
+- wa_gateway_api  TEXT (nullable) -- URL WhatsApp gateway
+- auto_approve_registration BOOL (default: false)
+- default_ppp_password_type VARCHAR(20, default: 'random') -- random/custom
+- default_ppp_password_length INT (default: 8)
+- created_at      TIMESTAMP
+- updated_at      TIMESTAMP
+
+B. customer_registrations (self-registration workflow)
+
+- id                       UUID (PK, auto)
+- tenant_id                UUID (FK -> tenants, NOT NULL)
+- customer_id              UUID (FK -> customers, nullable) -- filled saat approved
+- full_name                VARCHAR(255, NOT NULL)
+- email                    VARCHAR(255)
+- phone                    VARCHAR(50)
+- address                  TEXT
+- requested_package_id     UUID (FK -> internet_packages, NOT NULL)
+- requested_nas_id         UUID (FK -> nas, nullable)
+- status                   VARCHAR(50, default: 'pending') -- pending/approved/rejected
+- rejection_reason         TEXT (nullable)
+- approved_by              UUID (FK -> staffs, nullable)
+- approved_at              TIMESTAMP (nullable)
+- created_at               TIMESTAMP
+- updated_at               TIMESTAMP
 
- Migrasi database layer dari Goqu + raw SQL ke GORM.
+C. pppoe_accounts (akun PPPoE terpisah dari customer)
 
- 0.1 Add GORM dependencies
+- id                UUID (PK, auto)
+- tenant_id         UUID (FK -> tenants, NOT NULL)
+- customer_id       UUID (FK -> customers, NOT NULL)
+- subscription_id   UUID (FK -> subscriptions, nullable) -- link ke subscription
+- nas_id            UUID (FK -> nas, NOT NULL)
+- package_id        UUID (FK -> internet_packages, NOT NULL)
+- username          VARCHAR(100, NOT NULL) -- unique per tenant
+- password_encrypted TEXT (NOT NULL) -- encrypted
+- profile_name      VARCHAR(100) -- dari internet_packages, untuk MikroTik
+- original_profile  VARCHAR(100) -- tracking saat isolir (profile sebelum diubah)
+- status            VARCHAR(50, default: 'active') -- active/isolated/disabled
+- sync_status       VARCHAR(50, default: 'pending') -- synced/pending/error
+- last_sync_at      TIMESTAMP (nullable)
+- created_at        TIMESTAMP
+- updated_at        TIMESTAMP
+INDEX: (tenant_id, username) UNIQUE
 
- go get gorm.io/gorm gorm.io/driver/postgres
+D. activity_logs (audit trail)
 
- 0.2 Modify utils/database/database.go
+- id              UUID (PK, auto)
+- tenant_id       UUID (FK -> tenants, NOT NULL)
+- user_id         UUID (nullable) -- staff_id or customer_id
+- user_type       VARCHAR(50) -- 'staff' / 'customer' / 'system'
+- action          VARCHAR(100, NOT NULL) -- contoh: 'approve_registration', 'isolate_pppoe'
+- resource_type   VARCHAR(100) -- contoh: 'customer_registrations', 'pppoe_accounts'
+- resource_id     VARCHAR(100) -- UUID as string
+- details         JSONB (nullable) -- detail tambahan
+- ip_address      VARCHAR(45)
+- created_at      TIMESTAMP
+INDEX: (tenant_id, action)
+INDEX: (tenant_id, resource_type, resource_id)
 
- - Tambah fungsi InitGormDatabase(ctx, driver) *gorm.DB
- - GORM dibuka via gorm.Open(postgres.Open(dsn), &gorm.Config{})
- - Extract *sql.DB dari GORM untuk tetap jalankan Goose migrations
- - Set connection pool: MaxIdleConns=10, MaxOpenConns=100, ConnMaxLifetime=1h
+E. mikrotik_sync_logs (sync tracking)
 
- 0.3 Modify internal/port/outbound/registry_database.go
+- id                  UUID (PK, auto)
+- tenant_id           UUID (FK -> tenants, NOT NULL)
+- nas_id              UUID (FK -> nas, NOT NULL)
+- action              VARCHAR(50, NOT NULL) -- create/update/delete/isolate/restore
+- resource_type       VARCHAR(50, NOT NULL) -- ppp_secret/hotspot_user/profile/queue
+- resource_identifier VARCHAR(255) -- username atau profile name
+- status              VARCHAR(50, NOT NULL) -- success/failed
+- error_message       TEXT (nullable)
+- request_payload     JSONB (nullable) -- data yang dikirim
+- created_at          TIMESTAMP
+INDEX: (nas_id, resource_type)
+INDEX: (tenant_id, created_at)
 
- - Hapus DatabaseExecutor interface (raw SQL)
- - DatabasePort tetap sama pattern-nya, tapi internal adapter terima *gorm.DB
- - Tambah method WithTenantScope(tenantID string) DatabasePort untuk tenant filtering
+1.2 Modifikasi Tabel Existing
 
- 0.4 Modify internal/adapter/outbound/postgres/registry.go
+A. customers - Tambah field
 
- - Ganti *sql.DB + DatabaseExecutor → *gorm.DB
- - Transaction pakai db.Begin() / tx.Commit() / tx.Rollback() dari GORM
- - Method getDB() return tx jika dalam transaksi, atau db jika tidak
- - Implement WithTenantScope() yang return adapter baru dengan scoped DB
++ auto_cutoff  BOOL (default: true) -- apakah customer otomatis dicutoff
+Hapus field PPPoE dari customer (pppoe_username, pppoe_password) karena dipindah ke pppoe_accounts.
+Catatan: Migrasi ini harus dijalankan SETELAH data PPPoE dimigrasikan ke tabel baru.
 
- 0.5 Modify internal/adapter/outbound/postgres/client.go
+B. internet_packages - Tambah field
 
- - Ganti semua Goqu query → GORM operations
- - Upsert: db.Clauses(clause.OnConflict{...}).Create(&clients)
- - FindByFilter: db.Where(...).Find(&clients) dengan helper applyClientFilter()
- - DeleteByFilter: db.Where(...).Delete(&model.Client{})
- - IsExists: db.Where("bearer_key = ?", key).First(&client)
++ profile_name  VARCHAR(100) -- nama profile di MikroTik (contoh: '10M', '20M')
+Field ini digunakan untuk mapping langsung ke MikroTik PPP profile name.
 
- 0.6 Modify internal/app.go
+C. subscriptions - Tambah field
 
- - databaseOutbound(): panggil database.InitGormDatabase() bukan database.InitDatabase()
- - postgres_outbound_adapter.NewAdapter(db) terima *gorm.DB
++ pppoe_account_id UUID (FK -> pppoe_accounts, nullable) -- link ke PPPoE account
+Ini menghubungkan subscription dengan PPPoE account yang spesifik.
 
- 0.7 Update tests
+1.3 ERD Relationships (Updated)
 
- - internal/adapter/outbound/postgres/client_test.go: Gunakan go-sqlmock via GORM adapter atau in-memory SQLite
- - tests/integration/client_integration_test.go: Init GORM dengan testcontainers PostgreSQL
+tenants ─────────── tenant_settings (1:1)
+    **│**
 
- Files modified:
- - go.mod / go.sum
- - utils/database/database.go
- - internal/port/outbound/registry_database.go
- - internal/adapter/outbound/postgres/registry.go
- - internal/adapter/outbound/postgres/client.go
- - internal/adapter/outbound/postgres/client_test.go
- - internal/app.go
- - tests/integration/client_integration_test.go
+    **├── staffs**
 
- ---
- Phase 1: Shared Utilities
+    **├── nas**
 
- 1.1 Create utils/gorm/scope.go
+    **├── internet\_packages**
 
- func TenantScope(tenantID string) func(db *gorm.DB) *gorm.DB
- Menambahkan WHERE tenant_id = ? ke semua query secara otomatis.
+    **├── payment\_methods**
 
- 1.2 Create utils/crypto/encryption.go
+    **│**
 
- - AES-GCM encryption/decryption untuk password NAS MikroTik
- - Key dari env var ENCRYPTION_KEY (32 bytes)
- - Encrypt(plaintext) (ciphertext, error) dan Decrypt(ciphertext) (plaintext, error)
+    **├── customers ──────── customer\_registrations (1:many)**
 
- 1.3 Create utils/jwt/signer.go
+    **│      │**
 
- - Menggunakan github.com/golang-jwt/jwt/v5
- - GenerateStaffToken(staffID, tenantID, role, permissions, secret) (string, error)
- - GenerateCustomerToken(customerID, tenantID, secret) (string, error)
- - ParseStaffToken(tokenString, secret) (*StaffClaims, error)
- - ParseCustomerToken(tokenString, secret) (*CustomerClaims, error)
- - Claims struct: StaffClaims{StaffID, TenantID, Role, Permissions}, CustomerClaims{CustomerID, TenantID}
+    **│      ├── pppoe\_accounts (1:many)**
 
- 1.4 Modify utils/jwt/validator.go
+    **│      │      └── subscriptions (1:1, via pppoe\_account\_id)**
 
- - Tambah HMAC validation untuk self-issued tokens (selain JWKS yang sudah ada)
+    **│      │**
 
- 1.5 Modify utils/activity/activity.go
+    **│      ├── subscriptions (1:many)**
 
- - Tambah context keys: TenantID, StaffID, CustomerID, UserRole, UserPermissions
- - Helper functions: WithTenantID(), GetTenantID(), WithStaffID(), GetStaffID(), dll.
+    **│      │      └── invoices (1:many)**
 
- 1.6 Modify .env.example
+    **│      │             └── payments (1:many)**
 
- Tambah:
- JWT_SECRET=your-secret-key-min-32-chars
- ENCRYPTION_KEY=your-32-byte-encryption-key
- UPLOAD_PATH=./uploads
+    **│      │**
 
- Files created: utils/gorm/scope.go, utils/crypto/encryption.go, utils/jwt/signer.go
- Files modified: utils/jwt/validator.go, utils/activity/activity.go, .env.example
+    **│      └── activity\_logs**
 
- ---
- Phase 2: Models
+    **│**
 
- Buat model files menggunakan make model VAL=name lalu customize sesuai kebutuhan.
+    **├── activity\_logs**
 
- 2.1 internal/model/tenant.go
+    **└── mikrotik\_sync\_logs**
 
- Tenant{ID(uuid), TenantInput}
- TenantInput{Name, Slug(unique), Email, Phone, Address, LogoURL, MaxNas(default:3),
-             SubscriptionPlan(default:'basic'), SubscriptionExpiresAt, IsActive, CreatedAt, UpdatedAt}
- TenantFilter{IDs, Slugs, Emails}
 
- 2.2 internal/model/role.go
 
- Role{ID(serial), RoleInput}
- RoleInput{Name(unique), Description, CreatedAt, UpdatedAt}
- RoleFilter{IDs, Names}
 
- 2.3 internal/model/permission.go
+---
+BAGIAN 2: MIGRATION FILES
 
- Permission{ID(serial), PermissionInput}
- PermissionInput{Name(unique), Resource, Action, Description, CreatedAt, UpdatedAt}
- PermissionFilter{IDs, Resources, Actions}
- RolePermission{RoleID, PermissionID}  // join table
-
- // Constants:
- const (RoleAdmin="admin", RoleTechnician="technician", RoleSales="sales", RoleFinance="finance")
- const (ResourceNas, ResourceCustomer, ResourceSubscription, ResourceInvoice, ...)
- const (ActionCreate, ActionRead, ActionUpdate, ActionDelete, ActionManage)
-
- 2.4 internal/model/staff.go
-
- Staff{ID(uuid), StaffInput}
- StaffInput{TenantID, RoleID, Email, PasswordHash, FullName, Phone, IsActive, LastLoginAt, CreatedAt, UpdatedAt}
- // Password field (gorm:"-") untuk input only
- StaffFilter{IDs, TenantIDs, Emails, RoleIDs}
-
- 2.5 internal/model/nas.go
-
- Nas{ID(uuid), NasInput}
- NasInput{TenantID, Name, Host, ApiPort(8728), RestPort(80), Username, PasswordEncrypted,
-          UseSSL, RouterOsVersion, Identity, IsActive, LastSeenAt, CreatedAt, UpdatedAt}
- NasFilter{IDs, TenantIDs, Hosts}
-
- 2.6 internal/model/internet_package.go
-
- InternetPackage{ID(uuid), InternetPackageInput}
- InternetPackageInput{TenantID, Name, Description, Type(pppoe/hotspot/static),
-                      UploadRate, DownloadRate, UploadBurst, DownloadBurst,
-                      Price(int64), BillingCycle(daily/weekly/monthly/yearly),
-                      ValidityDays, IsActive, CreatedAt, UpdatedAt}
- InternetPackageFilter{IDs, TenantIDs, Types, Names}
-
- 2.7 internal/model/customer.go
-
- Customer{ID(uuid), CustomerInput}
- CustomerInput{TenantID, FullName, Email, Phone, Address, IdentityNumber,
-               Username, PasswordHash, PppoeUsername, PppoePassword,
-               StaticIP, NasID, IsActive, RegisteredAt, CreatedAt, UpdatedAt}
- CustomerFilter{IDs, TenantIDs, Emails, Usernames, PppoeUsernames, NasIDs}
-
- 2.8 internal/model/subscription.go
-
- Subscription{ID(uuid), SubscriptionInput}
- SubscriptionInput{TenantID, CustomerID, PackageID, NasID, Status(active/suspended/expired/cancelled/vacation),
-                   StartDate, EndDate, AutoRenew, VacationStart, VacationEnd,
-                   MikrotikQueueName, MikrotikSecretName, CreatedAt, UpdatedAt}
- SubscriptionFilter{IDs, TenantIDs, CustomerIDs, PackageIDs, Statuses}
-
- 2.9 internal/model/payment_method.go
-
- PaymentMethod{ID(uuid), PaymentMethodInput}
- PaymentMethodInput{TenantID, Name, Type(bank_transfer/e_wallet/cash/qris/other),
-                    AccountName, AccountNumber, BankName, Instructions, IsActive, CreatedAt, UpdatedAt}
- PaymentMethodFilter{IDs, TenantIDs, Types}
-
- 2.10 internal/model/invoice.go
-
- Invoice{ID(uuid), InvoiceInput}
- InvoiceInput{TenantID, CustomerID, SubscriptionID, InvoiceNumber, Amount, TaxAmount, TotalAmount,
-              Status(unpaid/paid/overdue/cancelled/partial), DueDate, PeriodStart, PeriodEnd,
-              Notes, PaidAt, CreatedAt, UpdatedAt}
- InvoiceFilter{IDs, TenantIDs, CustomerIDs, SubscriptionIDs, Statuses, InvoiceNumbers}
-
- 2.11 internal/model/payment.go
-
- Payment{ID(uuid), PaymentInput}
- PaymentInput{TenantID, InvoiceID, PaymentMethodID, Amount, PaymentDate, ProofURL,
-              Status(pending/verified/rejected), VerifiedBy, VerifiedAt, Notes, CreatedAt, UpdatedAt}
- PaymentFilter{IDs, TenantIDs, InvoiceIDs, PaymentMethodIDs, Statuses}
-
- 2.12 internal/model/mikrotik.go
-
- Non-persisted structs untuk MikroTik API responses:
- - MikrotikConnection{ID, Name, Service, CallerID, Address, Uptime}
- - MikrotikTraffic{Interface, RxBytes, TxBytes, RxPackets, TxPackets}
- - MikrotikBandwidth{Target, Upload, Download}
- - MikrotikPPPoESecret{ID, Name, Password, Service, Profile, Disabled, Comment}
- - MikrotikPPPoESecretInput{Name, Password, Service, Profile, Comment}
- - MikrotikHotspotUser, MikrotikHotspotUserInput
- - MikrotikSimpleQueue, MikrotikSimpleQueueInput
- - MikrotikProfile, MikrotikProfileInput
-
- 2.13 internal/model/auth.go
-
- - StaffAuthRequest{Email, Password}
- - CustomerAuthRequest{Username, Password, TenantSlug}
- - AuthTokenResponse{AccessToken, RefreshToken, ExpiresIn, TokenType}
- - StaffJWTClaims{StaffID, TenantID, Role, Permissions}
- - CustomerJWTClaims{CustomerID, TenantID}
-
- ---
- Phase 3: Migrations
-
- Menggunakan make migration-postgres VAL=name lalu customize SQL. Urutan berdasarkan foreign key dependencies.
- ┌─────┬──────────────────────────────┬───────────────────┬────────────────────────────────────────────┐
- │  #  │             File             │       Table       │              FK Dependencies               │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 2   │ 2_tenant.go                  │ tenants           │ -                                          │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 3   │ 3_role.go                    │ roles             │ -                                          │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 4   │ 4_permission.go              │ permissions       │ -                                          │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 5   │ 5_role_permission.go         │ role_permissions  │ roles, permissions                         │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 6   │ 6_staff.go                   │ staffs            │ tenants, roles                             │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 7   │ 7_nas.go                     │ nas               │ tenants                                    │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 8   │ 8_internet_package.go        │ internet_packages │ tenants                                    │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 9   │ 9_customer.go                │ customers         │ tenants, nas                               │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 10  │ 10_subscription.go           │ subscriptions     │ tenants, customers, internet_packages, nas │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 11  │ 11_payment_method.go         │ payment_methods   │ tenants                                    │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 12  │ 12_invoice.go                │ invoices          │ tenants, customers, subscriptions          │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 13  │ 13_payment.go                │ payments          │ tenants, invoices, payment_methods, staffs │
- ├─────┼──────────────────────────────┼───────────────────┼────────────────────────────────────────────┤
- │ 14  │ 14_seed_roles_permissions.go │ Seed data         │ roles, permissions, role_permissions       │
- └─────┴──────────────────────────────┴───────────────────┴────────────────────────────────────────────┘
- Semua tenant-scoped tables memiliki tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE dan CREATE INDEX idx_{table}_tenant_id ON {table}(tenant_id).
-
- ---
- Phase 4: Outbound Port Interfaces
-
- Menggunakan make outbound-database-postgres VAL=name untuk generate port+adapter skeleton.
-
- Database Ports (per entity)
-
- Buat file di internal/port/outbound/ untuk setiap entity:
- - tenant.go: TenantDatabasePort{Create, FindByFilter, FindByID, Update, Delete}
- - role.go: RoleDatabasePort{FindAll, FindByID, FindByName}
- - permission.go: PermissionDatabasePort{FindByRoleID, FindAll}
- - staff.go: StaffDatabasePort{Create, FindByFilter, FindByID, FindByEmail, Update, Delete}
- - nas.go: NasDatabasePort{Create, FindByFilter, FindByID, Update, Delete, CountByTenantID}
- - internet_package.go: InternetPackageDatabasePort{Create, FindByFilter, FindByID, Update, Delete}
- - customer.go: CustomerDatabasePort{Create, FindByFilter, FindByID, FindByUsername, Update, Delete}
- - subscription.go: SubscriptionDatabasePort{Create, FindByFilter, FindByID, Update, FindExpiring}
- - payment_method.go: PaymentMethodDatabasePort{Create, FindByFilter, FindByID, Update, Delete}
- - invoice.go: InvoiceDatabasePort{Create, FindByFilter, FindByID, Update, BulkCreate}
- - payment.go: PaymentDatabasePort{Create, FindByFilter, FindByID, Update}
-
- Update Registry Files
-
- - registry_database.go: Tambah semua entity accessors ke DatabasePort interface + WithTenantScope()
- - registry_cache.go: Tambah Staff(), Customer()
- - registry_http.go: Tambah Mikrotik() MikrotikPort
-
- MikroTik Port
-
- - mikrotik.go: Interface MikrotikPort dengan semua operasi RouterOS API + REST API
-
- ---
- Phase 5: Outbound Database Adapters
-
- Menggunakan make outbound-database-postgres VAL=name lalu implement GORM queries.
-
- Buat file di internal/adapter/outbound/postgres/ untuk setiap entity:
- tenant.go, role.go, permission.go, staff.go, nas.go, internet_package.go,
- customer.go, subscription.go, payment_method.go, invoice.go, payment.go
-
- Setiap adapter menerima *gorm.DB (yang sudah di-scope tenant_id jika perlu) dan implement GORM CRUD operations.
-
- Update registry.go untuk return semua adapter baru.
-
- ---
- Phase 6: Outbound Cache + MikroTik Adapters
-
- Cache Adapters
-
- - internal/adapter/outbound/redis/staff.go: Session caching untuk staff
- - internal/adapter/outbound/redis/customer.go: Session caching untuk customer
- - Update internal/adapter/outbound/redis/registry.go
-
- MikroTik Adapter (NEW directory)
-
- - internal/adapter/outbound/mikrotik/rest_client.go: HTTP client untuk MikroTik REST API
-   - Base URL: http(s)://{host}:{rest_port}/rest
-   - Basic Auth: username + decrypted password
-   - Methods: CRUD PPPoE secrets, hotspot users, simple queues, profiles
- - internal/adapter/outbound/mikrotik/routeros_client.go: RouterOS API client
-   - Library: github.com/go-routeros/routeros/v3
-   - Connect via routeros.DialTimeout(addr, user, pass, timeout)
-   - Methods: GetActiveConnections, GetInterfaceTraffic, MonitorBandwidth (ListenArgs)
- - internal/adapter/outbound/mikrotik/adapter.go: Main adapter implementing MikrotikPort
-   - Delegates ke rest_client atau routeros_client sesuai operasi
- - internal/adapter/outbound/mikrotik/registry.go: Registry
-
- Wiring di internal/app.go
-
- - Tambah httpOutbound() function yang return MikroTik adapter
- - Inject ke domain sebagai parameter baru atau lewat existing httpPort
-
- ---
- Phase 7: Domain Logic
-
- Menggunakan make domain VAL=name untuk generate skeleton, lalu implement business logic.
- ┌──────┬──────────────────┬────────────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────┐
- │  #   │      Domain      │                    File                    │                                   Key Logic                                    │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.1  │ tenant           │ internal/domain/tenant/domain.go           │ CRUD tenant, validasi slug unique                                              │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.2  │ auth             │ internal/domain/auth/domain.go             │ Staff+Customer login, bcrypt verify, JWT generation, refresh token             │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.3  │ staff            │ internal/domain/staff/domain.go            │ Staff CRUD, password hashing (bcrypt)                                          │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.4  │ nas              │ internal/domain/nas/domain.go              │ NAS CRUD, enforce max 3 per tenant, encrypt password, test connection          │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.5  │ internet_package │ internal/domain/internet_package/domain.go │ Package CRUD                                                                   │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.6  │ customer         │ internal/domain/customer/domain.go         │ Customer CRUD, PPPoE credential management                                     │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.7  │ subscription     │ internal/domain/subscription/domain.go     │ Lifecycle: create→active→suspend/vacation→expire→cancel, auto-sync ke MikroTik │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.8  │ payment_method   │ internal/domain/payment_method/domain.go   │ Payment method CRUD                                                            │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.9  │ invoice          │ internal/domain/invoice/domain.go          │ Invoice generation, bulk generate per period, status tracking                  │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.10 │ payment          │ internal/domain/payment/domain.go          │ Payment processing, verify/reject, update invoice status                       │
- ├──────┼──────────────────┼────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
- │ 7.11 │ mikrotik         │ internal/domain/mikrotik/domain.go         │ Orchestration: sync subscription↔MikroTik, bandwidth monitoring                │
- └──────┴──────────────────┴────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────┘
- Update internal/domain/registry.go:
- type Domain interface {
-     Client() client.ClientDomain
-     Tenant() tenant.TenantDomain
-     Auth() auth.AuthDomain
-     Staff() staff.StaffDomain
-     Nas() nas.NasDomain
-     InternetPackage() internet_package.InternetPackageDomain
-     Customer() customer.CustomerDomain
-     Subscription() subscription.SubscriptionDomain
-     PaymentMethod() payment_method.PaymentMethodDomain
-     Invoice() invoice.InvoiceDomain
-     Payment() payment.PaymentDomain
-     Mikrotik() mikrotik.MikrotikDomain
- }
- Domain constructor receives tambahan httpPort outbound_port.HttpPort untuk MikroTik access.
-
- ---
- Phase 8: Inbound Port Interfaces
-
- Menggunakan make inbound-http-gin VAL=name untuk generate skeleton.
-
- Middleware (modify internal/port/inbound/middleware.go)
-
- type MiddlewareHttpPort interface {
-     InternalAuth(a any) error      // existing
-     ClientAuth(a any) error        // existing
-     StaffAuth(a any) error         // NEW - JWT → extract tenant_id, role, permissions
-     CustomerAuth(a any) error      // NEW - JWT → extract customer_id, tenant_id
-     RequirePermission(resource, action string) gin.HandlerFunc  // NEW - RBAC check
- }
-
- New Port Files di internal/port/inbound/
-
- - auth.go: AuthHttpPort{StaffLogin, StaffRefresh, CustomerLogin, CustomerRefresh}
- - tenant.go: TenantHttpPort{Get, Update}
- - staff.go: StaffHttpPort{List, Create, Get, Update, Delete}
- - nas.go: NasHttpPort{List, Create, Get, Update, Delete, TestConnection, GetIdentity}
- - internet_package.go: InternetPackageHttpPort{List, Create, Get, Update, Delete}
- - customer.go: CustomerHttpPort{List, Create, Get, Update, Delete, GetConnectionStatus}
- - subscription.go: SubscriptionHttpPort{List, Create, Get, Update, Suspend, Activate, Cancel}
- - payment_method.go: PaymentMethodHttpPort{List, Create, Get, Update, Delete}
- - invoice.go: InvoiceHttpPort{List, Create, Get, Update, GenerateBulk}
- - payment.go: PaymentHttpPort{List, Get, Verify, Reject}
- - portal.go: PortalHttpPort{Dashboard, GetProfile, UpdateProfile, ...} (customer self-service)
- - MikroTik operations: MikrotikHttpPort{ListPPPoESecrets, CreatePPPoESecret, ...}
-
- Update internal/port/inbound/registry_http.go
-
- type HttpPort interface {
-     Middleware() MiddlewareHttpPort
-     Ping() PingHttpPort
-     Client() ClientHttpPort
-     Auth() AuthHttpPort
-     Tenant() TenantHttpPort
-     Staff() StaffHttpPort
-     Nas() NasHttpPort
-     InternetPackage() InternetPackageHttpPort
-     Customer() CustomerHttpPort
-     Subscription() SubscriptionHttpPort
-     PaymentMethod() PaymentMethodHttpPort
-     Invoice() InvoiceHttpPort
-     Payment() PaymentHttpPort
-     Portal() PortalHttpPort
-     Mikrotik() MikrotikHttpPort
- }
-
- ---
- Phase 9: Inbound Gin HTTP Adapters + Routes
-
- Adapter Files di internal/adapter/inbound/gin/
-
- Buat handler files: auth.go, tenant.go, staff.go, nas.go, internet_package.go,
- customer.go, subscription.go, payment_method.go, invoice.go, payment.go,
- portal.go, mikrotik.go
-
- Modify: middleware.go, registry.go, route.go
-
- Route Structure (route.go)
-
- # Auth (no middleware)
- POST   /auth/staff/login
- POST   /auth/staff/refresh
- POST   /auth/customer/login
- POST   /auth/customer/refresh
-
- # Internal (InternalAuth - existing)
- POST   /internal/client-upsert
- POST   /internal/client-find
- DELETE /internal/client-delete
- POST   /internal/tenant-upsert
-
- # Staff Admin API (StaffAuth + RequirePermission)
- GET/PUT          /api/v1/tenant
-
- GET/POST         /api/v1/staffs
- GET/PUT/DELETE   /api/v1/staffs/:id
-
- GET/POST         /api/v1/nas
- GET/PUT/DELETE   /api/v1/nas/:id
- POST             /api/v1/nas/:id/test
- GET              /api/v1/nas/:id/identity
-
- # MikroTik Operations via NAS
- GET/POST         /api/v1/nas/:id/pppoe/secrets
- PUT/DELETE       /api/v1/nas/:id/pppoe/secrets/:sid
- POST             /api/v1/nas/:id/pppoe/secrets/:sid/disable
- POST             /api/v1/nas/:id/pppoe/secrets/:sid/enable
- GET/POST         /api/v1/nas/:id/pppoe/profiles
- GET/POST         /api/v1/nas/:id/hotspot/users
- PUT/DELETE       /api/v1/nas/:id/hotspot/users/:uid
- GET/POST         /api/v1/nas/:id/queues
- PUT/DELETE       /api/v1/nas/:id/queues/:qid
- GET              /api/v1/nas/:id/connections
- GET              /api/v1/nas/:id/traffic/:interface
-
- GET/POST         /api/v1/packages
- GET/PUT/DELETE   /api/v1/packages/:id
-
- GET/POST         /api/v1/customers
- GET/PUT/DELETE   /api/v1/customers/:id
- GET              /api/v1/customers/:id/connection
-
- GET/POST         /api/v1/subscriptions
- GET/PUT          /api/v1/subscriptions/:id
- POST             /api/v1/subscriptions/:id/suspend
- POST             /api/v1/subscriptions/:id/activate
- POST             /api/v1/subscriptions/:id/cancel
-
- GET/POST         /api/v1/payment-methods
- GET/PUT/DELETE   /api/v1/payment-methods/:id
-
- GET/POST         /api/v1/invoices
- GET/PUT          /api/v1/invoices/:id
- POST             /api/v1/invoices/generate
-
- GET              /api/v1/payments
- GET              /api/v1/payments/:id
- POST             /api/v1/payments/:id/verify
- POST             /api/v1/payments/:id/reject
-
- # Customer Portal (CustomerAuth)
- GET    /portal/v1/dashboard
- GET    /portal/v1/profile
- PUT    /portal/v1/profile
- PUT    /portal/v1/profile/password
- GET    /portal/v1/subscription
- GET    /portal/v1/subscription/history
- POST   /portal/v1/subscription/upgrade
- POST   /portal/v1/subscription/downgrade
- POST   /portal/v1/subscription/vacation
- GET    /portal/v1/connection/status
- GET    /portal/v1/connection/bandwidth
- GET    /portal/v1/invoices
- GET    /portal/v1/invoices/:id
- GET    /portal/v1/payments
- POST   /portal/v1/payments
- GET    /portal/v1/payments/:id
- POST   /portal/v1/payments/:id/upload-proof
- GET    /portal/v1/packages
- GET    /portal/v1/payment-methods
-
- RBAC Permission Mapping per Role
- ┌──────────────────┬────────┬────────────┬────────┬─────────┐
- │     Resource     │ Admin  │ Technician │ Sales  │ Finance │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ tenant           │ manage │ -          │ -      │ -       │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ staff            │ manage │ -          │ -      │ -       │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ nas              │ manage │ manage     │ read   │ -       │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ internet_package │ manage │ read       │ read   │ read    │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ customer         │ manage │ read       │ manage │ read    │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ subscription     │ manage │ read       │ manage │ read    │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ payment_method   │ manage │ -          │ -      │ manage  │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ invoice          │ manage │ -          │ read   │ manage  │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ payment          │ manage │ -          │ read   │ manage  │
- ├──────────────────┼────────┼────────────┼────────┼─────────┤
- │ report           │ manage │ -          │ -      │ manage  │
- └──────────────────┴────────┴────────────┴────────┴─────────┘
- ---
- Phase 10: Tests
-
- Mock Generation
-
- make generate-mocks
-
- Domain Unit Tests
-
- Buat domain_test.go di setiap domain package mengikuti pattern GoConvey + gomock yang ada di internal/domain/client/domain_test.go.
-
- Test Fixtures
-
- Update tests/fixtures/testdata.go dengan fixtures untuk semua entity baru.
-
- Integration Tests
-
- - tests/integration/tenant_integration_test.go
- - tests/integration/billing_integration_test.go (end-to-end billing flow)
-
- ---
- Phase 11: Configuration
-
- Update .env.example
-
- # Existing
- OUTBOUND_DATABASE_DRIVER=postgres
- OUTBOUND_MESSAGE_DRIVER=rabbitmq
- OUTBOUND_CACHE_DRIVER=redis
- INBOUND_HTTP_DRIVER=gin
- DATABASE_HOST=localhost
- ...
-
- # New
- JWT_SECRET=your-secret-key-minimum-32-characters
- ENCRYPTION_KEY=your-32-byte-aes-encryption-key
- UPLOAD_PATH=./uploads
-
- Update Makefile
-
- - Update generate-mocks target untuk include semua port baru
-
- ---
- Database Schema Overview
-
- tenants (root)
- ├── staffs (tenant_id FK, role_id FK → roles)
- ├── nas (tenant_id FK)
- │   └── [MikroTik: PPPoE secrets, hotspot users, queues - external, not in DB]
- ├── internet_packages (tenant_id FK)
- ├── customers (tenant_id FK, nas_id FK → nas)
- │   └── subscriptions (tenant_id FK, customer_id FK, package_id FK, nas_id FK)
- │       └── invoices (tenant_id FK, customer_id FK, subscription_id FK)
- │           └── payments (tenant_id FK, invoice_id FK, payment_method_id FK, verified_by FK → staffs)
- ├── payment_methods (tenant_id FK)
- └── clients (existing, will add tenant_id later)
-
- roles (global, not tenant-scoped)
- ├── permissions (global)
- └── role_permissions (join table)
-
- ---
- Verification Plan
-
- 1. Phase 0 verification: make test - semua existing tests masih pass setelah GORM migration
- 2. Phase 1-2: go build ./... - compile check
- 3. Phase 3: make migration-up - semua migrations berhasil
- 4. Phase 4-6: make generate-mocks && go build ./... - compile check
- 5. Phase 7: make test - semua domain unit tests pass
- 6. Phase 8-9: make http - server start tanpa error, test endpoints via curl/Postman
- 7. Phase 10: make test && make test-integration - semua tests pass
- 8. End-to-end: Test flow lengkap:
-   - Create tenant → Create staff → Staff login → Create NAS → Test MikroTik connection
-   - Create package → Create customer → Create subscription → Auto-sync ke MikroTik
-   - Generate invoice → Customer login portal → View invoice → Submit payment → Verify payment
-   - Customer check bandwidth → Connection status
-
- ---
- Implementation Summary
- ┌───────┬───────────────┬────────────────┬──────────────────────┐
- │ Phase │ Files Created │ Files Modified │  Estimated Entities  │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 0     │ 0             │ 8              │ 0 (GORM migration)   │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 1     │ 3             │ 3              │ 0 (utilities)        │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 2     │ 13            │ 0              │ 13 models            │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 3     │ 13            │ 0              │ 13 migrations        │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 4     │ 12            │ 3              │ 12 port interfaces   │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 5     │ 11            │ 1              │ 11 DB adapters       │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 6     │ 6             │ 2              │ 2 cache + 4 mikrotik │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 7     │ 11            │ 1              │ 11 domain services   │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 8     │ 12            │ 2              │ 12 inbound ports     │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 9     │ 12            │ 3              │ 12 HTTP handlers     │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 10    │ 15+           │ 1              │ tests                │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ 11    │ 0             │ 2              │ config               │
- ├───────┼───────────────┼────────────────┼──────────────────────┤
- │ Total │ ~108          │ ~26            │                      │
- └───────┴───────────────┴────────────────┴──────────────────────┘
+Urutan migrasi baru (lanjutan dari migration 14):
+┌─────┬───────────────────────────────────────────────┬─────────────────────────────────────────────────────┐
+│ No  │                     File                      │                      Deskripsi                      │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 15  │ 15_tenant_setting.go                          │ Buat tabel tenant_settings                          │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 16  │ 16_customer_registration.go                   │ Buat tabel customer_registrations                   │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 17  │ 17_pppoe_account.go                           │ Buat tabel pppoe_accounts                           │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 18  │ 18_activity_log.go                            │ Buat tabel activity_logs                            │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 19  │ 19_mikrotik_sync_log.go                       │ Buat tabel mikrotik_sync_logs                       │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 20  │ 20_alter_customer_add_auto_cutoff.go          │ Tambah auto_cutoff ke customers                     │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 21  │ 21_alter_internet_package_add_profile_name.go │ Tambah profile_name ke internet_packages            │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 22  │ 22_alter_subscription_add_pppoe_account_id.go │ Tambah pppoe_account_id ke subscriptions            │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 23  │ 23_migrate_pppoe_data.go                      │ Migrasi data PPPoE dari customers ke pppoe_accounts │
+├─────┼───────────────────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ 24  │ 24_alter_customer_remove_pppoe_fields.go      │ Hapus pppoe_username, pppoe_password dari customers │
+└─────┴───────────────────────────────────────────────┴─────────────────────────────────────────────────────┘
+Path: internal/migration/postgres/
+Pattern: Mengikuti pola Goose migration yang sudah ada (lihat migration 1-14)
+
+---
+BAGIAN 3: MODELS (Go Structs)
+
+3.1 Model Baru
+
+internal/model/tenant_setting.go
+
+type TenantSetting struct {
+     **ID        string `json:"id" gorm:"primaryKey;type:uuid;default:gen\_random\_uuid()"`**
+
+     **TenantSettingInput**
+
+}
+
+type TenantSettingInput struct {
+     **TenantID                 string `json:"tenant\_id" gorm:"uniqueIndex;type:uuid;not null"`**
+
+     **CutoffDay                int    `json:"cutoff\_day" gorm:"default:1"`**
+
+     **GracePeriod              int    `json:"grace\_period" gorm:"default:3"`**
+
+     **IsolirProfileName        string `json:"isolir\_profile\_name" gorm:"default:'ISOLIR\_MIKROPS'"`**
+
+     **WaGatewayApi             string `json:"wa\_gateway\_api" gorm:"type:text"`**
+
+     **AutoApproveRegistration  bool   `json:"auto\_approve\_registration" gorm:"default:false"`**
+
+     **DefaultPppPasswordType   string `json:"default\_ppp\_password\_type" gorm:"default:'random'"`**
+
+     **DefaultPppPasswordLength int    `json:"default\_ppp\_password\_length" gorm:"default:8"`**
+
+     **CreatedAt                time.Time**
+
+     **UpdatedAt                time.Time**
+
+}
+
+internal/model/customer_registration.go
+
+type CustomerRegistration struct {
+     **ID string `json:"id" gorm:"primaryKey;type:uuid;default:gen\_random\_uuid()"`**
+
+     **CustomerRegistrationInput**
+
+     **Customer        \*Customer        `json:"customer,omitempty" gorm:"foreignKey:CustomerID"`**
+
+     **InternetPackage \*InternetPackage `json:"internet\_package,omitempty" gorm:"foreignKey:RequestedPackageID"`**
+
+     **Nas             \*Nas             `json:"nas,omitempty" gorm:"foreignKey:RequestedNasID"`**
+
+     **ApprovedByStaff \*Staff           `json:"approved\_by\_staff,omitempty" gorm:"foreignKey:ApprovedBy"`**
+
+}
+
+// Constants: RegistrationStatusPending, RegistrationStatusApproved, RegistrationStatusRejected
+
+internal/model/pppoe_account.go
+
+type PppoeAccount struct {
+     **ID string `json:"id" gorm:"primaryKey;type:uuid;default:gen\_random\_uuid()"`**
+
+     **PppoeAccountInput**
+
+     **Customer        \*Customer        `json:"customer,omitempty" gorm:"foreignKey:CustomerID"`**
+
+     **Nas             \*Nas             `json:"nas,omitempty" gorm:"foreignKey:NasID"`**
+
+     **InternetPackage \*InternetPackage `json:"internet\_package,omitempty" gorm:"foreignKey:PackageID"`**
+
+}
+
+// Constants: PppoeStatusActive, PppoeStatusIsolated, PppoeStatusDisabled
+// Constants: SyncStatusSynced, SyncStatusPending, SyncStatusError
+
+internal/model/activity_log.go
+
+type ActivityLog struct {
+     **ID string `json:"id" gorm:"primaryKey;type:uuid;default:gen\_random\_uuid()"`**
+
+     **ActivityLogInput**
+
+}
+
+internal/model/mikrotik_sync_log.go
+
+type MikrotikSyncLog struct {
+     **ID string `json:"id" gorm:"primaryKey;type:uuid;default:gen\_random\_uuid()"`**
+
+     **MikrotikSyncLogInput**
+
+}
+
+3.2 Modifikasi Model Existing
+
+internal/model/customer.go
+
+- Tambah field AutoCutoff bool ke CustomerInput
+- Hapus field PppoeUsername, PppoePassword (setelah migrasi data)
+- Tambah relasi: PppoeAccounts []PppoeAccount (optional preload)
+
+internal/model/internet_package.go
+
+- Tambah field ProfileName string ke InternetPackageInput
+
+internal/model/subscription.go
+
+- Tambah field PppoeAccountID *string ke SubscriptionInput
+- Tambah relasi: PppoeAccount *PppoeAccount (optional preload)
+
+---
+BAGIAN 4: BUSINESS FLOWS
+
+Flow 1: Customer Self-Registration
+
+Customer                    System                      Admin
+    **│                          │                           │**
+
+    **├─ Submit form ──────────> │                           │**
+
+    **│                          ├─ Validate input           │**
+
+    **│                          ├─ Insert customer\_         │**
+
+    **│                          │  registrations (pending)  │**
+
+    **│                          │                           │**
+
+    **│                          ├─ Check auto\_approve ──────┤**
+
+    **│                          │  setting                  │**
+
+    **│                          │                           │**
+
+    **│  \[auto\_approve=true]     │                           │**
+
+    **│  <── Credentials ────────┤                           │**
+
+    **│                          ├─ Create customer          │**
+
+    **│                          ├─ Create pppoe\_account     │**
+
+    **│                          ├─ Create subscription      │**
+
+    **│                          ├─ Enqueue MikroTik sync    │**
+
+    **│                          │                           │**
+
+    **│  \[auto\_approve=false]    │                           │**
+
+    **│                          ├── Notifikasi ────────────>│**
+
+    **│                          │                           ├─ Review**
+
+    **│                          │                           ├─ Approve/Reject**
+
+    **│                          │<── Approval action ───────┤**
+
+    **│                          │                           │**
+
+    **│  \[approved]              │                           │**
+
+    **│  <── Credentials ────────┤                           │**
+
+    **│                          ├─ Same as auto\_approve     │**
+
+    **│                          │                           │**
+
+    **│  \[rejected]              │                           │**
+
+    **│  <── Rejection email ────┤                           │**
+
+
+
+
+Domain Methods Needed:
+- CustomerRegistration.Submit(ctx, input) (registration, error) - public endpoint
+- CustomerRegistration.List(ctx, filter) ([]registration, error) - admin
+- CustomerRegistration.Approve(ctx, id, staffID) error - admin approval
+- CustomerRegistration.Reject(ctx, id, staffID, reason) error - admin rejection
+
+Approval Sub-steps (dalam domain):
+1. Create customers record
+2. Generate PPPoE credentials (sesuai tenant_settings)
+3. Insert pppoe_accounts (sync_status: pending)
+4. Create subscriptions linked to pppoe_account
+5. Create initial invoices (first month)
+6. Enqueue RabbitMQ job: mikrotik.ppp.create
+7. Log ke activity_logs
+
+Flow 2: Auto-Cutoff (Isolir)
+
+Cron (daily 00:01)
+    **│**
+
+    **├─ Query tenants WHERE cutoff\_day = today**
+
+    **│**
+
+    **├─ For each tenant:**
+
+    **│     ├─ Query customers WHERE:**
+
+    **│     │    - auto\_cutoff = true**
+
+    **│     │    - is\_active = true**
+
+    **│     │    - Has unpaid invoice past due\_date + grace\_period**
+
+    **│     │**
+
+    **│     ├─ For each customer:**
+
+    **│     │    ├─ Get pppoe\_accounts (status: active)**
+
+    **│     │    ├─ Enqueue RabbitMQ: mikrotik.ppp.isolate**
+
+    **│     │    │    payload: {pppoe\_account\_id, nas\_id, username, isolir\_profile}**
+
+    **│     │    ├─ Update pppoe\_account:**
+
+    **│     │    │    - original\_profile = current profile\_name**
+
+    **│     │    │    - status = 'isolated'**
+
+    **│     │    ├─ Update subscription: status = 'suspended'**
+
+    **│     │    └─ Log ke activity\_logs + mikrotik\_sync\_logs**
+
+    **│**
+
+    **└─ Worker:**
+
+          **├─ Connect ke MikroTik via API**
+
+          **├─ Change profile → ISOLIR\_MIKROPS**
+
+          **├─ Force disconnect active session**
+
+          **├─ Update sync\_status = 'synced'**
+
+          **└─ Log result**
+
+
+
+
+Domain Methods Needed:
+- Cutoff.RunDailyCutoff(ctx) error - called by cron/scheduler
+- Cutoff.IsolateCustomer(ctx, customerID) error - manual isolate
+- Cutoff.IsolatePppoeAccount(ctx, pppoeAccountID) error - isolate specific account
+
+MikroTik Commands:
+# Change profile to isolir
+/ppp secret set [find name={username}] profile=ISOLIR_MIKROPS
+# Force disconnect
+/ppp active remove [find name={username}]
+
+Flow 3: Payment → Restore
+
+Customer/Admin
+    **│**
+
+    **├─ Record payment (existing flow)**
+
+    **│**
+
+    **├─ Admin verifies payment (existing)**
+
+    **│     │**
+
+    **│     ├─ Update invoice status → 'paid'**
+
+    **│     ├─ Check: customer has isolated pppoe\_accounts?**
+
+    **│     │**
+
+    **│     ├─ \[has isolated accounts]**
+
+    **│     │    ├─ For each isolated pppoe\_account:**
+
+    **│     │    │    ├─ Enqueue RabbitMQ: mikrotik.ppp.restore**
+
+    **│     │    │    │    payload: {pppoe\_account\_id, nas\_id, username, restore\_profile}**
+
+    **│     │    │    ├─ Update pppoe\_account:**
+
+    **│     │    │    │    - profile\_name = original\_profile**
+
+    **│     │    │    │    - original\_profile = NULL**
+
+    **│     │    │    │    - status = 'active'**
+
+    **│     │    │    ├─ Update subscription: status = 'active'**
+
+    **│     │    │    └─ Log ke activity\_logs**
+
+    **│     │    │**
+
+    **│     │    └─ Worker:**
+
+    **│     │         ├─ Connect ke MikroTik**
+
+    **│     │         ├─ Restore profile → original profile**
+
+    **│     │         ├─ Force disconnect (reconnect with new profile)**
+
+    **│     │         └─ Update sync\_status**
+
+    **│     │**
+
+    **│     └─ \[no isolated accounts]**
+
+    **│          └─ Done (just mark invoice as paid)**
+
+
+
+
+Domain Method Modification:
+- Extend existing Payment.Verify() to trigger restore flow
+- Add Cutoff.RestorePppoeAccount(ctx, pppoeAccountID) error
+
+Flow 4: NAS Provisioning (Isolir Profile Setup)
+
+Admin adds NAS
+    **│**
+
+    **├─ Create NAS record (existing)**
+
+    **│**
+
+    **├─ \[new] Provision isolir infrastructure:**
+
+    **│    ├─ Check if ISOLIR profile exists on MikroTik**
+
+    **│    ├─ Create if not exists:**
+
+    **│    │    - /ppp profile add name=ISOLIR\_MIKROPS rate-limit=128k/128k**
+
+    **│    └─ Log ke mikrotik\_sync\_logs**
+
+
+
+
+Domain Method:
+- Extend Nas.Create() to trigger isolir profile provisioning
+
+---
+BAGIAN 5: PORTS (Interfaces)
+
+5.1 Outbound Ports Baru
+
+internal/port/outbound/tenant_setting.go
+
+type TenantSettingDatabasePort interface {
+     **Create(data model.TenantSettingInput) (model.TenantSetting, error)**
+
+     **FindByTenantID(tenantID string) (model.TenantSetting, error)**
+
+     **Update(id string, data model.TenantSettingInput) error**
+
+}
+
+internal/port/outbound/customer_registration.go
+
+type CustomerRegistrationDatabasePort interface {
+     **Create(data model.CustomerRegistrationInput) (model.CustomerRegistration, error)**
+
+     **FindByFilter(filter model.CustomerRegistrationFilter) (\[]model.CustomerRegistration, error)**
+
+     **FindByID(id string) (model.CustomerRegistration, error)**
+
+     **Update(id string, data model.CustomerRegistrationInput) error**
+
+}
+
+internal/port/outbound/pppoe_account.go
+
+type PppoeAccountDatabasePort interface {
+     **Create(data model.PppoeAccountInput) (model.PppoeAccount, error)**
+
+     **FindByFilter(filter model.PppoeAccountFilter) (\[]model.PppoeAccount, error)**
+
+     **FindByID(id string) (model.PppoeAccount, error)**
+
+     **Update(id string, data model.PppoeAccountInput) error**
+
+     **Delete(id string) error**
+
+}
+
+internal/port/outbound/activity_log.go
+
+type ActivityLogDatabasePort interface {
+     **Create(data model.ActivityLogInput) (model.ActivityLog, error)**
+
+     **FindByFilter(filter model.ActivityLogFilter) (\[]model.ActivityLog, error)**
+
+}
+
+internal/port/outbound/mikrotik_sync_log.go
+
+type MikrotikSyncLogDatabasePort interface {
+     **Create(data model.MikrotikSyncLogInput) (model.MikrotikSyncLog, error)**
+
+     **FindByFilter(filter model.MikrotikSyncLogFilter) (\[]model.MikrotikSyncLog, error)**
+
+}
+
+Update internal/port/outbound/registry_database.go
+
+Tambah methods:
+TenantSetting() TenantSettingDatabasePort
+CustomerRegistration() CustomerRegistrationDatabasePort
+PppoeAccount() PppoeAccountDatabasePort
+ActivityLog() ActivityLogDatabasePort
+MikrotikSyncLog() MikrotikSyncLogDatabasePort
+
+5.2 Inbound Ports Baru
+
+internal/port/inbound/tenant_setting.go
+
+type TenantSettingHttpPort interface {
+     **Get(a any) error**
+
+     **Update(a any) error**
+
+}
+
+internal/port/inbound/customer_registration.go
+
+type CustomerRegistrationHttpPort interface {
+     **Submit(a any) error    // public endpoint (no auth)**
+
+     **List(a any) error      // admin**
+
+     **Get(a any) error       // admin**
+
+     **Approve(a any) error   // admin**
+
+     **Reject(a any) error    // admin**
+
+}
+
+internal/port/inbound/pppoe_account.go
+
+type PppoeAccountHttpPort interface {
+     **List(a any) error**
+
+     **Get(a any) error**
+
+     **Create(a any) error**
+
+     **Update(a any) error**
+
+     **Delete(a any) error**
+
+     **Isolate(a any) error   // manual isolate**
+
+     **Restore(a any) error   // manual restore**
+
+}
+
+Update internal/port/inbound/registry_http.go
+
+Tambah methods:
+TenantSetting() TenantSettingHttpPort
+CustomerRegistration() CustomerRegistrationHttpPort
+PppoeAccount() PppoeAccountHttpPort
+
+---
+BAGIAN 6: DOMAIN SERVICES
+
+6.1 Domain Baru
+
+internal/domain/tenant_setting/ (TenantSettingDomain)
+
+- Get(ctx, tenantID) (TenantSetting, error)
+- Update(ctx, tenantID, input) error
+- GetOrCreateDefault(ctx, tenantID) (TenantSetting, error) -- auto-create default settings
+
+internal/domain/customer_registration/ (CustomerRegistrationDomain)
+
+- Submit(ctx, input) (CustomerRegistration, error) -- public registration
+- List(ctx, filter) ([]CustomerRegistration, error)
+- Get(ctx, id) (CustomerRegistration, error)
+- Approve(ctx, id, staffID) error -- triggers full provisioning flow
+- Reject(ctx, id, staffID, reason) error
+
+Approve Flow Internal:
+1. Validate registration exists & status=pending
+2. Get tenant_settings
+3. Create customer record (via existing Customer domain)
+4. Generate PPPoE credentials based on tenant_settings
+5. Create pppoe_account
+6. Create subscription
+7. Generate first invoice
+8. Enqueue MikroTik sync via RabbitMQ
+9. Send credentials notification
+10. Update registration status=approved
+11. Log activity
+
+internal/domain/pppoe_account/ (PppoeAccountDomain)
+
+- Create(ctx, input) (PppoeAccount, error)
+- List(ctx, filter) ([]PppoeAccount, error)
+- Get(ctx, id) (PppoeAccount, error)
+- Update(ctx, id, input) error
+- Delete(ctx, id) error
+- Isolate(ctx, id) error -- manual isolate, triggers MikroTik
+- Restore(ctx, id) error -- manual restore, triggers MikroTik
+
+internal/domain/cutoff/ (CutoffDomain)
+
+- RunDailyCutoff(ctx) error -- main cron job
+- ScanTenantsForCutoff(ctx) ([]TenantCutoffInfo, error)
+- IsolateCustomer(ctx, customerID) error -- isolate all PPPoE accounts
+- RestoreCustomer(ctx, customerID) error -- restore all PPPoE accounts
+- OnInvoicePaid(ctx, invoiceID) error -- triggered by payment verification
+
+internal/domain/activity_log/ (ActivityLogDomain)
+
+- Log(ctx, input) error -- simple logging
+- List(ctx, filter) ([]ActivityLog, error) -- admin view
+
+6.2 Modifikasi Domain Existing
+
+internal/domain/payment/
+
+- Extend Verify() method: setelah verify → check isolated pppoe_accounts → trigger restore
+
+internal/domain/nas/
+
+- Extend Create(): setelah create NAS → provision isolir profile di MikroTik
+
+internal/domain/invoice/
+
+- Extend GenerateBulk(): gunakan tenant_settings.cutoff_day untuk due_date calculation
+
+6.3 Update Domain Registry
+
+internal/domain/registry.go tambah:
+TenantSetting() tenant_setting.TenantSettingDomain
+CustomerRegistration() customer_registration.CustomerRegistrationDomain
+PppoeAccount() pppoe_account.PppoeAccountDomain
+Cutoff() cutoff.CutoffDomain
+ActivityLog() activity_log.ActivityLogDomain
+
+---
+BAGIAN 7: ADAPTERS
+
+7.1 Outbound Adapters (Postgres)
+
+Files baru di internal/adapter/outbound/postgres/:
+- tenant_setting.go -- CRUD tenant_settings
+- customer_registration.go -- CRUD customer_registrations
+- pppoe_account.go -- CRUD pppoe_accounts
+- activity_log.go -- Insert + query activity_logs
+- mikrotik_sync_log.go -- Insert + query mikrotik_sync_logs
+
+Update internal/adapter/outbound/postgres/registry.go:
+- Tambah 5 adapter baru ke registry
+
+7.2 Inbound Adapters (Gin HTTP)
+
+Files baru di internal/adapter/inbound/gin/:
+- tenant_setting.go -- GET/PUT tenant settings
+- customer_registration.go -- Submit (public) + List/Approve/Reject (admin)
+- pppoe_account.go -- CRUD + Isolate/Restore
+
+Update internal/adapter/inbound/gin/adapter.go:
+- Tambah 3 adapter baru
+
+7.3 Message Consumer (RabbitMQ)
+
+Files baru/update di internal/adapter/inbound/rabbitmq/:
+- pppoe_sync.go -- Consumer untuk mikrotik.ppp.create, mikrotik.ppp.isolate, mikrotik.ppp.restore
+- cutoff_worker.go -- Consumer untuk cutoff.process
+
+7.4 Command (Cron)
+
+File baru di internal/adapter/inbound/command/:
+- cutoff.go -- Command handler untuk daily cutoff job
+
+---
+BAGIAN 8: ROUTES
+
+8.1 Routes Baru
+
+Update internal/adapter/inbound/gin/route.go:
+
+# Public (no auth) - Customer Self-Registration
+POST /register/:tenant_slug                    → CustomerRegistration.Submit
+
+# Admin API (StaffAuth)
+GET    /api/v1/tenant/settings                 → TenantSetting.Get
+PUT    /api/v1/tenant/settings                 → TenantSetting.Update
+
+GET    /api/v1/registrations                   → CustomerRegistration.List
+GET    /api/v1/registrations/:id               → CustomerRegistration.Get
+POST   /api/v1/registrations/:id/approve       → CustomerRegistration.Approve
+POST   /api/v1/registrations/:id/reject        → CustomerRegistration.Reject
+
+GET    /api/v1/pppoe-accounts                  → PppoeAccount.List
+GET    /api/v1/pppoe-accounts/:id              → PppoeAccount.Get
+POST   /api/v1/pppoe-accounts                  → PppoeAccount.Create
+PUT    /api/v1/pppoe-accounts/:id              → PppoeAccount.Update
+DELETE /api/v1/pppoe-accounts/:id              → PppoeAccount.Delete
+POST   /api/v1/pppoe-accounts/:id/isolate      → PppoeAccount.Isolate
+POST   /api/v1/pppoe-accounts/:id/restore      → PppoeAccount.Restore
+
+GET    /api/v1/activity-logs                   → ActivityLog.List (read-only)
+GET    /api/v1/sync-logs                       → MikrotikSyncLog.List (read-only)
+
+# Customer Portal (existing group, tambahan)
+GET    /portal/v1/pppoe-accounts               → Portal.ListPppoeAccounts
+
+8.2 Permission Seeds (Migration Update)
+
+Tambah permissions baru ke seed data:
+- tenant_setting: manage
+- customer_registration: read, create, update
+- pppoe_account: read, create, update, delete, manage
+- activity_log: read
+- mikrotik_sync_log: read
+
+---
+BAGIAN 9: IMPLEMENTATION ORDER
+
+Phase A: Database Foundation (Migrasi + Model)
+
+1. Buat 5 model baru (tenant_setting, customer_registration, pppoe_account, activity_log, mikrotik_sync_log)
+2. Update 3 model existing (customer, internet_package, subscription)
+3. Buat 10 migration files (15-24)
+4. Run migrations
+
+Phase B: Outbound Ports + Adapters
+
+5. Buat 5 outbound port interfaces
+6. Update registry_database.go
+7. Buat 5 postgres adapters
+8. Update postgres registry
+9. Generate mocks
+
+Phase C: Domain Logic
+
+10. Buat domain tenant_setting
+11. Buat domain customer_registration (dengan approval flow)
+12. Buat domain pppoe_account (dengan isolate/restore)
+13. Buat domain cutoff (auto-cutoff logic)
+14. Buat domain activity_log
+15. Update domain payment (verify → trigger restore)
+16. Update domain nas (create → provision isolir)
+17. Update domain registry
+
+Phase D: Inbound Ports + Adapters + Routes
+
+18. Buat 3 inbound port interfaces
+19. Update registry_http.go
+20. Buat 3 gin adapters
+21. Update route.go
+22. Buat RabbitMQ consumers
+23. Buat command handler cutoff
+24. Update permission seeds
+
+Phase E: Testing
+
+25. Unit tests untuk semua domain baru
+26. Unit tests untuk domain yang dimodifikasi
+27. Integration tests untuk flows (registration, cutoff, restore)
+
+---
+BAGIAN 10: FILE MANIFEST
+
+Files Baru (31 files)
+
+Models (5):
+- internal/model/tenant_setting.go
+- internal/model/customer_registration.go
+- internal/model/pppoe_account.go
+- internal/model/activity_log.go
+- internal/model/mikrotik_sync_log.go
+
+Migrations (10):
+- internal/migration/postgres/15_tenant_setting.go
+- internal/migration/postgres/16_customer_registration.go
+- internal/migration/postgres/17_pppoe_account.go
+- internal/migration/postgres/18_activity_log.go
+- internal/migration/postgres/19_mikrotik_sync_log.go
+- internal/migration/postgres/20_alter_customer_add_auto_cutoff.go
+- internal/migration/postgres/21_alter_internet_package_add_profile_name.go
+- internal/migration/postgres/22_alter_subscription_add_pppoe_account_id.go
+- internal/migration/postgres/23_migrate_pppoe_data.go
+- internal/migration/postgres/24_alter_customer_remove_pppoe_fields.go
+
+Outbound Ports (5):
+- internal/port/outbound/tenant_setting.go
+- internal/port/outbound/customer_registration.go
+- internal/port/outbound/pppoe_account.go
+- internal/port/outbound/activity_log.go
+- internal/port/outbound/mikrotik_sync_log.go
+
+Outbound Adapters - Postgres (5):
+- internal/adapter/outbound/postgres/tenant_setting.go
+- internal/adapter/outbound/postgres/customer_registration.go
+- internal/adapter/outbound/postgres/pppoe_account.go
+- internal/adapter/outbound/postgres/activity_log.go
+- internal/adapter/outbound/postgres/mikrotik_sync_log.go
+
+Inbound Ports (3):
+- internal/port/inbound/tenant_setting.go
+- internal/port/inbound/customer_registration.go
+- internal/port/inbound/pppoe_account.go
+
+Inbound Adapters - Gin (3):
+- internal/adapter/inbound/gin/tenant_setting.go
+- internal/adapter/inbound/gin/customer_registration.go
+- internal/adapter/inbound/gin/pppoe_account.go
+
+Domain Logic (5):
+- internal/domain/tenant_setting/domain.go
+- internal/domain/customer_registration/domain.go
+- internal/domain/pppoe_account/domain.go
+- internal/domain/cutoff/domain.go
+- internal/domain/activity_log/domain.go
+
+Files Dimodifikasi (12 files)
+
+- internal/model/customer.go -- tambah AutoCutoff, hapus PPPoE fields
+- internal/model/internet_package.go -- tambah ProfileName
+- internal/model/subscription.go -- tambah PppoeAccountID
+- internal/port/outbound/registry_database.go -- tambah 5 port baru
+- internal/port/inbound/registry_http.go -- tambah 3 port baru
+- internal/adapter/outbound/postgres/registry.go -- tambah 5 adapter baru
+- internal/adapter/inbound/gin/adapter.go -- tambah 3 adapter baru
+- internal/adapter/inbound/gin/route.go -- tambah routes baru
+- internal/domain/registry.go -- tambah 5 domain baru
+- internal/domain/payment/domain.go -- extend Verify → trigger restore
+- internal/domain/nas/domain.go -- extend Create → provision isolir
+- internal/migration/postgres/14_seed_roles_permissions.go -- tambah permissions baru
+
+---
+BAGIAN 11: VERIFICATION
+
+Database
+
+1. make migration-up -- semua migrasi berhasil
+2. make migration-status -- semua migrasi applied
+3. Verify tabel baru via psql:
+- \dt -- list all tables
+- \d tenant_settings -- verify columns
+- \d pppoe_accounts -- verify columns + indexes
+
+Unit Tests
+
+4. make test -- semua existing tests tetap pass
+5. Test domain tenant_setting (CRUD)
+6. Test domain customer_registration (submit, approve, reject)
+7. Test domain pppoe_account (create, isolate, restore)
+8. Test domain cutoff (scan tenants, isolate flow)
+9. Test payment verify → restore flow
+
+Integration Tests (manual)
+
+10. Submit registration → verify record di DB
+11. Approve registration → verify customer + pppoe_account + subscription created
+12. Create overdue invoice → run cutoff → verify pppoe isolated
+13. Verify payment → verify pppoe restored
+14. Test MikroTik sync (jika router tersedia)
+
+API Testing
+
+15. Test semua new routes via curl/Postman
+16. Verify permission checks on all endpoints
+17. Test public registration endpoint (no auth)

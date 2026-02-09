@@ -190,14 +190,14 @@ func (a *App) messageInbound() {
 	switch inboundMessageDriver {
 	case "rabbitmq":
 		inboundMessageAdapter := rabbitmq_inbound_adapter.NewAdapter(a.domain)
-		rabbitmq_inbound_adapter.InitRoute(ctx, os.Args, inboundMessageAdapter)
+		rabbitmq_inbound_adapter.InitRoute(ctx, os.Args, inboundMessageAdapter, a.domain)
 	}
 }
 
 func (a *App) commandInbound() {
 	ctx := a.ctx
 	inboundCommandAdapter := command_inbound_adapter.NewAdapter(a.domain)
-	command_inbound_adapter.InitRoute(ctx, os.Args, inboundCommandAdapter)
+	command_inbound_adapter.InitRoute(ctx, os.Args, inboundCommandAdapter, a.domain)
 }
 
 func (a *App) workflowInbound() {

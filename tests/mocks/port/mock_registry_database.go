@@ -34,6 +34,20 @@ func (m *MockDatabasePort) EXPECT() *MockDatabasePortMockRecorder {
 	return m.recorder
 }
 
+// ActivityLog mocks base method.
+func (m *MockDatabasePort) ActivityLog() outbound_port.ActivityLogDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivityLog")
+	ret0, _ := ret[0].(outbound_port.ActivityLogDatabasePort)
+	return ret0
+}
+
+// ActivityLog indicates an expected call of ActivityLog.
+func (mr *MockDatabasePortMockRecorder) ActivityLog() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivityLog", reflect.TypeOf((*MockDatabasePort)(nil).ActivityLog))
+}
+
 // Client mocks base method.
 func (m *MockDatabasePort) Client() outbound_port.ClientDatabasePort {
 	m.ctrl.T.Helper()
@@ -60,6 +74,20 @@ func (m *MockDatabasePort) Customer() outbound_port.CustomerDatabasePort {
 func (mr *MockDatabasePortMockRecorder) Customer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Customer", reflect.TypeOf((*MockDatabasePort)(nil).Customer))
+}
+
+// CustomerRegistration mocks base method.
+func (m *MockDatabasePort) CustomerRegistration() outbound_port.CustomerRegistrationDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CustomerRegistration")
+	ret0, _ := ret[0].(outbound_port.CustomerRegistrationDatabasePort)
+	return ret0
+}
+
+// CustomerRegistration indicates an expected call of CustomerRegistration.
+func (mr *MockDatabasePortMockRecorder) CustomerRegistration() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CustomerRegistration", reflect.TypeOf((*MockDatabasePort)(nil).CustomerRegistration))
 }
 
 // DoInTransaction mocks base method.
@@ -103,6 +131,20 @@ func (m *MockDatabasePort) Invoice() outbound_port.InvoiceDatabasePort {
 func (mr *MockDatabasePortMockRecorder) Invoice() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Invoice", reflect.TypeOf((*MockDatabasePort)(nil).Invoice))
+}
+
+// MikrotikSyncLog mocks base method.
+func (m *MockDatabasePort) MikrotikSyncLog() outbound_port.MikrotikSyncLogDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MikrotikSyncLog")
+	ret0, _ := ret[0].(outbound_port.MikrotikSyncLogDatabasePort)
+	return ret0
+}
+
+// MikrotikSyncLog indicates an expected call of MikrotikSyncLog.
+func (mr *MockDatabasePortMockRecorder) MikrotikSyncLog() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MikrotikSyncLog", reflect.TypeOf((*MockDatabasePort)(nil).MikrotikSyncLog))
 }
 
 // Nas mocks base method.
@@ -159,6 +201,20 @@ func (m *MockDatabasePort) Permission() outbound_port.PermissionDatabasePort {
 func (mr *MockDatabasePortMockRecorder) Permission() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Permission", reflect.TypeOf((*MockDatabasePort)(nil).Permission))
+}
+
+// PppoeAccount mocks base method.
+func (m *MockDatabasePort) PppoeAccount() outbound_port.PppoeAccountDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PppoeAccount")
+	ret0, _ := ret[0].(outbound_port.PppoeAccountDatabasePort)
+	return ret0
+}
+
+// PppoeAccount indicates an expected call of PppoeAccount.
+func (mr *MockDatabasePortMockRecorder) PppoeAccount() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PppoeAccount", reflect.TypeOf((*MockDatabasePort)(nil).PppoeAccount))
 }
 
 // Role mocks base method.
@@ -229,62 +285,6 @@ func (m *MockDatabasePort) TenantSetting() outbound_port.TenantSettingDatabasePo
 func (mr *MockDatabasePortMockRecorder) TenantSetting() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TenantSetting", reflect.TypeOf((*MockDatabasePort)(nil).TenantSetting))
-}
-
-// CustomerRegistration mocks base method.
-func (m *MockDatabasePort) CustomerRegistration() outbound_port.CustomerRegistrationDatabasePort {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CustomerRegistration")
-	ret0, _ := ret[0].(outbound_port.CustomerRegistrationDatabasePort)
-	return ret0
-}
-
-// CustomerRegistration indicates an expected call of CustomerRegistration.
-func (mr *MockDatabasePortMockRecorder) CustomerRegistration() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CustomerRegistration", reflect.TypeOf((*MockDatabasePort)(nil).CustomerRegistration))
-}
-
-// PppoeAccount mocks base method.
-func (m *MockDatabasePort) PppoeAccount() outbound_port.PppoeAccountDatabasePort {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PppoeAccount")
-	ret0, _ := ret[0].(outbound_port.PppoeAccountDatabasePort)
-	return ret0
-}
-
-// PppoeAccount indicates an expected call of PppoeAccount.
-func (mr *MockDatabasePortMockRecorder) PppoeAccount() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PppoeAccount", reflect.TypeOf((*MockDatabasePort)(nil).PppoeAccount))
-}
-
-// ActivityLog mocks base method.
-func (m *MockDatabasePort) ActivityLog() outbound_port.ActivityLogDatabasePort {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ActivityLog")
-	ret0, _ := ret[0].(outbound_port.ActivityLogDatabasePort)
-	return ret0
-}
-
-// ActivityLog indicates an expected call of ActivityLog.
-func (mr *MockDatabasePortMockRecorder) ActivityLog() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivityLog", reflect.TypeOf((*MockDatabasePort)(nil).ActivityLog))
-}
-
-// MikrotikSyncLog mocks base method.
-func (m *MockDatabasePort) MikrotikSyncLog() outbound_port.MikrotikSyncLogDatabasePort {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MikrotikSyncLog")
-	ret0, _ := ret[0].(outbound_port.MikrotikSyncLogDatabasePort)
-	return ret0
-}
-
-// MikrotikSyncLog indicates an expected call of MikrotikSyncLog.
-func (mr *MockDatabasePortMockRecorder) MikrotikSyncLog() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MikrotikSyncLog", reflect.TypeOf((*MockDatabasePort)(nil).MikrotikSyncLog))
 }
 
 // WithTenantScope mocks base method.

@@ -15,6 +15,7 @@ func InitRoute(
 ) {
 	// ========== Public Registration (no middleware) ==========
 	router.POST("/register/:tenant_slug", func(c *gin.Context) { port.CustomerRegistration().PublicSubmit(c) })
+	router.POST("/webhooks/xendit", func(c *gin.Context) { port.Xendit().HandleWebhook(c) })
 
 	// ========== Auth (no middleware) ==========
 	auth := router.Group("/auth")

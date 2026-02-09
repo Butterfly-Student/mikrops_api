@@ -27,6 +27,7 @@ type invoiceDomain struct {
 	messagePort  outbound_port.MessagePort
 	cachePort    outbound_port.CachePort
 	workflowPort outbound_port.WorkflowPort
+	httpPort     outbound_port.HttpPort
 }
 
 func NewInvoiceDomain(
@@ -34,12 +35,14 @@ func NewInvoiceDomain(
 	messagePort outbound_port.MessagePort,
 	cachePort outbound_port.CachePort,
 	workflowPort outbound_port.WorkflowPort,
+	httpPort outbound_port.HttpPort,
 ) InvoiceDomain {
 	return &invoiceDomain{
 		databasePort: databasePort,
 		messagePort:  messagePort,
 		cachePort:    cachePort,
 		workflowPort: workflowPort,
+		httpPort:     httpPort,
 	}
 }
 
@@ -59,9 +62,40 @@ func (d *invoiceDomain) Create(ctx context.Context, input model.InvoiceInput) (m
 		input.TotalAmount = input.Amount + input.TaxAmount
 	}
 
+	// Create invoice in DB first
 	invoice, err := d.databasePort.Invoice().Create(input)
 	if err != nil {
 		return model.Invoice{}, stacktrace.Propagate(err, "failed to create invoice")
+	}
+
+	// Integrate with Xendit if CustomerID is present
+	if input.CustomerID != "" {
+		// Fetch customer
+		customer, err := d.databasePort.Customer().FindByID(input.CustomerID)
+		if err == nil {
+			// Call Xendit
+			externalID, invoiceURL, err := d.httpPort.Xendit().CreateInvoice(ctx, invoice, customer)
+			if err == nil {
+				// Update invoice with Xendit details
+				input.ExternalID = externalID
+				input.InvoiceURL = invoiceURL
+
+				// Persist updates to DB
+				err = d.databasePort.Invoice().Update(invoice.ID, input)
+				if err != nil {
+					// Log error but generally return the invoice (maybe without Xendit details persisted, which is bad)
+					// But we already have the invoice created.
+					return invoice, stacktrace.Propagate(err, "failed to update invoice with xendit details")
+				}
+
+				// Update returned invoice object
+				invoice.ExternalID = externalID
+				invoice.InvoiceURL = invoiceURL
+			} else {
+				// If Xendit fails, we return error so the caller knows payment link generation failed.
+				return invoice, stacktrace.Propagate(err, "failed to create xendit invoice")
+			}
+		}
 	}
 
 	return invoice, nil
@@ -159,7 +193,7 @@ func (d *invoiceDomain) GenerateBulk(ctx context.Context, tenantID string, perio
 			// Use cutoff_day from tenant settings
 			now := time.Now()
 			currentDay := now.Day()
-			
+
 			// If current day < cutoff_day: due_date = current_month + cutoff_day
 			// If current day >= cutoff_day: due_date = next_month + cutoff_day
 			if currentDay < cutoffDay {

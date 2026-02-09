@@ -35,6 +35,8 @@ type InvoiceInput struct {
 	PeriodEnd      time.Time  `json:"period_end" gorm:"column:period_end;not null"`
 	Notes          string     `json:"notes" gorm:"column:notes;type:text"`
 	PaidAt         *time.Time `json:"paid_at" gorm:"column:paid_at"`
+	ExternalID     string     `json:"external_id" gorm:"column:external_id;type:varchar(255);index"`
+	InvoiceURL     string     `json:"invoice_url" gorm:"column:invoice_url;type:varchar(255)"`
 	CreatedAt      time.Time  `json:"created_at" gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt      time.Time  `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"`
 }

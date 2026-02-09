@@ -4,9 +4,9 @@ import (
 	"mikrops/internal/domain/activity_log"
 	"mikrops/internal/domain/auth"
 	"mikrops/internal/domain/client"
-	"mikrops/internal/domain/cutoff"
 	"mikrops/internal/domain/customer"
 	"mikrops/internal/domain/customer_registration"
+	"mikrops/internal/domain/cutoff"
 	"mikrops/internal/domain/internet_package"
 	"mikrops/internal/domain/invoice"
 	"mikrops/internal/domain/mikrotik"
@@ -104,7 +104,7 @@ func (d *domain) PaymentMethod() payment_method.PaymentMethodDomain {
 }
 
 func (d *domain) Invoice() invoice.InvoiceDomain {
-	return invoice.NewInvoiceDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
+	return invoice.NewInvoiceDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort, d.httpPort)
 }
 
 func (d *domain) Payment() payment.PaymentDomain {

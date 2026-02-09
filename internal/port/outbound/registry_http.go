@@ -4,5 +4,5 @@ package outbound_port
 type HttpPort interface {
 	Mikrotik() MikrotikPort
 	Whatsapp() WhatsappPort
+	Xendit() XenditPort
 }
-

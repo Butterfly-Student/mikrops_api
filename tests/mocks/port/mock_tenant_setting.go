@@ -49,6 +49,20 @@ func (mr *MockTenantSettingDatabasePortMockRecorder) Create(data interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTenantSettingDatabasePort)(nil).Create), data)
 }
 
+// Delete mocks base method.
+func (m *MockTenantSettingDatabasePort) Delete(id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockTenantSettingDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTenantSettingDatabasePort)(nil).Delete), id)
+}
+
 // FindByFilter mocks base method.
 func (m *MockTenantSettingDatabasePort) FindByFilter(filter model.TenantSettingFilter) ([]model.TenantSetting, error) {
 	m.ctrl.T.Helper()
@@ -121,18 +135,4 @@ func (m *MockTenantSettingDatabasePort) Upsert(data model.TenantSettingInput) (m
 func (mr *MockTenantSettingDatabasePortMockRecorder) Upsert(data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upsert", reflect.TypeOf((*MockTenantSettingDatabasePort)(nil).Upsert), data)
-}
-
-// Delete mocks base method.
-func (m *MockTenantSettingDatabasePort) Delete(id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete.
-func (mr *MockTenantSettingDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTenantSettingDatabasePort)(nil).Delete), id)
 }

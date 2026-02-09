@@ -49,6 +49,20 @@ func (mr *MockPppoeAccountDatabasePortMockRecorder) Create(data interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockPppoeAccountDatabasePort)(nil).Create), data)
 }
 
+// Delete mocks base method.
+func (m *MockPppoeAccountDatabasePort) Delete(id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockPppoeAccountDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPppoeAccountDatabasePort)(nil).Delete), id)
+}
+
 // FindByFilter mocks base method.
 func (m *MockPppoeAccountDatabasePort) FindByFilter(filter model.PppoeAccountFilter) ([]model.PppoeAccount, error) {
 	m.ctrl.T.Helper()
@@ -91,18 +105,4 @@ func (m *MockPppoeAccountDatabasePort) Update(id string, data model.PppoeAccount
 func (mr *MockPppoeAccountDatabasePortMockRecorder) Update(id, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockPppoeAccountDatabasePort)(nil).Update), id, data)
-}
-
-// Delete mocks base method.
-func (m *MockPppoeAccountDatabasePort) Delete(id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete.
-func (mr *MockPppoeAccountDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPppoeAccountDatabasePort)(nil).Delete), id)
 }

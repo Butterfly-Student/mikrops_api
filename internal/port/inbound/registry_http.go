@@ -21,4 +21,5 @@ type HttpPort interface {
 	PppoeAccount() PppoeAccountHttpPort
 	ActivityLog() ActivityLogHttpPort
 	MikrotikSyncLog() MikrotikSyncLogHttpPort
+	Xendit() XenditHttpPort
 }

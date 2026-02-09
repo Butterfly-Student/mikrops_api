@@ -100,3 +100,7 @@ func (s *adapter) ActivityLog() inbound_port.ActivityLogHttpPort {
 func (s *adapter) MikrotikSyncLog() inbound_port.MikrotikSyncLogHttpPort {
 	return NewMikrotikSyncLogAdapter(s.domain)
 }
+
+func (s *adapter) Xendit() inbound_port.XenditHttpPort {
+	return NewXenditHandler(s.domain)
+}
