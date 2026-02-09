@@ -378,8 +378,6 @@ func (c *CustomerTestData) ValidCustomerInput() model.CustomerInput {
 		Username:       "testcustomer",
 		PasswordHash:   "$2a$10$abcdefghijklmnopqrstuvwxyz1234567890",
 		Password:       "password123",
-		PppoeUsername:  "pppoe_test",
-		PppoePassword:  "pppoe_pass",
 		StaticIP:       "10.10.10.10",
 		NasID:          &nasID,
 		IsActive:       true,
@@ -403,7 +401,6 @@ func (c *CustomerTestData) ValidCustomerFilter() model.CustomerFilter {
 		TenantIDs:      []string{"tenant-123"},
 		Emails:         []string{"customer@example.com"},
 		Usernames:      []string{"testcustomer"},
-		PppoeUsernames: []string{"pppoe_test"},
 		IsActive:       &isActive,
 	}
 }
@@ -425,8 +422,6 @@ func (c *CustomerTestData) MultipleCustomers(count int) []model.Customer {
 				IdentityNumber: fmt.Sprintf("%016d", i+1),
 				Username:       fmt.Sprintf("customer%d", i+1),
 				PasswordHash:   "$2a$10$abcdefghijklmnopqrstuvwxyz1234567890",
-				PppoeUsername:  fmt.Sprintf("pppoe_%d", i+1),
-				PppoePassword:  "pppoe_pass",
 				NasID:          &nasID,
 				IsActive:       true,
 				RegisteredAt:   now,

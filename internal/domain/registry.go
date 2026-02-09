@@ -1,18 +1,23 @@
 package domain
 
 import (
+	"mikrops/internal/domain/activity_log"
 	"mikrops/internal/domain/auth"
 	"mikrops/internal/domain/client"
 	"mikrops/internal/domain/customer"
+	"mikrops/internal/domain/customer_registration"
 	"mikrops/internal/domain/internet_package"
 	"mikrops/internal/domain/invoice"
 	"mikrops/internal/domain/mikrotik"
+	"mikrops/internal/domain/mikrotik_sync_log"
 	"mikrops/internal/domain/nas"
 	"mikrops/internal/domain/payment"
 	"mikrops/internal/domain/payment_method"
+	"mikrops/internal/domain/pppoe_account"
 	"mikrops/internal/domain/staff"
 	"mikrops/internal/domain/subscription"
 	"mikrops/internal/domain/tenant"
+	"mikrops/internal/domain/tenant_setting"
 	outbound_port "mikrops/internal/port/outbound"
 )
 
@@ -29,6 +34,11 @@ type Domain interface {
 	Invoice() invoice.InvoiceDomain
 	Payment() payment.PaymentDomain
 	Mikrotik() mikrotik.MikrotikDomain
+	TenantSetting() tenant_setting.TenantSettingDomain
+	CustomerRegistration() customer_registration.CustomerRegistrationDomain
+	PppoeAccount() pppoe_account.PppoeAccountDomain
+	ActivityLog() activity_log.ActivityLogDomain
+	MikrotikSyncLog() mikrotik_sync_log.MikrotikSyncLogDomain
 }
 
 type domain struct {
@@ -101,4 +111,24 @@ func (d *domain) Payment() payment.PaymentDomain {
 
 func (d *domain) Mikrotik() mikrotik.MikrotikDomain {
 	return mikrotik.NewMikrotikDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort, d.httpPort)
+}
+
+func (d *domain) TenantSetting() tenant_setting.TenantSettingDomain {
+	return tenant_setting.NewTenantSettingDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
+}
+
+func (d *domain) CustomerRegistration() customer_registration.CustomerRegistrationDomain {
+	return customer_registration.NewCustomerRegistrationDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
+}
+
+func (d *domain) PppoeAccount() pppoe_account.PppoeAccountDomain {
+	return pppoe_account.NewPppoeAccountDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
+}
+
+func (d *domain) ActivityLog() activity_log.ActivityLogDomain {
+	return activity_log.NewActivityLogDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
+}
+
+func (d *domain) MikrotikSyncLog() mikrotik_sync_log.MikrotikSyncLogDomain {
+	return mikrotik_sync_log.NewMikrotikSyncLogDomain(d.databasePort, d.messagePort, d.cachePort, d.workflowPort)
 }

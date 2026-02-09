@@ -23,6 +23,7 @@ type InternetPackageInput struct {
 	Price         int64     `json:"price" gorm:"column:price;not null"`
 	BillingCycle  string    `json:"billing_cycle" gorm:"column:billing_cycle;type:varchar(50);default:'monthly'"`
 	ValidityDays  int       `json:"validity_days" gorm:"column:validity_days;default:30"`
+	ProfileName   string    `json:"profile_name" gorm:"column:profile_name;type:varchar(100)"`
 	IsActive      bool      `json:"is_active" gorm:"column:is_active;default:true"`
 	CreatedAt     time.Time `json:"created_at" gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt     time.Time `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"`

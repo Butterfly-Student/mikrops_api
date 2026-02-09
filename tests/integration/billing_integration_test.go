@@ -240,8 +240,6 @@ func TestBillingIntegration(t *testing.T) {
 				Phone:         "+6281234567890",
 				Username:      "johndoe",
 				PasswordHash:  "$2a$10$hash",
-				PppoeUsername: "pppoe_john",
-				PppoePassword: "pppoe_pass",
 				IsActive:      true,
 				RegisteredAt:  now,
 				CreatedAt:     now,

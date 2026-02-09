@@ -80,3 +80,23 @@ func (s *adapter) Portal() inbound_port.PortalHttpPort {
 func (s *adapter) Mikrotik() inbound_port.MikrotikHttpPort {
 	return NewMikrotikAdapter(s.domain, s.httpPort)
 }
+
+func (s *adapter) TenantSetting() inbound_port.TenantSettingHttpPort {
+	return NewTenantSettingAdapter(s.domain)
+}
+
+func (s *adapter) CustomerRegistration() inbound_port.CustomerRegistrationHttpPort {
+	return NewCustomerRegistrationAdapter(s.domain)
+}
+
+func (s *adapter) PppoeAccount() inbound_port.PppoeAccountHttpPort {
+	return NewPppoeAccountAdapter(s.domain)
+}
+
+func (s *adapter) ActivityLog() inbound_port.ActivityLogHttpPort {
+	return NewActivityLogAdapter(s.domain)
+}
+
+func (s *adapter) MikrotikSyncLog() inbound_port.MikrotikSyncLogHttpPort {
+	return NewMikrotikSyncLogAdapter(s.domain)
+}

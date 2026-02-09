@@ -135,3 +135,23 @@ func (s *adapter) Invoice() outbound_port.InvoiceDatabasePort {
 func (s *adapter) Payment() outbound_port.PaymentDatabasePort {
 	return NewPaymentAdapter(s.getDB())
 }
+
+func (s *adapter) TenantSetting() outbound_port.TenantSettingDatabasePort {
+	return NewTenantSettingAdapter(s.getDB())
+}
+
+func (s *adapter) CustomerRegistration() outbound_port.CustomerRegistrationDatabasePort {
+	return NewCustomerRegistrationAdapter(s.getDB())
+}
+
+func (s *adapter) PppoeAccount() outbound_port.PppoeAccountDatabasePort {
+	return NewPppoeAccountAdapter(s.getDB())
+}
+
+func (s *adapter) ActivityLog() outbound_port.ActivityLogDatabasePort {
+	return NewActivityLogAdapter(s.getDB())
+}
+
+func (s *adapter) MikrotikSyncLog() outbound_port.MikrotikSyncLogDatabasePort {
+	return NewMikrotikSyncLogAdapter(s.getDB())
+}

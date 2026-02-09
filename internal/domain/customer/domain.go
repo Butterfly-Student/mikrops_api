@@ -2,9 +2,6 @@ package customer
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
-	"fmt"
 
 	"github.com/palantir/stacktrace"
 	"golang.org/x/crypto/bcrypt"
@@ -44,14 +41,6 @@ func NewCustomerDomain(
 }
 
 func (d *customerDomain) Create(ctx context.Context, input model.CustomerInput) (model.Customer, error) {
-	// Generate PPPoE credentials if not provided
-	if input.PppoeUsername == "" {
-		input.PppoeUsername = generatePPPoEUsername()
-	}
-	if input.PppoePassword == "" {
-		input.PppoePassword = generatePPPoEPassword()
-	}
-
 	// Hash password if provided
 	if input.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
@@ -143,18 +132,4 @@ func (d *customerDomain) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-// generatePPPoEUsername generates a random PPPoE username
-func generatePPPoEUsername() string {
-	b := make([]byte, 4)
-	rand.Read(b)
-	return fmt.Sprintf("pppoe_%s", hex.EncodeToString(b))
-}
-
-// generatePPPoEPassword generates a random PPPoE password
-func generatePPPoEPassword() string {
-	b := make([]byte, 8)
-	rand.Read(b)
-	return hex.EncodeToString(b)
 }

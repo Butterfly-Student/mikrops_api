@@ -16,4 +16,9 @@ type HttpPort interface {
 	Payment() PaymentHttpPort
 	Portal() PortalHttpPort
 	Mikrotik() MikrotikHttpPort
+	TenantSetting() TenantSettingHttpPort
+	CustomerRegistration() CustomerRegistrationHttpPort
+	PppoeAccount() PppoeAccountHttpPort
+	ActivityLog() ActivityLogHttpPort
+	MikrotikSyncLog() MikrotikSyncLogHttpPort
 }

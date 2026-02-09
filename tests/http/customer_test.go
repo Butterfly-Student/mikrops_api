@@ -43,8 +43,6 @@ func TestCustomerAdapter(t *testing.T) {
 				FullName:      "John Doe",
 				Email:         "john@test.com",
 				Phone:         "081234567890",
-				PppoeUsername: "pppoe_john",
-				PppoePassword: "pppoepass123",
 				IsActive:      true,
 				CreatedAt:     time.Now(),
 				UpdatedAt:     time.Now(),
@@ -103,8 +101,6 @@ func TestCustomerAdapter(t *testing.T) {
 				FullName:      "Jane Doe",
 				Email:         "jane@test.com",
 				Phone:         "081234567891",
-				PppoeUsername: "pppoe_jane",
-				PppoePassword: "pppoepass456",
 			}
 
 			Convey("Success", func() {

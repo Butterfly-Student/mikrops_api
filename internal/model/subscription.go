@@ -15,6 +15,7 @@ type Subscription struct {
 	SubscriptionInput
 	Customer        *Customer        `json:"customer,omitempty" gorm:"foreignKey:CustomerID"`
 	InternetPackage *InternetPackage `json:"internet_package,omitempty" gorm:"foreignKey:PackageID"`
+	PppoeAccount    *PppoeAccount    `json:"pppoe_account,omitempty" gorm:"foreignKey:PppoeAccountID"`
 }
 
 func (Subscription) TableName() string {
@@ -26,6 +27,7 @@ type SubscriptionInput struct {
 	CustomerID         string     `json:"customer_id" gorm:"column:customer_id;type:uuid;not null"`
 	PackageID          string     `json:"package_id" gorm:"column:package_id;type:uuid;not null"`
 	NasID              string     `json:"nas_id" gorm:"column:nas_id;type:uuid;not null"`
+	PppoeAccountID     *string    `json:"pppoe_account_id" gorm:"column:pppoe_account_id;type:uuid"`
 	Status             string     `json:"status" gorm:"column:status;type:varchar(50);default:'active'"`
 	StartDate          time.Time  `json:"start_date" gorm:"column:start_date;not null"`
 	EndDate            time.Time  `json:"end_date" gorm:"column:end_date;not null"`
@@ -39,17 +41,19 @@ type SubscriptionInput struct {
 }
 
 type SubscriptionFilter struct {
-	IDs          []string `json:"ids"`
-	TenantIDs    []string `json:"tenant_ids"`
-	CustomerIDs  []string `json:"customer_ids"`
-	PackageIDs   []string `json:"package_ids"`
-	NasIDs       []string `json:"nas_ids"`
-	Statuses     []string `json:"statuses"`
-	AutoRenew    *bool    `json:"auto_renew,omitempty"`
-	WithTenant   bool     `json:"-"`
-	WithCustomer bool     `json:"-"`
-	WithPackage  bool     `json:"-"`
-	WithNas      bool     `json:"-"`
+	IDs             []string `json:"ids"`
+	TenantIDs       []string `json:"tenant_ids"`
+	CustomerIDs     []string `json:"customer_ids"`
+	PackageIDs      []string `json:"package_ids"`
+	NasIDs          []string `json:"nas_ids"`
+	PppoeAccountIDs []string `json:"pppoe_account_ids"`
+	Statuses        []string `json:"statuses"`
+	AutoRenew       *bool    `json:"auto_renew,omitempty"`
+	WithTenant      bool     `json:"-"`
+	WithCustomer    bool     `json:"-"`
+	WithPackage     bool     `json:"-"`
+	WithNas         bool     `json:"-"`
+	WithPppoeAccount bool   `json:"-"`
 }
 
 func (f SubscriptionFilter) IsEmpty() bool {
