@@ -44,3 +44,7 @@ func (s *adapter) DoInTransaction(txFunc outbound_port.InTransaction) (out inter
 func (s *adapter) Client() outbound_port.ClientDatabasePort {
 	return NewClientAdapter(s.db)
 }
+
+func (s *adapter) User() outbound_port.UserDatabasePort {
+	return NewUserAdapter(s.db)
+}

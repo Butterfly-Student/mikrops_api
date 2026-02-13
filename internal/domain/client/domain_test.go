@@ -36,7 +36,7 @@ func TestClient(t *testing.T) {
 		mockCachePort.EXPECT().Client().Return(mockClientCachePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		clientDomain := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort)
+		clientDomain := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil)
 
 		inputs := []model.ClientInput{
 			{

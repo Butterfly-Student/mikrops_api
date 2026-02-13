@@ -37,7 +37,7 @@ func TestMiddlewareAdapter(t *testing.T) {
 		mockMessagePort.EXPECT().Client().Return(mockClientMessagePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		// Set Gin to test mode
@@ -118,13 +118,9 @@ func TestMiddlewareAdapter(t *testing.T) {
 				os.Setenv("AUTH_DRIVER", "database")
 				defer os.Unsetenv("AUTH_DRIVER")
 
-				// 1. Check Cache (Miss)
 				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
-				// 2. Check DB (Exists)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(true, nil).Times(1)
-				// 3. Fetch from DB for Caching
-				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return([]model.Client{{}}, nil).Times(1)
-				// 4. Set in Cache
+				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return([]model.Client{{ID: 1}}, nil).Times(1)
 				mockClientCachePort.EXPECT().Set(gomock.Any()).Return(nil).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -138,9 +134,7 @@ func TestMiddlewareAdapter(t *testing.T) {
 				os.Setenv("AUTH_DRIVER", "database")
 				defer os.Unsetenv("AUTH_DRIVER")
 
-				// 1. Check Cache (Miss)
 				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
-				// 2. Check DB (Not Exists)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(false, nil).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -154,9 +148,7 @@ func TestMiddlewareAdapter(t *testing.T) {
 				os.Setenv("AUTH_DRIVER", "database")
 				defer os.Unsetenv("AUTH_DRIVER")
 
-				// 1. Check Cache (Miss)
 				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
-				// 2. Check DB (Error)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(false, redis.Nil).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -164,6 +156,19 @@ func TestMiddlewareAdapter(t *testing.T) {
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 				So(w.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+
+			Convey("Client exists in cache", func() {
+				os.Setenv("AUTH_DRIVER", "database")
+				defer os.Unsetenv("AUTH_DRIVER")
+
+				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, nil).Times(1)
+
+				req := httptest.NewRequest(http.MethodGet, "/test", nil)
+				req.Header.Set("Authorization", "Bearer valid-client-key")
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+				So(w.Code, ShouldEqual, http.StatusOK)
 			})
 		})
 	})

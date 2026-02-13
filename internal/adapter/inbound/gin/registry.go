@@ -26,3 +26,11 @@ func (s *adapter) Middleware() inbound_port.MiddlewareHttpPort {
 func (s *adapter) Ping() inbound_port.PingHttpPort {
 	return NewPingAdapter(s.domain)
 }
+
+func (s *adapter) Auth() inbound_port.AuthHttpPort {
+	return NewAuthAdapter(s.domain)
+}
+
+func (s *adapter) User() inbound_port.UserHttpPort {
+	return NewUserAdapter(s.domain)
+}

@@ -28,4 +28,28 @@ func InitRoute(
 	{
 		v1.GET("/ping", port.Ping().GetResource)
 	}
+
+	// Auth routes
+	auth := app.Group("/auth")
+	{
+		auth.POST("/login", port.Auth().Login)
+		auth.POST("/register", port.Auth().Register)
+		auth.POST("/refresh", port.Auth().RefreshToken)
+	}
+
+	// User routes
+	user := app.Group("/user")
+	user.Use(port.Middleware().UserAuth())
+	{
+		user.POST("/change-password", port.Auth().ChangePassword)
+		user.POST("/logout", port.Auth().Logout)
+	}
+
+	// Protected user profile routes with RBAC
+	userProfile := user.Group("/")
+	userProfile.Use(port.Middleware().RBAC())
+	{
+		userProfile.GET("/profile", port.User().GetProfile)
+		userProfile.PUT("/profile", port.User().UpdateProfile)
+	}
 }

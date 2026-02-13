@@ -6,4 +6,6 @@ import "github.com/gin-gonic/gin"
 type MiddlewareHttpPort interface {
 	InternalAuth() gin.HandlerFunc
 	ClientAuth() gin.HandlerFunc
+	UserAuth() gin.HandlerFunc
+	RBAC() gin.HandlerFunc
 }

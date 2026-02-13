@@ -4,4 +4,6 @@ type HttpPort interface {
 	Middleware() MiddlewareHttpPort
 	Ping() PingHttpPort
 	Client() ClientHttpPort
+	Auth() AuthHttpPort
+	User() UserHttpPort
 }

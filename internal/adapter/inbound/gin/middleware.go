@@ -1,6 +1,7 @@
 package gin_inbound_adapter
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -9,6 +10,7 @@ import (
 	"go-template/internal/domain"
 	"go-template/internal/model"
 	inbound_port "go-template/internal/port/inbound"
+	"go-template/internal/utils/token"
 	"go-template/utils/activity"
 	"go-template/utils/jwt"
 )
@@ -51,6 +53,69 @@ func (h *middlewareAdapter) InternalAuth() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Unauthorized",
 			})
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func (h *middlewareAdapter) UserAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader(authorizationHeader)
+		var bearerToken string
+
+		if len(authHeader) > bearerPrefixLen && authHeader[:bearerPrefixLen] == bearerPrefix {
+			bearerToken = authHeader[bearerPrefixLen:]
+		} else {
+			bearerToken = authHeader
+		}
+
+		if bearerToken == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			return
+		}
+
+		claims, err := token.ValidateToken(bearerToken, false)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token: " + err.Error()})
+			return
+		}
+
+		userIDFloat, ok := claims["sub"].(float64)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			return
+		}
+
+		role, _ := claims["role"].(string)
+
+		c.Set("userID", uint(userIDFloat))
+		c.Set("role", role)
+		c.Next()
+	}
+}
+
+func (h *middlewareAdapter) RBAC() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, exists := c.Get("userID")
+		if !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+
+		sub := fmt.Sprintf("%d", userID.(uint))
+		obj := c.Request.URL.Path
+		act := c.Request.Method
+
+		ok, err := h.domain.Auth().Enforce(sub, obj, act)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Error checking permissions: " + err.Error()})
+			return
+		}
+
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 			return
 		}
 

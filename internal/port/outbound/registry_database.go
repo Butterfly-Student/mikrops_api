@@ -7,6 +7,7 @@ type InTransaction func(repoRegistry DatabasePort) (interface{}, error)
 
 type DatabasePort interface {
 	Client() ClientDatabasePort
+	User() UserDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 
