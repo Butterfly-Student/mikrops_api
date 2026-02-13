@@ -52,7 +52,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 `)
 		enforcer, _ := casbin.NewEnforcer(m)
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, enforcer)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, enforcer)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		gin.SetMode(gin.TestMode)

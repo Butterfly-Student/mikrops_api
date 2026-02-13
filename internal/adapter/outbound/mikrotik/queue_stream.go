@@ -9,6 +9,7 @@ import (
 	"go-template/internal/model"
 
 	"github.com/go-routeros/routeros/v3"
+	"github.com/go-routeros/routeros/v3/proto"
 )
 
 // Streaming Stats
@@ -26,40 +27,22 @@ func (a *mikrotikClientAdapter) ListenQueueStats(router *model.MikrotikRouter) (
 		defer close(statsCh)
 
 		for {
-			// Correct usage of ListenArgs: returns (chan *Reply, error)
-			// It accepts variadic string args
-			// v3.0.1: func (c *Client) ListenArgs(args ...string) (chan *Reply, error)
-			// Wait, if it returns 2 values, where is the error channel?
-			// The channel returns *Reply. Error is returned immediately if start fails.
-			// Async errors might come in the channel?
-			// Checking common patterns: ListenArgs returns a channel that emits replies.
-			// When command finishes, channel closes? Or keeps open?
+			cmd := []string{"/queue/simple/print", "stats"}
 
-			// Command: /queue/simple/print stats
-			// Args: "/queue/simple/print", "stats" -> passed as individual strings
-
-			// Note: "stats" is a parameter without value, usually passed as "stats" in CLI, but in API often just "stats".
-			// Or "=stats=". Let's try "stats".
-
-			replyChan, err := client.ListenArgs("/queue/simple/print", "stats")
+			listenReply, err := client.ListenArgs(cmd)
 			if err != nil {
 				return
 			}
 
 			var batch []model.QueueStats
+			replyChan := listenReply.Chan()
 
-			for re := range replyChan {
-				if re.Done {
-					// Command finished
-					statsCh <- batch
-					batch = nil
-					break
-				}
-				// Reply sentence
-				batch = append(batch, *parseQueueStats(re))
+			for sen := range replyChan {
+				stats := parseQueueStatsSentence(sen)
+				batch = append(batch, *stats)
 			}
 
-			// Poll interval
+			statsCh <- batch
 			time.Sleep(1 * time.Second)
 		}
 	}()
@@ -67,14 +50,14 @@ func (a *mikrotikClientAdapter) ListenQueueStats(router *model.MikrotikRouter) (
 	return statsCh, nil
 }
 
-func parseQueueStats(re *routeros.Reply) *model.QueueStats {
-	bytes := parseSlashPair(re.Map["bytes"])
-	packets := parseSlashPair(re.Map["packets"])
-	rate := parseSlashPair(re.Map["rate"])
-	packetRate := parseSlashPair(re.Map["packet-rate"])
+func parseQueueStatsSentence(sen *proto.Sentence) *model.QueueStats {
+	bytes := parseSlashPair(sen.Map["bytes"])
+	packets := parseSlashPair(sen.Map["packets"])
+	rate := parseSlashPair(sen.Map["rate"])
+	packetRate := parseSlashPair(sen.Map["packet-rate"])
 
 	return &model.QueueStats{
-		Name:          re.Map["name"],
+		Name:          sen.Map["name"],
 		BytesIn:       bytes[0],
 		BytesOut:      bytes[1],
 		PacketsIn:     packets[0],
