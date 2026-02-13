@@ -22,6 +22,18 @@ type MikrotikPort interface {
 	ListActiveSessions(router *model.MikrotikRouter) ([]model.PppoeActive, error)
 	GetActiveSession(router *model.MikrotikRouter, id string) (*model.PppoeActive, error)
 	RemoveActiveSession(router *model.MikrotikRouter, id string) error
+
+	// Queue
+	CreateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error
+	UpdateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error
+	DeleteQueue(router *model.MikrotikRouter, id string) error
+	GetQueue(router *model.MikrotikRouter, id string) (*model.PppoeQueue, error)
+	ListQueues(router *model.MikrotikRouter) ([]model.PppoeQueue, error)
+
+	// Queue Streaming
+	// ListenQueueStats starts streaming stats for all simple queues
+	// It returns a channel for updates and a cancel function/channel
+	ListenQueueStats(router *model.MikrotikRouter) (<-chan []model.QueueStats, error)
 }
 
 // MikrotikDatabasePort defines methods for managing MikroTik router configurations

@@ -222,6 +222,93 @@ func (mr *MockMikrotikPortMockRecorder) RemoveActiveSession(router, id interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveActiveSession", reflect.TypeOf((*MockMikrotikPort)(nil).RemoveActiveSession), router, id)
 }
 
+// CreateQueue mocks base method.
+func (m *MockMikrotikPort) CreateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateQueue", router, queue)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateQueue indicates an expected call of CreateQueue.
+func (mr *MockMikrotikPortMockRecorder) CreateQueue(router, queue interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateQueue", reflect.TypeOf((*MockMikrotikPort)(nil).CreateQueue), router, queue)
+}
+
+// UpdateQueue mocks base method.
+func (m *MockMikrotikPort) UpdateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateQueue", router, queue)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateQueue indicates an expected call of UpdateQueue.
+func (mr *MockMikrotikPortMockRecorder) UpdateQueue(router, queue interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateQueue", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateQueue), router, queue)
+}
+
+// DeleteQueue mocks base method.
+func (m *MockMikrotikPort) DeleteQueue(router *model.MikrotikRouter, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteQueue", router, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteQueue indicates an expected call of DeleteQueue.
+func (mr *MockMikrotikPortMockRecorder) DeleteQueue(router, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQueue", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteQueue), router, id)
+}
+
+// GetQueue mocks base method.
+func (m *MockMikrotikPort) GetQueue(router *model.MikrotikRouter, id string) (*model.PppoeQueue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQueue", router, id)
+	ret0, _ := ret[0].(*model.PppoeQueue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQueue indicates an expected call of GetQueue.
+func (mr *MockMikrotikPortMockRecorder) GetQueue(router, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQueue", reflect.TypeOf((*MockMikrotikPort)(nil).GetQueue), router, id)
+}
+
+// ListQueues mocks base method.
+func (m *MockMikrotikPort) ListQueues(router *model.MikrotikRouter) ([]model.PppoeQueue, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListQueues", router)
+	ret0, _ := ret[0].([]model.PppoeQueue)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListQueues indicates an expected call of ListQueues.
+func (mr *MockMikrotikPortMockRecorder) ListQueues(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListQueues", reflect.TypeOf((*MockMikrotikPort)(nil).ListQueues), router)
+}
+
+// ListenQueueStats mocks base method.
+func (m *MockMikrotikPort) ListenQueueStats(router *model.MikrotikRouter) (<-chan []model.QueueStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListenQueueStats", router)
+	ret0, _ := ret[0].(<-chan []model.QueueStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListenQueueStats indicates an expected call of ListenQueueStats.
+func (mr *MockMikrotikPortMockRecorder) ListenQueueStats(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenQueueStats", reflect.TypeOf((*MockMikrotikPort)(nil).ListenQueueStats), router)
+}
+
 // MockMikrotikDatabasePort is a mock of MikrotikDatabasePort interface.
 type MockMikrotikDatabasePort struct {
 	ctrl     *gomock.Controller

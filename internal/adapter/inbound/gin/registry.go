@@ -38,3 +38,7 @@ func (s *adapter) User() inbound_port.UserHttpPort {
 func (s *adapter) Pppoe() inbound_port.PppoeHttpPort {
 	return NewPppoeAdapter(s.domain)
 }
+
+func (s *adapter) Queue() inbound_port.QueueHttpPort {
+	return NewQueueAdapter(s.domain)
+}

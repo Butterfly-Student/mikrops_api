@@ -87,4 +87,19 @@ func InitRoute(
 
 	// WebSocket
 	app.GET("/ws/pppoe", port.Pppoe().HandleWebSocket)
+
+	// Queue Management
+	queue := app.Group("/queues")
+	queue.Use(port.Middleware().UserAuth())
+	{
+		queue.POST("", port.Queue().CreateQueue)
+		queue.GET("", port.Queue().ListQueues)
+		queue.GET("/:id", port.Queue().GetQueue)
+		queue.PUT("/:id", port.Queue().UpdateQueue)
+		queue.DELETE("/:id", port.Queue().DeleteQueue)
+		queue.POST("/monitor", port.Queue().StartStreaming)
+	}
+
+	// Queue WebSocket
+	app.GET("/ws/queues", port.Queue().HandleWebSocket)
 }

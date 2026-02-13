@@ -4,6 +4,7 @@ import (
 	"go-template/internal/domain/auth"
 	"go-template/internal/domain/client"
 	"go-template/internal/domain/pppoe"
+	"go-template/internal/domain/queue"
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
 
@@ -15,6 +16,7 @@ type Domain interface {
 	Auth() auth.AuthDomain
 	User() user.UserDomain
 	Pppoe() pppoe.PppoeDomain
+	Queue() queue.QueueDomain
 }
 
 type domain struct {
@@ -58,4 +60,8 @@ func (d *domain) User() user.UserDomain {
 
 func (d *domain) Pppoe() pppoe.PppoeDomain {
 	return pppoe.NewPppoeDomain(d.databasePort, d.cachePort, d.mikrotikPort)
+}
+
+func (d *domain) Queue() queue.QueueDomain {
+	return queue.NewQueueDomain(d.databasePort, d.cachePort, d.mikrotikPort)
 }

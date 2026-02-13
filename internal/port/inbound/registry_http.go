@@ -7,4 +7,5 @@ type HttpPort interface {
 	Auth() AuthHttpPort
 	User() UserHttpPort
 	Pppoe() PppoeHttpPort
+	Queue() QueueHttpPort
 }

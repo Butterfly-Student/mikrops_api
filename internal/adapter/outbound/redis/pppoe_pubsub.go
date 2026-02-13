@@ -28,16 +28,32 @@ func (a *pppoePubSubAdapter) PublishSessionEvent(event string, data interface{})
 }
 
 func (a *pppoePubSubAdapter) SubscribeToSessionEvents(ctx context.Context) (<-chan model.WebSocketMessage, error) {
-	ch := make(chan model.WebSocketMessage, 100) // Buffer for safety
+	return a.subscribe(ctx, "pppoe-events")
+}
+
+func (a *pppoePubSubAdapter) PublishQueueStats(data interface{}) error {
+	msg := model.WebSocketMessage{
+		Event: "queue_stats",
+		Data:  data,
+	}
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	return redis.Publish(context.Background(), "queue-stats", string(bytes))
+}
+
+func (a *pppoePubSubAdapter) SubscribeToQueueStats(ctx context.Context) (<-chan model.WebSocketMessage, error) {
+	return a.subscribe(ctx, "queue-stats")
+}
+
+func (a *pppoePubSubAdapter) subscribe(ctx context.Context, channel string) (<-chan model.WebSocketMessage, error) {
+	ch := make(chan model.WebSocketMessage, 100)
 
 	go func() {
-		// Subscribe blocks, so we run it in a goroutine
-		// Using the provided context allows cancellation when the client disconnects
-		err := redis.Subscribe(ctx, "pppoe-events", func(payload string) {
+		err := redis.Subscribe(ctx, channel, func(payload string) {
 			var msg model.WebSocketMessage
 			if err := json.Unmarshal([]byte(payload), &msg); err == nil {
-				// Non-blocking send or drop if full?
-				// For now blocking send but channel is buffered
 				select {
 				case ch <- msg:
 				case <-ctx.Done():
