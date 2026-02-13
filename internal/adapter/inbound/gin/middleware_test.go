@@ -37,7 +37,7 @@ func TestMiddlewareAdapter(t *testing.T) {
 		mockMessagePort.EXPECT().Client().Return(mockClientMessagePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, nil)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		// Set Gin to test mode

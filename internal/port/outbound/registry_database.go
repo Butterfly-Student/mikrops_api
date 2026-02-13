@@ -8,6 +8,7 @@ type InTransaction func(repoRegistry DatabasePort) (interface{}, error)
 type DatabasePort interface {
 	Client() ClientDatabasePort
 	User() UserDatabasePort
+	Mikrotik() MikrotikDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 

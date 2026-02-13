@@ -28,9 +28,15 @@ func Publish(ctx context.Context, channel string, message string) error {
 
 func Subscribe(ctx context.Context, channel string, handler func(string)) error {
 	pubsub := pubsubClient.Subscribe(ctx, channel)
+	defer pubsub.Close()
+
 	ch := pubsub.Channel()
-	for msg := range ch {
-		handler(msg.Payload)
+	for {
+		select {
+		case msg := <-ch:
+			handler(msg.Payload)
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
-	return nil
 }
