@@ -6,4 +6,5 @@ type HttpPort interface {
 	Client() ClientHttpPort
 	Auth() AuthHttpPort
 	User() UserHttpPort
+	Pppoe() PppoeHttpPort
 }

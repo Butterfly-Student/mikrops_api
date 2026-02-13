@@ -52,4 +52,38 @@ func InitRoute(
 		userProfile.GET("/profile", port.User().GetProfile)
 		userProfile.PUT("/profile", port.User().UpdateProfile)
 	}
+
+	// PPPoE Management
+	pppoe := app.Group("/pppoe")
+	pppoe.Use(port.Middleware().UserAuth())
+	// pppoe.Use(port.Middleware().RBAC()) // Enabled RBAC later
+	{
+		// Secrets
+		pppoe.POST("/secrets", port.Pppoe().CreateSecret)
+		pppoe.GET("/secrets", port.Pppoe().ListSecrets)
+		pppoe.GET("/secrets/:id", port.Pppoe().GetSecret)
+		pppoe.PUT("/secrets/:id", port.Pppoe().UpdateSecret)
+		pppoe.DELETE("/secrets/:id", port.Pppoe().DeleteSecret)
+
+		// Profiles
+		pppoe.POST("/profiles", port.Pppoe().CreateProfile)
+		pppoe.GET("/profiles", port.Pppoe().ListProfiles)
+		pppoe.GET("/profiles/:id", port.Pppoe().GetProfile)
+		pppoe.PUT("/profiles/:id", port.Pppoe().UpdateProfile)
+		pppoe.DELETE("/profiles/:id", port.Pppoe().DeleteProfile)
+
+		// Sessions
+		pppoe.GET("/sessions/active", port.Pppoe().ListActiveSessions)
+		pppoe.GET("/sessions/history", port.Pppoe().ListSessionHistory)
+	}
+
+	// PPPoE Webhooks
+	webhooks := app.Group("/webhooks/pppoe")
+	{
+		webhooks.POST("/on-up", port.Pppoe().CallbackOnUp)
+		webhooks.POST("/on-down", port.Pppoe().CallbackOnDown)
+	}
+
+	// WebSocket
+	app.GET("/ws/pppoe", port.Pppoe().HandleWebSocket)
 }

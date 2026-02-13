@@ -14,6 +14,7 @@ import (
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
 	rabbitmq_inbound_adapter "go-template/internal/adapter/inbound/rabbitmq"
 	temporal_inbound_adapter "go-template/internal/adapter/inbound/temporal"
+	mikrotik_outbound_adapter "go-template/internal/adapter/outbound/mikrotik"
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
 	rabbitmq_outbound_adapter "go-template/internal/adapter/outbound/rabbitmq"
 	redis_outbound_adapter "go-template/internal/adapter/outbound/redis"
@@ -66,6 +67,7 @@ func NewApp() *App {
 		messageOutbound(ctx),
 		cacheOutbound(ctx),
 		workflowOutbound(ctx),
+		mikrotikOutbound(),
 		enforcer,
 	)
 
@@ -117,6 +119,10 @@ func messageOutbound(ctx context.Context) outbound_port.MessagePort {
 		return rabbitmq_outbound_adapter.NewAdapter()
 	}
 	return nil
+}
+
+func mikrotikOutbound() outbound_port.MikrotikPort {
+	return mikrotik_outbound_adapter.NewMikrotikClientAdapter()
 }
 
 func cacheOutbound(ctx context.Context) outbound_port.CachePort {

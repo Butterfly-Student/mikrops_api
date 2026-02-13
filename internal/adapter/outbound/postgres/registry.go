@@ -48,3 +48,7 @@ func (s *adapter) Client() outbound_port.ClientDatabasePort {
 func (s *adapter) User() outbound_port.UserDatabasePort {
 	return NewUserAdapter(s.db)
 }
+
+func (s *adapter) Mikrotik() outbound_port.MikrotikDatabasePort {
+	return NewMikrotikAdapter(s.db)
+}

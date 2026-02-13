@@ -34,3 +34,7 @@ func (s *adapter) Auth() inbound_port.AuthHttpPort {
 func (s *adapter) User() inbound_port.UserHttpPort {
 	return NewUserAdapter(s.domain)
 }
+
+func (s *adapter) Pppoe() inbound_port.PppoeHttpPort {
+	return NewPppoeAdapter(s.domain)
+}
