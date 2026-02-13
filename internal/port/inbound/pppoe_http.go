@@ -19,6 +19,7 @@ type PppoeHttpPort interface {
 
 	// Session Management (Active/Inactive)
 	ListActiveSessions(c *gin.Context)
+	ListInactiveSessions(c *gin.Context)
 	ListSessionHistory(c *gin.Context)
 
 	// Webhooks

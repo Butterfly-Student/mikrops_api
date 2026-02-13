@@ -229,6 +229,21 @@ func (h *pppoeAdapter) ListActiveSessions(c *gin.Context) {
 	c.JSON(http.StatusOK, sessions)
 }
 
+func (h *pppoeAdapter) ListInactiveSessions(c *gin.Context) {
+	routerID, err := getRouterID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
+		return
+	}
+
+	sessions, err := h.domain.Pppoe().ListInactiveSessions(routerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, sessions)
+}
+
 func (h *pppoeAdapter) ListSessionHistory(c *gin.Context) {
 	// Not implemented in domain per revised plan (no local history)
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented"})

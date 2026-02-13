@@ -23,6 +23,7 @@ type PppoeDomain interface {
 
 	// Session Management
 	ListActiveSessions(routerID uint) ([]model.PppoeActive, error)
+	ListInactiveSessions(routerID uint) ([]model.PppoeSecret, error)
 	GetActiveSession(routerID uint, id string) (*model.PppoeActive, error)
 	RemoveActiveSession(routerID uint, id string) error
 

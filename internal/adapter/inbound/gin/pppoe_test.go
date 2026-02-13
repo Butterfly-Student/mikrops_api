@@ -32,6 +32,8 @@ func TestPppoeAdapter(t *testing.T) {
 		mockWorkflowPort := mock_outbound_port.NewMockWorkflowPort(mockCtrl)
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
 
+		// Fix: Use EXPECT() on the mock interface, but DatabasePort interface has been updated
+		// and the mock needs to reflect that.
 		mockDatabasePort.EXPECT().Mikrotik().Return(mockMikrotikDBPort).AnyTimes()
 
 		// Setup Casbin
@@ -70,6 +72,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		{
 			pppoe.POST("/secrets", adapter.Pppoe().CreateSecret)
 			pppoe.GET("/secrets/:id", adapter.Pppoe().GetSecret)
+			pppoe.GET("/sessions/inactive", adapter.Pppoe().ListInactiveSessions)
 		}
 
 		routerID := uint(1)
@@ -107,6 +110,38 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 				router.ServeHTTP(w, req)
 
 				So(w.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+		})
+
+		Convey("ListInactiveSessions", func() {
+			Convey("Success", func() {
+				// Mock domain logic indirectly via port calls
+				// 1. Get Router
+				mockMikrotikDBPort.EXPECT().FindByID(routerID).Return(routerModel, nil).Times(1)
+
+				// 2. List Secrets
+				secrets := []model.PppoeSecret{
+					{Name: "active_user", Disabled: false},
+					{Name: "inactive_user", Disabled: false},
+				}
+				mockMikrotikPort.EXPECT().ListSecrets(routerModel).Return(secrets, nil).Times(1)
+
+				// 3. List Active Sessions
+				activeSessions := []model.PppoeActive{
+					{Name: "active_user"},
+				}
+				mockMikrotikPort.EXPECT().ListActiveSessions(routerModel).Return(activeSessions, nil).Times(1)
+
+				req := httptest.NewRequest(http.MethodGet, "/pppoe/sessions/inactive?router_id=1", nil)
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusOK)
+
+				var res []model.PppoeSecret
+				json.Unmarshal(w.Body.Bytes(), &res)
+				So(len(res), ShouldEqual, 1)
+				So(res[0].Name, ShouldEqual, "inactive_user")
 			})
 		})
 	})

@@ -74,6 +74,7 @@ func InitRoute(
 
 		// Sessions
 		pppoe.GET("/sessions/active", port.Pppoe().ListActiveSessions)
+		pppoe.GET("/sessions/inactive", port.Pppoe().ListInactiveSessions)
 		pppoe.GET("/sessions/history", port.Pppoe().ListSessionHistory)
 	}
 

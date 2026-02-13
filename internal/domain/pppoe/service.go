@@ -123,6 +123,42 @@ func (s *service) ListActiveSessions(routerID uint) ([]model.PppoeActive, error)
 	return s.mikrotikPort.ListActiveSessions(router)
 }
 
+func (s *service) ListInactiveSessions(routerID uint) ([]model.PppoeSecret, error) {
+	router, err := s.getRouter(routerID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 1. Fetch all secrets (all potential users)
+	secrets, err := s.mikrotikPort.ListSecrets(router)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Fetch active sessions
+	activeSessions, err := s.mikrotikPort.ListActiveSessions(router)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Create a map of active users for O(1) lookup
+	// Key: name (username)
+	activeUsers := make(map[string]bool)
+	for _, session := range activeSessions {
+		activeUsers[session.Name] = true
+	}
+
+	// 4. Filter secrets that are NOT in active sessions
+	var inactiveUsers []model.PppoeSecret
+	for _, secret := range secrets {
+		if _, isActive := activeUsers[secret.Name]; !isActive && !secret.Disabled {
+			inactiveUsers = append(inactiveUsers, secret)
+		}
+	}
+
+	return inactiveUsers, nil
+}
+
 func (s *service) GetActiveSession(routerID uint, id string) (*model.PppoeActive, error) {
 	router, err := s.getRouter(routerID)
 	if err != nil {
