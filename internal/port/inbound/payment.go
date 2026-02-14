@@ -10,4 +10,7 @@ type PaymentHttpPort interface {
 	DeletePayment(c *gin.Context)
 	ProcessXenditWebhook(c *gin.Context)
 	CreatePaymentLink(c *gin.Context)
+	GenerateReceipt(c *gin.Context)
+	GetPaymentHistory(c *gin.Context)
+	GetPaymentStatistics(c *gin.Context)
 }

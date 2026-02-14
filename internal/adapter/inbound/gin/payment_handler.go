@@ -161,3 +161,94 @@ func (h *PaymentHandler) ProcessXenditWebhook(c *gin.Context) {
 func (h *PaymentHandler) CreatePaymentLink(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "payment link creation not implemented yet"})
 }
+
+// GenerateReceipt generates a PDF receipt for a payment
+func (h *PaymentHandler) GenerateReceipt(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "payment ID is required"})
+		return
+	}
+
+	pdfBytes, err := h.domain.Payment().GenerateReceipt(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get payment to use number in filename
+	payment, err := h.domain.Payment().GetPayment(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	filename := "receipt_" + payment.PaymentNumber + ".pdf"
+
+	c.Header("Content-Type", "application/pdf")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Length", strconv.Itoa(len(pdfBytes)))
+
+	c.Data(http.StatusOK, "application/pdf", pdfBytes)
+}
+
+// GetPaymentHistory returns payment history for a customer
+func (h *PaymentHandler) GetPaymentHistory(c *gin.Context) {
+	customerID := c.Param("customer_id")
+	if customerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "customer ID is required"})
+		return
+	}
+
+	filter := model.PaymentFilter{}
+
+	if status := c.Query("status"); status != "" {
+		filter.Status = append(filter.Status, status)
+	}
+
+	if paymentMethod := c.Query("payment_method"); paymentMethod != "" {
+		filter.PaymentMethod = append(filter.PaymentMethod, paymentMethod)
+	}
+
+	if startDate := c.Query("start_date"); startDate != "" {
+		t, err := time.Parse(time.RFC3339, startDate)
+		if err == nil {
+			filter.PaymentStart = &t
+		}
+	}
+
+	if endDate := c.Query("end_date"); endDate != "" {
+		t, err := time.Parse(time.RFC3339, endDate)
+		if err == nil {
+			filter.PaymentEnd = &t
+		}
+	}
+
+	payments, totalCount, err := h.domain.Payment().GetPaymentHistory(c.Request.Context(), customerID, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"payments":    payments,
+		"total_count": totalCount,
+	})
+}
+
+// GetPaymentStatistics returns payment statistics for a customer
+func (h *PaymentHandler) GetPaymentStatistics(c *gin.Context) {
+	customerID := c.Param("customer_id")
+	if customerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "customer ID is required"})
+		return
+	}
+
+	stats, err := h.domain.Payment().GetPaymentStatistics(c.Request.Context(), customerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
+}

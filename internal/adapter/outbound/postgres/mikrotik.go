@@ -41,3 +41,23 @@ func (a *mikrotikAdapter) Update(router *model.MikrotikRouter) error {
 func (a *mikrotikAdapter) Delete(id string) error {
 	return a.db.Where("id = ?", id).Delete(&model.MikrotikRouter{}).Error
 }
+
+// Firewall methods - These are currently no-op as firewall rules are not stored in the database
+// They are managed directly on the MikroTik router via the MikrotikPort interface
+func (a *mikrotikAdapter) AddFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error {
+	// Firewall rules are managed on the router itself, not in the database
+	// This method is here to satisfy the interface but does nothing
+	return nil
+}
+
+func (a *mikrotikAdapter) RemoveFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error {
+	// Firewall rules are managed on the router itself, not in the database
+	// This method is here to satisfy the interface but does nothing
+	return nil
+}
+
+func (a *mikrotikAdapter) ListFirewallRules(router *model.MikrotikRouter) ([]model.FirewallRule, error) {
+	// Firewall rules are managed on the router itself, not in the database
+	// This method is here to satisfy the interface but returns empty slice
+	return []model.FirewallRule{}, nil
+}

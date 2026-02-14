@@ -308,7 +308,7 @@ func (d *domain) SendInvoiceReminder(ctx context.Context, customerID string, inv
 	emailContent := fmt.Sprintf(`
 Dear %s,
 
-This is a friendly reminder that your invoice is %s days overdue.
+This is a friendly reminder that your invoice is %d days overdue.
 
 Invoice Details:
 - Invoice Number: %s

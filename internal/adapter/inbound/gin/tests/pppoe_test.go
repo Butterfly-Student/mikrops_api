@@ -21,8 +21,8 @@ import (
 	mock_outbound_port "go-template/tests/mocks/port"
 )
 
-func TestQueueAdapter(t *testing.T) {
-	Convey("Test Queue HTTP Adapter", t, func() {
+func TestPppoeAdapter(t *testing.T) {
+	Convey("Test PPPoE HTTP Adapter", t, func() {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
@@ -53,7 +53,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 `)
 		enforcer, _ := casbin.NewEnforcer(m)
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, mockMikrotikPort, enforcer)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, mockMikrotikPort, nil, nil, enforcer)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		gin.SetMode(gin.TestMode)
@@ -64,29 +64,30 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			c.Next()
 		}
 
-		queue := router.Group("/queues")
-		queue.Use(authMiddleware)
+		pppoe := router.Group("/pppoe")
+		pppoe.Use(authMiddleware)
 		{
-			queue.POST("", adapter.Queue().CreateQueue)
-			queue.GET("", adapter.Queue().ListQueues)
+			pppoe.POST("/secrets", adapter.Pppoe().CreateSecret)
+			pppoe.GET("/secrets/:id", adapter.Pppoe().GetSecret)
+			pppoe.GET("/sessions/inactive", adapter.Pppoe().ListInactiveSessions)
 		}
 
 		routerID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
 		routerModel := &model.MikrotikRouter{ID: routerID, Name: "TestRouter", Address: "192.168.88.1:8728"}
 
-		Convey("CreateQueue", func() {
-			queueItem := model.PppoeQueue{
-				Name:     "testqueue",
-				Target:   "192.168.1.10",
-				MaxLimit: "10M/10M",
+		Convey("CreateSecret", func() {
+			secret := model.PppoeSecret{
+				Name:     "testuser",
+				Password: "password",
+				Service:  "pppoe",
 			}
 
 			Convey("Success", func() {
 				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(routerModel, nil).Times(1)
-				mockMikrotikPort.EXPECT().CreateQueue(routerModel, gomock.Any()).Return(nil).Times(1)
+				mockMikrotikPort.EXPECT().CreateSecret(routerModel, gomock.Any()).Return(nil).Times(1)
 
-				body, _ := json.Marshal(queueItem)
-				req := httptest.NewRequest(http.MethodPost, "/queues?router_id="+routerID.String(), bytes.NewReader(body))
+				body, _ := json.Marshal(secret)
+				req := httptest.NewRequest(http.MethodPost, "/pppoe/secrets?router_id="+routerID.String(), bytes.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
@@ -98,14 +99,46 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			Convey("Router Not Found", func() {
 				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(nil, errors.New("not found")).Times(1)
 
-				body, _ := json.Marshal(queueItem)
-				req := httptest.NewRequest(http.MethodPost, "/queues?router_id="+routerID.String(), bytes.NewReader(body))
+				body, _ := json.Marshal(secret)
+				req := httptest.NewRequest(http.MethodPost, "/pppoe/secrets?router_id="+routerID.String(), bytes.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 
 				So(w.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+		})
+
+		Convey("ListInactiveSessions", func() {
+			Convey("Success", func() {
+				// Mock domain logic indirectly via port calls
+				// 1. Get Router
+				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(routerModel, nil).Times(1)
+
+				// 2. List Secrets
+				secrets := []model.PppoeSecret{
+					{Name: "active_user", Disabled: false},
+					{Name: "inactive_user", Disabled: false},
+				}
+				mockMikrotikPort.EXPECT().ListSecrets(routerModel).Return(secrets, nil).Times(1)
+
+				// 3. List Active Sessions
+				activeSessions := []model.PppoeActive{
+					{Name: "active_user"},
+				}
+				mockMikrotikPort.EXPECT().ListActiveSessions(routerModel).Return(activeSessions, nil).Times(1)
+
+				req := httptest.NewRequest(http.MethodGet, "/pppoe/sessions/inactive?router_id="+routerID.String(), nil)
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
+
+				So(w.Code, ShouldEqual, http.StatusOK)
+
+				var res []model.PppoeSecret
+				json.Unmarshal(w.Body.Bytes(), &res)
+				So(len(res), ShouldEqual, 1)
+				So(res[0].Name, ShouldEqual, "inactive_user")
 			})
 		})
 	})

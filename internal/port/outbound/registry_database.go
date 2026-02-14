@@ -1,6 +1,6 @@
 package outbound_port
 
-import "gorm.io/gorm"
+//go:generate mockgen -source=registry_database.go -destination=./../../../tests/mocks/port/mock_registry_database.go
 
 type InTransaction func(repoRegistry DatabasePort) (interface{}, error)
 
@@ -24,6 +24,7 @@ type DatabasePort interface {
 
 // DatabaseExecutor is now GORM's *gorm.DB
 // We keep this interface for compatibility, but it now wraps gorm.DB
-type DatabaseExecutor interface {
-	*gorm.DB
-}
+// NOTE: Commented out because mockgen cannot handle embedded pointer types
+// type DatabaseExecutor interface {
+// 	*gorm.DB
+// }

@@ -9,7 +9,15 @@
       "Bash(grep:*)",
       "Bash(docker:*)",
       "Bash(go vet:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(make generate-mocks:*)",
+      "Bash(go fmt:*)",
+      "Bash(go get:*)",
+      "Bash(mockgen:*)",
+      "Bash(go generate:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

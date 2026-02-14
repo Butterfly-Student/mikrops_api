@@ -864,3 +864,10 @@ ESTIMATED EFFORT
 | Phase 7: Activity Logs | 1 migration + 1 domain + middleware | 1-2 days |
 | Phase 8: Integration | Registry updates + routing + env vars | 1-2 days |
 | TOTAL | 16 migrations + 8 domains + 3 utilities | 22-33 days |
+
+  Jika ingin melanjutkan:
+  1. Implement Temporal Activity Functions (untuk workflow execution)
+  2. Add Refund HTTP Endpoints (CRUD refund)
+  3. Write Tests (unit & integration tests)
+  4. Configure Temporal Cron (scheduled isolation check)
+  5. Add Reconciliation Reports (PDF/CSV export)

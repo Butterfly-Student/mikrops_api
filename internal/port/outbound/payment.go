@@ -8,6 +8,7 @@ type PaymentDatabasePort interface {
 	Create(payment *model.Payment) error
 	FindByID(id string) (*model.Payment, error)
 	Find(filter model.PaymentFilter) ([]model.Payment, error)
+	Count(filter model.PaymentFilter) (int64, error)
 	Update(payment *model.Payment) error
 	Delete(id string) error
 	FindByXenditExternalID(externalID string) (*model.Payment, error)

@@ -41,6 +41,27 @@ func (a *PaymentAdapter) Find(filter model.PaymentFilter) ([]model.Payment, erro
 	var payments []model.Payment
 	query := a.db.Table(tablePayment).Preload("Customer").Preload("Invoice").Preload("CreatedByUser").Preload("ProcessedByUser").Where("deleted_at IS NULL")
 
+	query = a.applyFilters(query, filter)
+
+	if err := query.Find(&payments).Error; err != nil {
+		return nil, err
+	}
+	return payments, nil
+}
+
+func (a *PaymentAdapter) Count(filter model.PaymentFilter) (int64, error) {
+	var count int64
+	query := a.db.Table(tablePayment).Where("deleted_at IS NULL")
+
+	query = a.applyFilters(query, filter)
+
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (a *PaymentAdapter) applyFilters(query *gorm.DB, filter model.PaymentFilter) *gorm.DB {
 	if !filter.IsEmpty() {
 		if len(filter.IDs) > 0 {
 			query = query.Where("id IN ?", filter.IDs)
@@ -50,6 +71,9 @@ func (a *PaymentAdapter) Find(filter model.PaymentFilter) ([]model.Payment, erro
 		}
 		if len(filter.CustomerIDs) > 0 {
 			query = query.Where("customer_id IN ?", filter.CustomerIDs)
+		}
+		if filter.CustomerID != nil {
+			query = query.Where("customer_id = ?", *filter.CustomerID)
 		}
 		if len(filter.InvoiceIDs) > 0 {
 			query = query.Where("invoice_id IN ?", filter.InvoiceIDs)
@@ -98,10 +122,7 @@ func (a *PaymentAdapter) Find(filter model.PaymentFilter) ([]model.Payment, erro
 		}
 	}
 
-	if err := query.Find(&payments).Error; err != nil {
-		return nil, err
-	}
-	return payments, nil
+	return query
 }
 
 func (a *PaymentAdapter) Update(payment *model.Payment) error {

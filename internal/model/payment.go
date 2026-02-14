@@ -65,6 +65,7 @@ type PaymentFilter struct {
 	IDs             []uuid.UUID `json:"ids"`
 	PaymentNumbers  []string    `json:"payment_numbers"`
 	CustomerIDs     []uuid.UUID `json:"customer_ids"`
+	CustomerID      *uuid.UUID  `json:"customer_id"`
 	InvoiceIDs      []uuid.UUID `json:"invoice_ids"`
 	Status          []string    `json:"status"`
 	PaymentMethod   []string    `json:"payment_method"`
@@ -97,7 +98,7 @@ type PaymentAllocationInput struct {
 
 func (f PaymentFilter) IsEmpty() bool {
 	return len(f.IDs) == 0 && len(f.PaymentNumbers) == 0 &&
-		len(f.CustomerIDs) == 0 && len(f.InvoiceIDs) == 0 &&
+		len(f.CustomerIDs) == 0 && f.CustomerID == nil && len(f.InvoiceIDs) == 0 &&
 		len(f.Status) == 0 && len(f.PaymentMethod) == 0 &&
 		f.PaymentStart == nil && f.PaymentEnd == nil &&
 		f.AmountMin == nil && f.AmountMax == nil &&

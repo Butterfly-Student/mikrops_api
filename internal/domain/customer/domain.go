@@ -43,7 +43,7 @@ func (d *domain) getPaymentPortalURL() string {
 	return "portal.example.com"
 }
 
-func (d *domain) NewCustomerDomain(
+func NewCustomerDomain(
 	dbPort outbound_port.DatabasePort,
 	mikrotikPort outbound_port.MikrotikPort,
 ) CustomerDomain {
@@ -327,16 +327,17 @@ func (d *domain) IsolateCustomer(ctx context.Context, customerID string) error {
 		log.WithContext(ctx).Info(fmt.Sprintf("Customer %s isolated on router %s with profile %s", customer.CustomerCode, router.Address, isolatedProfile.PppProfileName))
 	}
 
-	// Generate redirect script
-	redirectScript := d.GenerateRedirectScript(customer)
-	// Apply script to Mikrotik router
+	// Get router for script generation
 	router, err := d.dbPort.Mikrotik().FindByID(customer.RouterID.String())
 	if err != nil {
 		return fmt.Errorf("router not found: %w", err)
 	}
 
+	// Generate redirect script
+	redirectScript := d.GenerateRedirectScript(customer, router)
+
 	// Apply firewall rules for isolation
-	firewallRules := d.GenerateIsolationFirewallRules(customer)
+	firewallRules := d.GenerateIsolationFirewallRules(customer, router)
 	for _, rule := range firewallRules {
 		err = d.mikrotikPort.AddFirewallRule(router, rule)
 		if err != nil {
@@ -366,7 +367,8 @@ func (d *domain) ActivateCustomer(ctx context.Context, customerID string) error 
 		return errors.New("customer has no profile assigned")
 	}
 
-	originalProfile, err := d.bandwidthProfile.GetProfile(ctx, customer.ProfileID.String())
+	bandwidthProfileDomain := d.getBandwidthProfile(ctx)
+	originalProfile, err := bandwidthProfileDomain.GetProfile(ctx, customer.ProfileID.String())
 	if err != nil {
 		return fmt.Errorf("failed to get original profile: %w", err)
 	}
@@ -396,13 +398,13 @@ func (d *domain) ActivateCustomer(ctx context.Context, customerID string) error 
 			return fmt.Errorf("failed to restore PPP secret on Mikrotik: %w", err)
 		}
 
-		log.WithContext(ctx).Info(fmt.Sprintf("Customer %s activated on router %s with profile %s", customer.CustomerCode, router.Host, originalProfile.PppProfileName))
+		log.WithContext(ctx).Info(fmt.Sprintf("Customer %s activated on router %s with profile %s", customer.CustomerCode, router.Address, originalProfile.PppProfileName))
 	}
 
 	// Remove isolation firewall rules
 	router, err := d.dbPort.Mikrotik().FindByID(customer.RouterID.String())
 	if err == nil {
-		firewallRules := d.GenerateIsolationFirewallRules(customer)
+		firewallRules := d.GenerateIsolationFirewallRules(customer, router)
 		for _, rule := range firewallRules {
 			err = d.mikrotikPort.RemoveFirewallRule(router, rule)
 			if err != nil {
@@ -418,9 +420,10 @@ func (d *domain) ActivateCustomer(ctx context.Context, customerID string) error 
 	}
 
 	// Send notification if available
-	if d.notificationPort != nil {
+	notificationDomain := d.getNotificationDomain(ctx)
+	if notificationDomain != nil {
 		// Send activation notification to customer
-		// notificationPort.SendActivationNotification(ctx, customerID, "Customer activated, internet restored")
+		// notificationDomain.SendActivationNotification(ctx, customerID, "Customer activated, internet restored")
 	}
 
 	return nil
@@ -450,18 +453,18 @@ func (d *domain) GenerateIsolationFirewallRules(customer *model.Customer, router
 			Chain:      "dstnat",
 			Protocol:   "tcp",
 			SrcAddress: router.Address,
-			DstPort:     80,
+			DstPort:    80,
 			Action:     "redirect",
-			ToPorts:     "8080",
+			ToPorts:    "8080",
 			Comment:    fmt.Sprintf("Redirect %s to payment portal", customer.CustomerCode),
 		},
 		{
 			Chain:      "dstnat",
 			Protocol:   "tcp",
 			SrcAddress: router.Address,
-			DstPort:     443,
+			DstPort:    443,
 			Action:     "redirect",
-			ToPorts:     "8080",
+			ToPorts:    "8080",
 			Comment:    fmt.Sprintf("Redirect %s HTTPS to payment portal", customer.CustomerCode),
 		},
 		{
@@ -479,7 +482,7 @@ func (d *domain) GenerateIsolationFirewallRules(customer *model.Customer, router
 			Action:     "accept",
 			DstAddress: portalURL,
 			Comment:    "Allow payment portal HTTPS access",
-			},
+		},
 	}
 
 	return rules

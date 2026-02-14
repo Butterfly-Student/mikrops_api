@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
 	"go-template/utils/log"
+	"go-template/utils/pdf"
 	"go-template/utils/xendit"
 )
 
@@ -23,6 +25,9 @@ type PaymentDomain interface {
 	AllocatePayment(ctx context.Context, paymentID string, invoiceID string, amount float64) error
 	GetUnpaidInvoices(ctx context.Context, customerID string) ([]model.Invoice, error)
 	CreateXenditInvoice(ctx context.Context, invoice *model.Invoice, customer *model.Customer) (*xendit.CreateInvoiceResponse, error)
+	GenerateReceipt(ctx context.Context, paymentID string) ([]byte, error)
+	GetPaymentHistory(ctx context.Context, customerID string, filter model.PaymentFilter) ([]model.Payment, int64, error)
+	GetPaymentStatistics(ctx context.Context, customerID string) (*PaymentStatistics, error)
 }
 
 type domain struct {
@@ -293,4 +298,222 @@ func (d *domain) CreateXenditInvoice(ctx context.Context, invoice *model.Invoice
 	log.WithContext(ctx).Info(fmt.Sprintf("Created xendit invoice for %s: %s", invoice.InvoiceNumber, response.ID))
 
 	return response, nil
+}
+
+func (d *domain) GenerateReceipt(ctx context.Context, paymentID string) ([]byte, error) {
+	if paymentID == "" {
+		return nil, errors.New("payment ID is required")
+	}
+
+	// Get payment
+	payment, err := d.dbPort.Payment().FindByID(paymentID)
+	if err != nil {
+		return nil, fmt.Errorf("payment not found: %w", err)
+	}
+
+	// Get customer
+	customer, err := d.dbPort.Customer().FindByID(payment.CustomerID.String())
+	if err != nil {
+		return nil, fmt.Errorf("customer not found: %w", err)
+	}
+
+	// Get invoice if available
+	var invoice *model.Invoice
+	var invoiceItems []model.InvoiceItem
+	if payment.InvoiceID != nil {
+		invoice, err = d.dbPort.Invoice().FindByID(payment.InvoiceID.String())
+		if err == nil {
+			invoiceItems, err = d.dbPort.InvoiceItem().FindByInvoiceID(invoice.ID.String())
+			if err != nil {
+				log.WithContext(ctx).Warn(fmt.Sprintf("Failed to get invoice items: %v", err))
+			}
+		}
+	}
+
+	// Get company info from system settings
+	companyName := d.getSystemSetting("company.name", "PT Internet Provider")
+	companyAddress := d.getSystemSetting("company.address", "Jl. Raya No. 123")
+	companyPhone := d.getSystemSetting("company.phone", "021-12345678")
+	companyEmail := d.getSystemSetting("company.email", "info@isp.com")
+	companyTaxID := d.getSystemSetting("company.tax_id", "")
+
+	// Prepare receipt data
+	receiptData := pdf.ReceiptData{
+		ReceiptNumber: payment.PaymentNumber,
+		ReceiptDate:   payment.CreatedAt,
+		InvoiceNumber: "",
+		CompanyInfo: pdf.CompanyInfo{
+			Name:    companyName,
+			Address: companyAddress,
+			Phone:   companyPhone,
+			Email:   companyEmail,
+			TaxID:   companyTaxID,
+		},
+		CustomerInfo: pdf.CustomerInfo{
+			Name:    customer.FullName,
+			Email:   getStringValue(customer.Email),
+			Phone:   customer.Phone,
+			Address: getStringValue(customer.Address),
+		},
+		PaymentInfo: pdf.PaymentInfo{
+			PaymentDate:          payment.PaymentDate,
+			PaymentMethod:        payment.PaymentMethod,
+			Status:               payment.Status,
+			BankName:             getStringValue(payment.BankName),
+			TransactionReference: getStringValue(payment.TransactionReference),
+			Subtotal:             payment.Amount,
+			TaxAmount:            0,
+			TaxLabel:             "PPN 11%",
+			DiscountAmount:       0,
+			TotalAmount:          payment.Amount,
+		},
+		InvoiceItems: []pdf.InvoiceItem{},
+	}
+
+	if invoice != nil {
+		receiptData.InvoiceNumber = invoice.InvoiceNumber
+		receiptData.PaymentInfo.Subtotal = invoice.Subtotal
+		receiptData.PaymentInfo.TaxAmount = invoice.TaxAmount
+		receiptData.PaymentInfo.DiscountAmount = invoice.DiscountAmount
+		receiptData.PaymentInfo.TotalAmount = invoice.TotalAmount
+
+		for _, item := range invoiceItems {
+			receiptData.InvoiceItems = append(receiptData.InvoiceItems, pdf.InvoiceItem{
+				Description: item.Description,
+				Quantity:    item.Quantity,
+				UnitPrice:   item.UnitPrice,
+				Total:       item.Total,
+			})
+		}
+	} else {
+		// If no invoice, create a simple item
+		receiptData.InvoiceItems = append(receiptData.InvoiceItems, pdf.InvoiceItem{
+			Description: "Payment",
+			Quantity:    1,
+			UnitPrice:   payment.Amount,
+			Total:       payment.Amount,
+		})
+	}
+
+	// Generate PDF
+	generator := pdf.NewPDFGenerator()
+	pdfBytes, err := generator.GenerateReceipt(receiptData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate receipt PDF: %w", err)
+	}
+
+	log.WithContext(ctx).Info(fmt.Sprintf("Generated receipt for payment %s", payment.PaymentNumber))
+
+	return pdfBytes, nil
+}
+
+func (d *domain) GetPaymentHistory(ctx context.Context, customerID string, filter model.PaymentFilter) ([]model.Payment, int64, error) {
+	if customerID == "" {
+		return nil, 0, errors.New("customer ID is required")
+	}
+
+	// Set customer ID filter
+	customerUUID, err := uuid.Parse(customerID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("invalid customer ID: %w", err)
+	}
+	filter.CustomerID = &customerUUID
+
+	// Get payments
+	payments, err := d.dbPort.Payment().Find(filter)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get payment history: %w", err)
+	}
+
+	// Get total count
+	totalCount, err := d.dbPort.Payment().Count(filter)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to count payments: %w", err)
+	}
+
+	log.WithContext(ctx).Info(fmt.Sprintf("Retrieved %d payment history records for customer %s", len(payments), customerID))
+
+	return payments, totalCount, nil
+}
+
+func (d *domain) GetPaymentStatistics(ctx context.Context, customerID string) (*PaymentStatistics, error) {
+	if customerID == "" {
+		return nil, errors.New("customer ID is required")
+	}
+
+	customerUUID, err := uuid.Parse(customerID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid customer ID: %w", err)
+	}
+
+	// Get all confirmed payments
+	filter := model.PaymentFilter{
+		CustomerID: &customerUUID,
+		Status:     []string{"confirmed"},
+	}
+
+	payments, err := d.dbPort.Payment().Find(filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get payments for statistics: %w", err)
+	}
+
+	// Calculate statistics
+	stats := &PaymentStatistics{
+		TotalPayments:     int64(len(payments)),
+		TotalAmount:       0,
+		AverageAmount:     0,
+		LastPaymentDate:   nil,
+		LastPaymentAmount: 0,
+	}
+
+	if len(payments) > 0 {
+		for _, payment := range payments {
+			stats.TotalAmount += payment.Amount
+		}
+		stats.AverageAmount = stats.TotalAmount / float64(len(payments))
+
+		// Get last payment
+		lastPayment := payments[0]
+		for _, p := range payments {
+			if p.PaymentDate.After(lastPayment.PaymentDate) {
+				lastPayment = p
+			}
+		}
+		stats.LastPaymentDate = &lastPayment.PaymentDate
+		stats.LastPaymentAmount = lastPayment.Amount
+	}
+
+	log.WithContext(ctx).Info(fmt.Sprintf("Generated payment statistics for customer %s", customerID))
+
+	return stats, nil
+}
+
+// Helper functions
+
+func (d *domain) getSystemSetting(key string, defaultValue string) string {
+	setting, err := d.dbPort.SystemSetting().FindByKey(key)
+	if err != nil || setting == nil {
+		return defaultValue
+	}
+	if setting.Value == nil {
+		return defaultValue
+	}
+	return *setting.Value
+}
+
+func getStringValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+
+// PaymentStatistics represents payment statistics for a customer
+type PaymentStatistics struct {
+	TotalPayments     int64     `json:"total_payments"`
+	TotalAmount       float64   `json:"total_amount"`
+	AverageAmount     float64   `json:"average_amount"`
+	LastPaymentDate   *time.Time `json:"last_payment_date"`
+	LastPaymentAmount float64   `json:"last_payment_amount"`
 }
