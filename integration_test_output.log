@@ -1,0 +1,468 @@
+=== RUN   TestAuthIntegration
+2026/02/14 12:40:51 github.com/testcontainers/testcontainers-go - Connected to docker: 
+  Server Version: 28.4.0
+  API Version: 1.51
+  Operating System: Docker Desktop
+  Total Memory: 7919 MB
+  Labels:
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+  Testcontainers for Go Version: v0.40.0
+  Resolved Docker Host: npipe:////./pipe/docker_engine
+  Resolved Docker Socket Path: //var/run/docker.sock
+  Test SessionID: 3647bee09f091fadb09be8525e4d155e1d742fa18d8b80a7f24ae686cc98b99c
+  Test ProcessID: 1a1902b5-ce7e-4bae-bf3b-97277ca0ff12
+2026/02/14 12:40:51 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:40:55 🐳 Creating container for image testcontainers/ryuk:0.13.0
+2026/02/14 12:40:56 ✅ Container created: 493a9933a837
+2026/02/14 12:40:56 🐳 Starting container: 493a9933a837
+2026/02/14 12:41:02 ✅ Container started: 493a9933a837
+2026/02/14 12:41:02 ⏳ Waiting for container id 493a9933a837 image: testcontainers/ryuk:0.13.0. Waiting for: port 8080/tcp to be listening
+2026/02/14 12:41:04 Shell not found in container
+2026/02/14 12:41:04 🔔 Container is ready: 493a9933a837
+2026/02/14 12:41:04 ✅ Container created: b6e417b4f966
+2026/02/14 12:41:04 🐳 Starting container: b6e417b4f966
+2026/02/14 12:41:06 ✅ Container started: b6e417b4f966
+2026/02/14 12:41:06 ⏳ Waiting for container id b6e417b4f966 image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:41:21 container logs (wait until ready: internal check: container exec inspect: Get "http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.51/exec/243a48c1542b0315318075198e9b257b83fe5520387c871978f35bf357e54aa9/json": context deadline exceeded, host port waiting failed):
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+sh: locale: not found
+2026-02-14 05:41:10.263 UTC [69] WARNING:  no usable system locales were found
+performing post-bootstrap initialization ... ok
+    auth_integration_test.go:42: Failed to setup postgres container: failed to start postgres container (ensure Docker is running): run postgres: generic container: start container: started hook: wait until ready: internal check: container exec inspect: Get "http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.51/exec/243a48c1542b0315318075198e9b257b83fe5520387c871978f35bf357e54aa9/json": context deadline exceeded, host port waiting failed
+--- FAIL: TestAuthIntegration (31.04s)
+=== RUN   TestClientIntegration
+2026/02/14 12:41:22 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:41:23 ✅ Container created: ab7d9d86105d
+2026/02/14 12:41:23 🐳 Starting container: ab7d9d86105d
+2026/02/14 12:41:25 ✅ Container started: ab7d9d86105d
+2026/02/14 12:41:25 ⏳ Waiting for container id ab7d9d86105d image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:41:39 🔔 Container is ready: ab7d9d86105d
+2026/02/14 12:41:39 [SEED] Environment: testing
+2026/02/14 12:41:39 [SEED] Entities: [all]
+2026/02/14 12:41:39 [SEED] Running 4 seeders
+2026/02/14 12:41:39 [SEED] Running: Testing Casbin Rules
+[CASBIN TEST SEED] Starting seeder...
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/clients/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/users/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/mikrotik/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/pppoe/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/queues/*, *
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues/*, GET
+[CASBIN TEST SEED] Created rule: p, test-role, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: g, test-admin@example.com, admin, 
+[CASBIN TEST SEED] Created rule: g, test-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, inactive-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, regular@example.com, user, 
+[CASBIN TEST SEED] Completed successfully
+2026/02/14 12:41:39 [SEED] SUCCESS: Testing Casbin Rules
+2026/02/14 12:41:39 [SEED] Running: Testing Clients
+[CLIENT TEST SEED] Starting seeder...
+[CLIENT TEST SEED] Processing client: test-client-1
+[CLIENT TEST SEED] Created: test-client-1 with bearer key
+[CLIENT TEST SEED] Processing client: test-client-2
+[CLIENT TEST SEED] Created: test-client-2 with bearer key
+[CLIENT TEST SEED] Processing client: integration-test-client
+[CLIENT TEST SEED] Created: integration-test-client with bearer key
+2026/02/14 12:41:39 [SEED] SUCCESS: Testing Clients
+2026/02/14 12:41:39 [SEED] Running: Testing MikroTik Routers
+[MIKROTIK TEST SEED] Created: Test Router 1
+[MIKROTIK TEST SEED] Created: Test Router 2
+[MIKROTIK TEST SEED] Created: Inactive Test Router
+2026/02/14 12:41:39 [SEED] SUCCESS: Testing MikroTik Routers
+2026/02/14 12:41:39 [SEED] Running: Testing Users
+[USER TEST SEED] Created: test-admin@example.com
+[USER TEST SEED] Created: test-user@example.com
+[USER TEST SEED] Created: inactive-user@example.com
+[USER TEST SEED] Created: regular@example.com
+2026/02/14 12:41:40 [SEED] SUCCESS: Testing Users
+2026/02/14 12:41:40 [SEED] Completed: 4/4 successful
+
+  Test Client Integration with PostgreSQL 
+    Full CRUD cycle 
+      Upsert creates a new client [32m.[0m
+        FindByFilter retrieves the client [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+        IsExists returns true for existing client [32m.[0m[32m.[0m[32m.[0m
+        Upsert updates existing client [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+        DeleteByFilter removes the client [32m.[0m[32m.[0m[32m.[0m
+    IsExists returns false for non-existent client [32m.[0m[32m.[0m
+    FindByFilter with multiple filters [32m.[0m[32m.[0m[32m.[0m
+
+[31m[0m[33m[0m[32m
+22 total assertions[0m
+
+2026/02/14 12:41:40 🐳 Stopping container: ab7d9d86105d
+2026/02/14 12:41:43 ✅ Container stopped: ab7d9d86105d
+2026/02/14 12:41:43 🐳 Terminating container: ab7d9d86105d
+2026/02/14 12:41:43 🚫 Container terminated: ab7d9d86105d
+--- PASS: TestClientIntegration (22.06s)
+=== RUN   TestMikrotikIntegration
+2026/02/14 12:41:44 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:41:45 ✅ Container created: 274c22edd840
+2026/02/14 12:41:45 🐳 Starting container: 274c22edd840
+2026/02/14 12:41:46 ✅ Container started: 274c22edd840
+2026/02/14 12:41:46 ⏳ Waiting for container id 274c22edd840 image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:41:56 🔔 Container is ready: 274c22edd840
+2026/02/14 12:41:56 [SEED] Environment: testing
+2026/02/14 12:41:56 [SEED] Entities: [all]
+2026/02/14 12:41:56 [SEED] Running 4 seeders
+2026/02/14 12:41:56 [SEED] Running: Testing Casbin Rules
+[CASBIN TEST SEED] Starting seeder...
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/clients/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/users/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/mikrotik/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/pppoe/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/queues/*, *
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues/*, GET
+[CASBIN TEST SEED] Created rule: p, test-role, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: g, test-admin@example.com, admin, 
+[CASBIN TEST SEED] Created rule: g, test-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, inactive-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, regular@example.com, user, 
+[CASBIN TEST SEED] Completed successfully
+2026/02/14 12:41:56 [SEED] SUCCESS: Testing Casbin Rules
+2026/02/14 12:41:56 [SEED] Running: Testing Clients
+[CLIENT TEST SEED] Starting seeder...
+[CLIENT TEST SEED] Processing client: test-client-1
+[CLIENT TEST SEED] Created: test-client-1 with bearer key
+[CLIENT TEST SEED] Processing client: test-client-2
+[CLIENT TEST SEED] Created: test-client-2 with bearer key
+[CLIENT TEST SEED] Processing client: integration-test-client
+[CLIENT TEST SEED] Created: integration-test-client with bearer key
+2026/02/14 12:41:56 [SEED] SUCCESS: Testing Clients
+2026/02/14 12:41:56 [SEED] Running: Testing MikroTik Routers
+[MIKROTIK TEST SEED] Created: Test Router 1
+[MIKROTIK TEST SEED] Created: Test Router 2
+[MIKROTIK TEST SEED] Created: Inactive Test Router
+2026/02/14 12:41:57 [SEED] SUCCESS: Testing MikroTik Routers
+2026/02/14 12:41:57 [SEED] Running: Testing Users
+[USER TEST SEED] Created: test-admin@example.com
+[USER TEST SEED] Created: test-user@example.com
+[USER TEST SEED] Created: inactive-user@example.com
+[USER TEST SEED] Created: regular@example.com
+2026/02/14 12:41:57 [SEED] SUCCESS: Testing Users
+2026/02/14 12:41:57 [SEED] Completed: 4/4 successful
+
+  Test Mikrotik Integration with PostgreSQL [32m.[0m
+    Router CRUD Operations [32m.[0m
+      FindByID retrieves router [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      Update router [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      FindAll returns all routers [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      Delete removes router [32m.[0m[32m.[0m[32m.[0m
+
+[31m[0m[33m[0m[32m
+42 total assertions[0m
+
+2026/02/14 12:41:58 🐳 Stopping container: 274c22edd840
+2026/02/14 12:42:00 ✅ Container stopped: 274c22edd840
+2026/02/14 12:42:00 🐳 Terminating container: 274c22edd840
+2026/02/14 12:42:01 🚫 Container terminated: 274c22edd840
+--- PASS: TestMikrotikIntegration (17.41s)
+=== RUN   TestPppoeIntegration
+2026/02/14 12:42:01 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:42:02 ✅ Container created: 427b99ff983d
+2026/02/14 12:42:02 🐳 Starting container: 427b99ff983d
+2026/02/14 12:42:04 ✅ Container started: 427b99ff983d
+2026/02/14 12:42:04 ⏳ Waiting for container id 427b99ff983d image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:42:10 🔔 Container is ready: 427b99ff983d
+2026/02/14 12:42:10 [SEED] Environment: testing
+2026/02/14 12:42:10 [SEED] Entities: [all]
+2026/02/14 12:42:10 [SEED] Running 4 seeders
+2026/02/14 12:42:10 [SEED] Running: Testing Casbin Rules
+[CASBIN TEST SEED] Starting seeder...
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/clients/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/users/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/mikrotik/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/pppoe/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/queues/*, *
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues/*, GET
+[CASBIN TEST SEED] Created rule: p, test-role, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: g, test-admin@example.com, admin, 
+[CASBIN TEST SEED] Created rule: g, test-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, inactive-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, regular@example.com, user, 
+[CASBIN TEST SEED] Completed successfully
+2026/02/14 12:42:10 [SEED] SUCCESS: Testing Casbin Rules
+2026/02/14 12:42:10 [SEED] Running: Testing Clients
+[CLIENT TEST SEED] Starting seeder...
+[CLIENT TEST SEED] Processing client: test-client-1
+[CLIENT TEST SEED] Created: test-client-1 with bearer key
+[CLIENT TEST SEED] Processing client: test-client-2
+[CLIENT TEST SEED] Created: test-client-2 with bearer key
+[CLIENT TEST SEED] Processing client: integration-test-client
+[CLIENT TEST SEED] Created: integration-test-client with bearer key
+2026/02/14 12:42:10 [SEED] SUCCESS: Testing Clients
+2026/02/14 12:42:10 [SEED] Running: Testing MikroTik Routers
+[MIKROTIK TEST SEED] Created: Test Router 1
+[MIKROTIK TEST SEED] Created: Test Router 2
+[MIKROTIK TEST SEED] Created: Inactive Test Router
+2026/02/14 12:42:10 [SEED] SUCCESS: Testing MikroTik Routers
+2026/02/14 12:42:10 [SEED] Running: Testing Users
+[USER TEST SEED] Created: test-admin@example.com
+[USER TEST SEED] Created: test-user@example.com
+[USER TEST SEED] Created: inactive-user@example.com
+[USER TEST SEED] Created: regular@example.com
+2026/02/14 12:42:11 [SEED] SUCCESS: Testing Users
+2026/02/14 12:42:11 [SEED] Completed: 4/4 successful
+
+  Test PPPoE Integration with PostgreSQL [32m.[0m
+    Router Management 
+      GetProfile retrieves router by ID [32m.[0m[32m.[0m[32m.[0m
+      Update router updates fields [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      FindAll returns all routers [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      Delete removes router [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+    Router Field Management 
+      Update router with additional fields [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      Test IsActive and LastSeenAt fields [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+    Error Cases 
+      FindByID with non-existent UUID returns error [32m.[0m[32m.[0m
+      Delete with non-existent UUID does not error [32m.[0m[32m.[0m
+    Password encryption field works [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+
+[31m[0m[33m[0m[32m
+83 total assertions[0m
+
+2026/02/14 12:42:12 🐳 Stopping container: 427b99ff983d
+2026/02/14 12:42:13 ✅ Container stopped: 427b99ff983d
+2026/02/14 12:42:13 🐳 Terminating container: 427b99ff983d
+2026/02/14 12:42:14 🚫 Container terminated: 427b99ff983d
+--- PASS: TestPppoeIntegration (13.21s)
+=== RUN   TestQueueIntegration
+2026/02/14 12:42:14 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:42:15 ✅ Container created: 0be8f3324807
+2026/02/14 12:42:15 🐳 Starting container: 0be8f3324807
+2026/02/14 12:42:16 ✅ Container started: 0be8f3324807
+2026/02/14 12:42:16 ⏳ Waiting for container id 0be8f3324807 image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:42:20 🔔 Container is ready: 0be8f3324807
+2026/02/14 12:42:20 [SEED] Environment: testing
+2026/02/14 12:42:20 [SEED] Entities: [all]
+2026/02/14 12:42:20 [SEED] Running 4 seeders
+2026/02/14 12:42:20 [SEED] Running: Testing Casbin Rules
+[CASBIN TEST SEED] Starting seeder...
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/clients/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/users/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/mikrotik/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/pppoe/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/queues/*, *
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues/*, GET
+[CASBIN TEST SEED] Created rule: p, test-role, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: g, test-admin@example.com, admin, 
+[CASBIN TEST SEED] Created rule: g, test-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, inactive-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, regular@example.com, user, 
+[CASBIN TEST SEED] Completed successfully
+2026/02/14 12:42:20 [SEED] SUCCESS: Testing Casbin Rules
+2026/02/14 12:42:20 [SEED] Running: Testing Clients
+[CLIENT TEST SEED] Starting seeder...
+[CLIENT TEST SEED] Processing client: test-client-1
+[CLIENT TEST SEED] Created: test-client-1 with bearer key
+[CLIENT TEST SEED] Processing client: test-client-2
+[CLIENT TEST SEED] Created: test-client-2 with bearer key
+[CLIENT TEST SEED] Processing client: integration-test-client
+[CLIENT TEST SEED] Created: integration-test-client with bearer key
+2026/02/14 12:42:20 [SEED] SUCCESS: Testing Clients
+2026/02/14 12:42:20 [SEED] Running: Testing MikroTik Routers
+[MIKROTIK TEST SEED] Created: Test Router 1
+[MIKROTIK TEST SEED] Created: Test Router 2
+[MIKROTIK TEST SEED] Created: Inactive Test Router
+2026/02/14 12:42:20 [SEED] SUCCESS: Testing MikroTik Routers
+2026/02/14 12:42:20 [SEED] Running: Testing Users
+[USER TEST SEED] Created: test-admin@example.com
+[USER TEST SEED] Created: test-user@example.com
+[USER TEST SEED] Created: inactive-user@example.com
+[USER TEST SEED] Created: regular@example.com
+2026/02/14 12:42:21 [SEED] SUCCESS: Testing Users
+2026/02/14 12:42:21 [SEED] Completed: 4/4 successful
+
+  Test Queue Integration with PostgreSQL [32m.[0m
+    Router operations 
+      FindByID retrieves router [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      Update router fields [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+      FindAll returns all routers [32m.[0m[32m.[0m[32m.[0m
+
+[31m[0m[33m[0m[32m
+95 total assertions[0m
+
+2026/02/14 12:42:21 🐳 Stopping container: 0be8f3324807
+2026/02/14 12:42:22 ✅ Container stopped: 0be8f3324807
+2026/02/14 12:42:22 🐳 Terminating container: 0be8f3324807
+2026/02/14 12:42:23 🚫 Container terminated: 0be8f3324807
+--- PASS: TestQueueIntegration (8.78s)
+=== RUN   TestSeedDataIntegration
+2026/02/14 12:42:23 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:42:24 ✅ Container created: c19d74c83ef9
+2026/02/14 12:42:24 🐳 Starting container: c19d74c83ef9
+2026/02/14 12:42:25 ✅ Container started: c19d74c83ef9
+2026/02/14 12:42:25 ⏳ Waiting for container id c19d74c83ef9 image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:42:30 🔔 Container is ready: c19d74c83ef9
+2026/02/14 12:42:30 [SEED] Environment: testing
+2026/02/14 12:42:30 [SEED] Entities: [all]
+2026/02/14 12:42:30 [SEED] Running 4 seeders
+2026/02/14 12:42:30 [SEED] Running: Testing Casbin Rules
+[CASBIN TEST SEED] Starting seeder...
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/clients/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/users/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/mikrotik/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/pppoe/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/queues/*, *
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues/*, GET
+[CASBIN TEST SEED] Created rule: p, test-role, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: g, test-admin@example.com, admin, 
+[CASBIN TEST SEED] Created rule: g, test-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, inactive-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, regular@example.com, user, 
+[CASBIN TEST SEED] Completed successfully
+2026/02/14 12:42:30 [SEED] SUCCESS: Testing Casbin Rules
+2026/02/14 12:42:30 [SEED] Running: Testing Clients
+[CLIENT TEST SEED] Starting seeder...
+[CLIENT TEST SEED] Processing client: test-client-1
+[CLIENT TEST SEED] Created: test-client-1 with bearer key
+[CLIENT TEST SEED] Processing client: test-client-2
+[CLIENT TEST SEED] Created: test-client-2 with bearer key
+[CLIENT TEST SEED] Processing client: integration-test-client
+[CLIENT TEST SEED] Created: integration-test-client with bearer key
+2026/02/14 12:42:30 [SEED] SUCCESS: Testing Clients
+2026/02/14 12:42:30 [SEED] Running: Testing MikroTik Routers
+[MIKROTIK TEST SEED] Created: Test Router 1
+[MIKROTIK TEST SEED] Created: Test Router 2
+[MIKROTIK TEST SEED] Created: Inactive Test Router
+2026/02/14 12:42:30 [SEED] SUCCESS: Testing MikroTik Routers
+2026/02/14 12:42:30 [SEED] Running: Testing Users
+[USER TEST SEED] Created: test-admin@example.com
+[USER TEST SEED] Created: test-user@example.com
+[USER TEST SEED] Created: inactive-user@example.com
+[USER TEST SEED] Created: regular@example.com
+2026/02/14 12:42:31 [SEED] SUCCESS: Testing Users
+2026/02/14 12:42:31 [SEED] Completed: 4/4 successful
+
+  Test Seed Data Integration 
+    Test users are seeded [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+    Test clients are seeded [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+    Test MikroTik routers are seeded [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+
+[31m[0m[33m[0m[32m
+110 total assertions[0m
+
+2026/02/14 12:42:31 🐳 Stopping container: c19d74c83ef9
+2026/02/14 12:42:31 ✅ Container stopped: c19d74c83ef9
+2026/02/14 12:42:31 🐳 Terminating container: c19d74c83ef9
+2026/02/14 12:42:31 🚫 Container terminated: c19d74c83ef9
+--- PASS: TestSeedDataIntegration (8.87s)
+=== RUN   TestUserIntegration
+2026/02/14 12:42:32 🐳 Creating container for image postgres:15-alpine
+2026/02/14 12:42:32 ✅ Container created: 97cba41c905b
+2026/02/14 12:42:32 🐳 Starting container: 97cba41c905b
+2026/02/14 12:42:33 ✅ Container started: 97cba41c905b
+2026/02/14 12:42:33 ⏳ Waiting for container id 97cba41c905b image: postgres:15-alpine. Waiting for: all of: [first exposed port to be listening]
+2026/02/14 12:42:37 🔔 Container is ready: 97cba41c905b
+2026/02/14 12:42:37 [SEED] Environment: testing
+2026/02/14 12:42:37 [SEED] Entities: [all]
+2026/02/14 12:42:37 [SEED] Running 4 seeders
+2026/02/14 12:42:37 [SEED] Running: Testing Casbin Rules
+[CASBIN TEST SEED] Starting seeder...
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/clients/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/users/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/mikrotik/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/pppoe/*, *
+[CASBIN TEST SEED] Created rule: p, admin, /api/v1/queues/*, *
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/mikrotik/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/pppoe/secrets/*, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues, GET
+[CASBIN TEST SEED] Created rule: p, user, /api/v1/queues/*, GET
+[CASBIN TEST SEED] Created rule: p, test-role, /api/v1/*, *
+[CASBIN TEST SEED] Created rule: g, test-admin@example.com, admin, 
+[CASBIN TEST SEED] Created rule: g, test-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, inactive-user@example.com, user, 
+[CASBIN TEST SEED] Created rule: g, regular@example.com, user, 
+[CASBIN TEST SEED] Completed successfully
+2026/02/14 12:42:37 [SEED] SUCCESS: Testing Casbin Rules
+2026/02/14 12:42:37 [SEED] Running: Testing Clients
+[CLIENT TEST SEED] Starting seeder...
+[CLIENT TEST SEED] Processing client: test-client-1
+[CLIENT TEST SEED] Created: test-client-1 with bearer key
+[CLIENT TEST SEED] Processing client: test-client-2
+[CLIENT TEST SEED] Created: test-client-2 with bearer key
+[CLIENT TEST SEED] Processing client: integration-test-client
+[CLIENT TEST SEED] Created: integration-test-client with bearer key
+2026/02/14 12:42:37 [SEED] SUCCESS: Testing Clients
+2026/02/14 12:42:37 [SEED] Running: Testing MikroTik Routers
+[MIKROTIK TEST SEED] Created: Test Router 1
+[MIKROTIK TEST SEED] Created: Test Router 2
+[MIKROTIK TEST SEED] Created: Inactive Test Router
+2026/02/14 12:42:37 [SEED] SUCCESS: Testing MikroTik Routers
+2026/02/14 12:42:37 [SEED] Running: Testing Users
+[USER TEST SEED] Created: test-admin@example.com
+[USER TEST SEED] Created: test-user@example.com
+[USER TEST SEED] Created: inactive-user@example.com
+[USER TEST SEED] Created: regular@example.com
+2026/02/14 12:42:37 [SEED] SUCCESS: Testing Users
+2026/02/14 12:42:37 [SEED] Completed: 4/4 successful
+
+  Test User Integration with PostgreSQL 
+    Full CRUD cycle 
+      Create creates a new user [32m.[0m[32m.[0m
+        FindByID retrieves the user [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+        FindByEmail retrieves the user [32m.[0m[32m.[0m[32m.[0m[32m.[0m
+        Update updates the user [32m.[0m[32m.[0m[32m.[0m
+    FindByEmail returns error for non-existent user [32m.[0m
+    FindByID returns error for non-existent user [32m.[0m
+
+[31m[0m[33m[0m[32m
+125 total assertions[0m
+
+2026/02/14 12:42:37 🐳 Stopping container: 97cba41c905b
+2026/02/14 12:42:38 ✅ Container stopped: 97cba41c905b
+2026/02/14 12:42:38 🐳 Terminating container: 97cba41c905b
+2026/02/14 12:42:39 🚫 Container terminated: 97cba41c905b
+--- PASS: TestUserIntegration (7.04s)
+FAIL
+FAIL	go-template/tests/integration	109.046s
+FAIL

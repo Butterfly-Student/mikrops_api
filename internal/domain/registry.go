@@ -3,12 +3,15 @@ package domain
 import (
 	"go-template/internal/domain/auth"
 	"go-template/internal/domain/client"
+	"go-template/internal/domain/iface"
+	"go-template/internal/domain/ippool"
+	"go-template/internal/domain/ping"
 	"go-template/internal/domain/pppoe"
 	"go-template/internal/domain/queue"
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
 
-	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v3"
 )
 
 type Domain interface {
@@ -17,6 +20,9 @@ type Domain interface {
 	User() user.UserDomain
 	Pppoe() pppoe.PppoeDomain
 	Queue() queue.QueueDomain
+	Interface() iface.InterfaceDomain
+	IpPool() ippool.IpPoolDomain
+	Ping() ping.PingDomain
 }
 
 type domain struct {
@@ -64,4 +70,16 @@ func (d *domain) Pppoe() pppoe.PppoeDomain {
 
 func (d *domain) Queue() queue.QueueDomain {
 	return queue.NewQueueDomain(d.databasePort, d.cachePort, d.mikrotikPort)
+}
+
+func (d *domain) Interface() iface.InterfaceDomain {
+	return iface.NewInterfaceDomain(d.databasePort, d.cachePort, d.mikrotikPort)
+}
+
+func (d *domain) IpPool() ippool.IpPoolDomain {
+	return ippool.NewIpPoolDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) Ping() ping.PingDomain {
+	return ping.NewPingDomain(d.databasePort, d.cachePort, d.mikrotikPort)
 }

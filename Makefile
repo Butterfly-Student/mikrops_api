@@ -5,7 +5,7 @@ CONTAINER_NAME=$(shell basename $(CURDIR))_app
 # This prevents make from getting confused if files with these names exist in the directory
 # and ensures these targets always run when called, regardless of file timestamps
 # All listed targets are command targets that perform actions rather than creating output files
-.PHONY: build http message command workflow model domain migration-postgres inbound-http-gin inbound-message-rabbitmq inbound-command inbound-workflow-temporal outbound-database-postgres outbound-http outbound-message-rabbitmq outbound-cache-redis outbound-workflow-temporal run generate-mocks lint test test-coverage test-integration
+.PHONY: build http message command workflow model domain migration-postgres inbound-http-gin inbound-message-rabbitmq inbound-command inbound-workflow-temporal outbound-database-postgres outbound-http outbound-message-rabbitmq outbound-cache-redis outbound-workflow-temporal run generate-mocks seed seed-prod seed-dev seed-test seed-clean seed-refresh lint test test-coverage test-integration
 
 build:
 	@if [ "$(BUILD)" = "true" ]; then \
@@ -933,7 +933,7 @@ run:
 	if [ -n "$$target" ]; then \
 		echo "[INFO] Selected target: $$target"; \
 		case "$$target" in \
-			"model"|"domain"|"migration-postgres"|"inbound-http-fiber"|"inbound-message-rabbitmq"|"inbound-command"|"inbound-workflow-temporal"|"outbound-database-postgres"|"outbound-http"|"outbound-message-rabbitmq"|"outbound-cache-redis"|"outbound-workflow-temporal") \
+			"model"|"domain"|"migration-postgres"|"inbound-http-gin"|"inbound-message-rabbitmq"|"inbound-command"|"inbound-workflow-temporal"|"outbound-database-postgres"|"outbound-http"|"outbound-message-rabbitmq"|"outbound-cache-redis"|"outbound-workflow-temporal") \
 				printf "Enter VAL parameter: "; \
 				val=$$(bash -c 'read -r val && echo "$$val"'); \
 				if [ -n "$$val" ]; then \
@@ -1017,6 +1017,31 @@ generate-mocks:
 	@echo "[INFO] Successfully generated mock for outbound CachePort."
 	@go generate ./internal/port/outbound/registry_message.go
 	@echo "[INFO] Successfully generated mock for outbound MessagePort."
+
+seed:
+	@echo "[INFO] Running seeds with environment: $${SEED_ENV:-development} and entities: $${SEED_ENTITIES:-all}"
+	@go run cmd/seed/main.go
+
+seed-prod:
+	@echo "[INFO] Running production seeds..."
+	@SEED_ENV=production $(MAKE) seed
+
+seed-dev:
+	@echo "[INFO] Running development seeds..."
+	@SEED_ENV=development $(MAKE) seed
+
+seed-test:
+	@echo "[INFO] Running test seeds..."
+	@SEED_ENV=testing $(MAKE) seed
+
+seed-clean:
+	@echo "[INFO] Cleaning seed data..."
+	@go run cmd/seed/main.go --clean
+
+seed-refresh:
+	@echo "[INFO] Refreshing seed data (clean + seed)..."
+	@$(MAKE) seed-clean
+	@$(MAKE) seed
 
 lint:
 	@echo "[INFO] Running golangci-lint..."

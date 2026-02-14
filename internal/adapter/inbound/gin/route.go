@@ -29,6 +29,17 @@ func InitRoute(
 		v1.GET("/ping", port.Ping().GetResource)
 	}
 
+	// Ping Management
+	pingMgmt := app.Group("/ping")
+	pingMgmt.Use(port.Middleware().UserAuth())
+	{
+		pingMgmt.POST("", port.Ping().StartPing)
+		pingMgmt.DELETE("/:address", port.Ping().StopPing)
+	}
+
+	// Ping WebSocket (requires ?address=target filter)
+	app.GET("/ws/ping", port.Ping().HandleWebSocket)
+
 	// Auth routes
 	auth := app.Group("/auth")
 	{
@@ -97,9 +108,38 @@ func InitRoute(
 		queue.GET("/:id", port.Queue().GetQueue)
 		queue.PUT("/:id", port.Queue().UpdateQueue)
 		queue.DELETE("/:id", port.Queue().DeleteQueue)
-		queue.POST("/monitor", port.Queue().StartStreaming)
+
+		// Streaming endpoints
+		queue.POST("/monitor", port.Queue().StartStreamingAll)           // Start all
+		queue.POST("/monitor/:name", port.Queue().StartStreamingByName)  // Start by name
+		queue.DELETE("/monitor", port.Queue().StopStreamingAll)          // Stop all
+		queue.DELETE("/monitor/:name", port.Queue().StopStreamingByName) // Stop by name
 	}
 
-	// Queue WebSocket
+	// Queue WebSocket (supports ?name=queue-name filter)
 	app.GET("/ws/queues", port.Queue().HandleWebSocket)
+
+	// Interface Monitoring
+	iface := app.Group("/interfaces")
+	iface.Use(port.Middleware().UserAuth())
+	{
+		iface.POST("/monitor", port.Interface().StartMonitoring)           // Start all
+		iface.POST("/monitor/:name", port.Interface().StartMonitoringByName) // Start by name
+		iface.DELETE("/monitor", port.Interface().StopMonitoring)          // Stop all
+		iface.DELETE("/monitor/:name", port.Interface().StopMonitoringByName) // Stop by name
+	}
+
+	// Interface WebSocket (supports ?name=interface-name filter)
+	app.GET("/ws/interfaces", port.Interface().HandleWebSocket)
+
+	// IP Pool Management
+	ippool := app.Group("/ip-pools")
+	ippool.Use(port.Middleware().UserAuth())
+	{
+		ippool.POST("", port.IpPool().CreateIpPool)
+		ippool.GET("", port.IpPool().ListIpPools)
+		ippool.GET("/:id", port.IpPool().GetIpPool)
+		ippool.PUT("/:id", port.IpPool().UpdateIpPool)
+		ippool.DELETE("/:id", port.IpPool().DeleteIpPool)
+	}
 }

@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/casbin/casbin/v3"
+	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/casbin/casbin/v2"
-	casbinmodel "github.com/casbin/casbin/v2/model"
 
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
 	"go-template/internal/domain"
@@ -33,7 +33,7 @@ func TestUserAdapter(t *testing.T) {
 
 		mockDatabasePort.EXPECT().User().Return(mockUserDatabasePort).AnyTimes()
 
-        // Setup Casbin (needed for domain creation)
+		// Setup Casbin (needed for domain creation)
 		m, _ := casbinmodel.NewModelFromString(`
 [request_definition]
 r = sub, obj, act
@@ -52,14 +52,14 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 `)
 		enforcer, _ := casbin.NewEnforcer(m)
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, enforcer)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, enforcer)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		gin.SetMode(gin.TestMode)
 		router := gin.New()
 
-        // Mock auth middleware
-        authMiddleware := func(c *gin.Context) {
+		// Mock auth middleware
+		authMiddleware := func(c *gin.Context) {
 			c.Set("userID", uint(1))
 			c.Next()
 		}
@@ -68,7 +68,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		router.PUT("/user/profile", authMiddleware, adapter.User().UpdateProfile)
 
 		Convey("GetProfile", func() {
-            user := &model.User{ID: 1, Name: "Test User", Email: "test@example.com", Role: "user"}
+			user := &model.User{ID: 1, Name: "Test User", Email: "test@example.com", Role: "user"}
 
 			Convey("Success", func() {
 				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
@@ -79,12 +79,12 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 
 				So(w.Code, ShouldEqual, http.StatusOK)
 
-                var res model.User
+				var res model.User
 				json.Unmarshal(w.Body.Bytes(), &res)
 				So(res.Name, ShouldEqual, user.Name)
 			})
 
-            Convey("User Not Found", func() {
+			Convey("User Not Found", func() {
 				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(nil, errors.New("not found")).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/user/profile", nil)
@@ -96,17 +96,17 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		})
 
 		Convey("UpdateProfile", func() {
-            user := &model.User{ID: 1, Name: "Old Name", Email: "old@example.com"}
-            reqBody := model.UserInput{Name: "New Name", Email: "new@example.com"}
+			user := &model.User{ID: 1, Name: "Old Name", Email: "old@example.com"}
+			reqBody := model.UserInput{Name: "New Name", Email: "new@example.com"}
 
 			Convey("Success", func() {
 				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
-                mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(nil, errors.New("not found")).Times(1) // Check email uniqueness
+				mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(nil, errors.New("not found")).Times(1) // Check email uniqueness
 				mockUserDatabasePort.EXPECT().Update(gomock.Any()).Return(nil).Times(1)
 
 				body, _ := json.Marshal(reqBody)
 				req := httptest.NewRequest(http.MethodPut, "/user/profile", bytes.NewReader(body))
-                req.Header.Set("Content-Type", "application/json")
+				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
@@ -114,14 +114,14 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 				So(w.Code, ShouldEqual, http.StatusOK)
 			})
 
-            Convey("Email Taken", func() {
-                existingUser := &model.User{ID: 2, Email: "new@example.com"}
+			Convey("Email Taken", func() {
+				existingUser := &model.User{ID: 2, Email: "new@example.com"}
 				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
-                mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(existingUser, nil).Times(1)
+				mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(existingUser, nil).Times(1)
 
 				body, _ := json.Marshal(reqBody)
 				req := httptest.NewRequest(http.MethodPut, "/user/profile", bytes.NewReader(body))
-                req.Header.Set("Content-Type", "application/json")
+				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)

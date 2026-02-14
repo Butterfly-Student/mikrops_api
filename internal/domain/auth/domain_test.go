@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	"go-template/internal/model"
-	"go-template/internal/utils/hash"
-	"go-template/internal/utils/token"
 	mock_outbound_port "go-template/tests/mocks/port"
+	"go-template/utils/hash"
+	"go-template/utils/token"
 
-	"github.com/casbin/casbin/v2"
-	casbinmodel "github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v3"
+	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )

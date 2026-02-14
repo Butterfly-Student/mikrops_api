@@ -10,9 +10,9 @@ import (
 	"go-template/internal/domain"
 	"go-template/internal/model"
 	inbound_port "go-template/internal/port/inbound"
-	"go-template/internal/utils/token"
 	"go-template/utils/activity"
 	"go-template/utils/jwt"
+	"go-template/utils/token"
 )
 
 const (

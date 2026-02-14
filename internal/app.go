@@ -29,11 +29,11 @@ import (
 	"go-template/utils/rabbitmq"
 	"go-template/utils/redis"
 
-	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v3"
 )
 
 var databaseDriverList = []string{"postgres"}
-var httpDriverList = []string{"fiber"}
+var httpDriverList = []string{"gin"}
 var messageDriverList = []string{"rabbitmq"}
 var workflowDriverList = []string{"temporal"}
 var outboundDatabaseDriver string
@@ -140,6 +140,10 @@ func cacheOutbound(ctx context.Context) outbound_port.CachePort {
 }
 
 func workflowOutbound(ctx context.Context) outbound_port.WorkflowPort {
+	if outboundWorkflowDriver == "" {
+		return nil
+	}
+
 	if !utils.IsInList([]string{"temporal"}, outboundWorkflowDriver) {
 		log.WithContext(ctx).Error("workflow driver is not supported")
 		os.Exit(1)

@@ -32,7 +32,7 @@ When creating tasks, consider GoTemplate's hexagonal architecture structure base
   - **Inbound Ports**: Define how external systems communicate with the application
   - **Outbound Ports**: Define how the application communicates with external systems
 - **Adapters**: Implementations connecting to external systems
-  - **Inbound Adapters**: HTTP (Fiber), RabbitMQ consumers, CLI commands, Temporal workflows
+  - **Inbound Adapters**: HTTP (Gin), RabbitMQ consumers, CLI commands, Temporal workflows
   - **Outbound Adapters**: PostgreSQL, HTTP clients, RabbitMQ publishers, Redis cache, Temporal starters
 - **Models**: Data structures and entities (business objects and their attributes)
 - **Migrations**: Database schema changes (PostgreSQL-specific)
@@ -42,7 +42,7 @@ When creating tasks, consider GoTemplate's hexagonal architecture structure base
 cmd/                          # Application entry point
 internal/
   ├── adapter/
-  │   ├── inbound/            # command/, fiber/, rabbitmq/, temporal/
+  │   ├── inbound/            # command/, gin/, rabbitmq/, temporal/
   │   └── outbound/           # http/, postgres/, rabbitmq/, redis/, temporal/
   ├── domain/                 # Core business logic
   ├── port/
@@ -69,7 +69,7 @@ GoTemplate provides comprehensive Makefile targets for automated code generation
 - **`make migration-postgres VAL=name`**: Create PostgreSQL migration files  
 
 ### Inbound Adapters (Receiving Requests)
-- **`make inbound-http-fiber VAL=name`**: Create HTTP handlers using Fiber framework
+- **`make inbound-http-gin VAL=name`**: Create HTTP handlers using gin framework
 - **`make inbound-message-rabbitmq VAL=name`**: Create RabbitMQ message consumers
 - **`make inbound-command VAL=name`**: Create CLI command handlers
 - **`make inbound-workflow-temporal VAL=name`**: Create Temporal workflow workers

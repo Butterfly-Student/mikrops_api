@@ -15,7 +15,7 @@ internal/
 ├── adapter/              # Implementations of ports (adapters)
 │   ├── inbound/          # Adapters receiving requests into the application
 │   │   ├── command/      # CLI command adapters
-│   │   ├── fiber/        # HTTP Fiber framework adapters
+│   │   ├── gin/        # HTTP Gin framework adapters
 │   │   └── rabbitmq/     # RabbitMQ consumer adapters
 │   └── outbound/         # Adapters sending requests to external systems
 │       ├── http/         # HTTP client adapters
@@ -54,7 +54,7 @@ Located in the `internal/port/` directory, ports define the contracts for how th
 Located in the `internal/adapter/` directory, adapters implement the ports:
 
 1. **Inbound Adapters (`internal/adapter/inbound/`)**: 
-   - `fiber/`: HTTP handlers using the Fiber framework
+   - `gin/`: HTTP handlers using the Gin framework
    - `rabbitmq/`: Message consumers using RabbitMQ
    - `command/`: CLI command handlers
 
@@ -98,7 +98,7 @@ The project uses a Makefile to automate the creation of new components:
 
 ### Inbound Adapters
 
-- `make inbound-http-fiber VAL=name`: Creates HTTP handler interfaces, adapters, and registry updates
+- `make inbound-http-gin VAL=name`: Creates HTTP handler interfaces, adapters, and registry updates
 - `make inbound-message-rabbitmq VAL=name`: Creates RabbitMQ consumer interfaces, adapters, and registry updates
 - `make inbound-command VAL=name`: Creates command handler interfaces, adapters, and registry updates
 

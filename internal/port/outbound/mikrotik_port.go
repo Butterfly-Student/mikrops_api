@@ -1,6 +1,10 @@
 package outbound_port
 
-import "go-template/internal/model"
+import (
+	"context"
+
+	"go-template/internal/model"
+)
 
 // MikrotikPort defines methods for interacting with MikroTik RouterOS via API
 type MikrotikPort interface {
@@ -34,13 +38,36 @@ type MikrotikPort interface {
 	// ListenQueueStats starts streaming stats for all simple queues
 	// It returns a channel for updates and a cancel function/channel
 	ListenQueueStats(router *model.MikrotikRouter) (<-chan []model.QueueStats, error)
+
+	// ListenQueueStatsWithContext streams all queue stats with context support for cancellation
+	ListenQueueStatsWithContext(ctx context.Context, router *model.MikrotikRouter) (<-chan []model.QueueStats, error)
+
+	// ListenQueueStatsByName streams specific queue stats by name with context support
+	ListenQueueStatsByName(ctx context.Context, router *model.MikrotikRouter, queueName string) (<-chan model.QueueStats, error)
+
+	// Interface Monitoring
+	// MonitorAllInterfaces streams traffic stats for all interfaces
+	MonitorAllInterfaces(ctx context.Context, router *model.MikrotikRouter) (<-chan []model.InterfaceStats, error)
+
+	// MonitorInterface streams traffic stats for a specific interface by name
+	MonitorInterface(ctx context.Context, router *model.MikrotikRouter, interfaceName string) (<-chan model.InterfaceStats, error)
+
+	// IP Pool CRUD
+	CreateIpPool(router *model.MikrotikRouter, pool *model.IpPool) error
+	UpdateIpPool(router *model.MikrotikRouter, pool *model.IpPool) error
+	DeleteIpPool(router *model.MikrotikRouter, id string) error
+	GetIpPool(router *model.MikrotikRouter, id string) (*model.IpPool, error)
+	ListIpPools(router *model.MikrotikRouter) ([]model.IpPool, error)
+
+	// Ping
+	Ping(ctx context.Context, router *model.MikrotikRouter, req model.PingRequest) (<-chan model.PingResult, error)
 }
 
 // MikrotikDatabasePort defines methods for managing MikroTik router configurations
 type MikrotikDatabasePort interface {
 	Create(router *model.MikrotikRouter) error
-	FindByID(id uint) (*model.MikrotikRouter, error)
+	FindByID(id string) (*model.MikrotikRouter, error)
 	FindAll() ([]model.MikrotikRouter, error)
 	Update(router *model.MikrotikRouter) error
-	Delete(id uint) error
+	Delete(id string) error
 }

@@ -3,18 +3,27 @@ package model
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type MikrotikRouter struct {
-	ID        uint           `gorm:"primaryKey" json:"id"`
-	Name      string         `gorm:"not null" json:"name" validate:"required"`
-	Address   string         `gorm:"not null" json:"address" validate:"required"` // IP:Port
-	Username  string         `gorm:"not null" json:"username" validate:"required"`
-	Password  string         `gorm:"not null" json:"password" validate:"required"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID                uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Name              string         `gorm:"not null" json:"name" validate:"required"`
+	Address           string         `gorm:"not null" json:"address" validate:"required"` // IP:Port
+	ApiPort           *int           `gorm:"default:8728" json:"api_port"`
+	RestPort          *int           `gorm:"default:80" json:"rest_port"`
+	Username          string         `gorm:"not null" json:"username" validate:"required"`
+	Password          string         `gorm:"not null" json:"password" validate:"required"`
+	PasswordEncrypted *string        `gorm:"type:text" json:"password_encrypted"`
+	UseSSL            *bool          `gorm:"default:false" json:"use_ssl"`
+	RouterOSVersion   *string        `gorm:"size:50" json:"router_os_version"`
+	Identity          *string        `gorm:"size:255" json:"identity"`
+	IsActive          *bool          `gorm:"default:true" json:"is_active"`
+	LastSeenAt        *time.Time     `json:"last_seen_at"`
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
+	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // PPPoE Models for JSON communication (from RouterOS)
@@ -34,15 +43,15 @@ type PppoeSecret struct {
 }
 
 type PppoeProfile struct {
-	ID            string `json:"id,omitempty"`
-	Name          string `json:"name" validate:"required"`
-	LocalAddress  string `json:"local_address"`
-	RemoteAddress string `json:"remote_address"`
-	Bridge        string `json:"bridge"`
-	ChangeTCPMSS  string `json:"change_tcp_mss"` // default, yes, no
-	RateLimit     string `json:"rate_limit"`
-	OnlyOne       string `json:"only_one"` // default, yes, no
-	UseMPLS       string `json:"use_mpls"`
+	ID             string `json:"id,omitempty"`
+	Name           string `json:"name" validate:"required"`
+	LocalAddress   string `json:"local_address"`
+	RemoteAddress  string `json:"remote_address"`
+	Bridge         string `json:"bridge"`
+	ChangeTCPMSS   string `json:"change_tcp_mss"` // default, yes, no
+	RateLimit      string `json:"rate_limit"`
+	OnlyOne        string `json:"only_one"` // default, yes, no
+	UseMPLS        string `json:"use_mpls"`
 	UseCompression string `json:"use_compression"`
 	UseEncryption  string `json:"use_encryption"`
 	UseIPv6        string `json:"use_ipv6"`
@@ -51,14 +60,14 @@ type PppoeProfile struct {
 }
 
 type PppoeActive struct {
-	ID         string `json:"id,omitempty"`
-	Name       string `json:"name"`
-	Service    string `json:"service"`
-	CallerID   string `json:"caller_id"`
-	Address    string `json:"address"`
-	Uptime     string `json:"uptime"`
-	Encoding   string `json:"encoding"`
-	SessionID  string `json:"session_id"`
+	ID            string `json:"id,omitempty"`
+	Name          string `json:"name"`
+	Service       string `json:"service"`
+	CallerID      string `json:"caller_id"`
+	Address       string `json:"address"`
+	Uptime        string `json:"uptime"`
+	Encoding      string `json:"encoding"`
+	SessionID     string `json:"session_id"`
 	LimitBytesIn  int64  `json:"limit_bytes_in"`
 	LimitBytesOut int64  `json:"limit_bytes_out"`
 	Radius        bool   `json:"radius"`
@@ -76,7 +85,7 @@ type PppoeCallbackData struct {
 	BytesOut   int64  `json:"bytes-out"`
 	PacketsIn  int64  `json:"packets-in"`
 	PacketsOut int64  `json:"packets-out"`
-    RouterID   uint   `json:"router_id"` // Included in callback URL query
+	RouterID   uint   `json:"router_id"` // Included in callback URL query
 }
 
 // WebSocketMessage represents the message sent to connected clients

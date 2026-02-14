@@ -8,10 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/casbin/casbin/v2"
-	casbinmodel "github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v3"
+	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	. "github.com/smartystreets/goconvey/convey"
 
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
@@ -32,11 +33,8 @@ func TestPppoeAdapter(t *testing.T) {
 		mockWorkflowPort := mock_outbound_port.NewMockWorkflowPort(mockCtrl)
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
 
-		// Fix: Use EXPECT() on the mock interface, but DatabasePort interface has been updated
-		// and the mock needs to reflect that.
 		mockDatabasePort.EXPECT().Mikrotik().Return(mockMikrotikDBPort).AnyTimes()
 
-		// Setup Casbin
 		m, _ := casbinmodel.NewModelFromString(`
 [request_definition]
 r = sub, obj, act
@@ -61,7 +59,6 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		gin.SetMode(gin.TestMode)
 		router := gin.New()
 
-		// Setup middleware mock
 		authMiddleware := func(c *gin.Context) {
 			c.Set("userID", uint(1))
 			c.Next()
@@ -75,8 +72,8 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			pppoe.GET("/sessions/inactive", adapter.Pppoe().ListInactiveSessions)
 		}
 
-		routerID := uint(1)
-		routerModel := &model.MikrotikRouter{ID: 1, Name: "TestRouter", Address: "192.168.88.1:8728"}
+		routerID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
+		routerModel := &model.MikrotikRouter{ID: routerID, Name: "TestRouter", Address: "192.168.88.1:8728"}
 
 		Convey("CreateSecret", func() {
 			secret := model.PppoeSecret{
@@ -86,11 +83,11 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			}
 
 			Convey("Success", func() {
-				mockMikrotikDBPort.EXPECT().FindByID(routerID).Return(routerModel, nil).Times(1)
+				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(routerModel, nil).Times(1)
 				mockMikrotikPort.EXPECT().CreateSecret(routerModel, gomock.Any()).Return(nil).Times(1)
 
 				body, _ := json.Marshal(secret)
-				req := httptest.NewRequest(http.MethodPost, "/pppoe/secrets?router_id=1", bytes.NewReader(body))
+				req := httptest.NewRequest(http.MethodPost, "/pppoe/secrets?router_id="+routerID.String(), bytes.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
@@ -100,10 +97,10 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			})
 
 			Convey("Router Not Found", func() {
-				mockMikrotikDBPort.EXPECT().FindByID(routerID).Return(nil, errors.New("not found")).Times(1)
+				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(nil, errors.New("not found")).Times(1)
 
 				body, _ := json.Marshal(secret)
-				req := httptest.NewRequest(http.MethodPost, "/pppoe/secrets?router_id=1", bytes.NewReader(body))
+				req := httptest.NewRequest(http.MethodPost, "/pppoe/secrets?router_id="+routerID.String(), bytes.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
@@ -117,7 +114,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			Convey("Success", func() {
 				// Mock domain logic indirectly via port calls
 				// 1. Get Router
-				mockMikrotikDBPort.EXPECT().FindByID(routerID).Return(routerModel, nil).Times(1)
+				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(routerModel, nil).Times(1)
 
 				// 2. List Secrets
 				secrets := []model.PppoeSecret{
@@ -132,7 +129,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 				}
 				mockMikrotikPort.EXPECT().ListActiveSessions(routerModel).Return(activeSessions, nil).Times(1)
 
-				req := httptest.NewRequest(http.MethodGet, "/pppoe/sessions/inactive?router_id=1", nil)
+				req := httptest.NewRequest(http.MethodGet, "/pppoe/sessions/inactive?router_id="+routerID.String(), nil)
 				w := httptest.NewRecorder()
 				router.ServeHTTP(w, req)
 

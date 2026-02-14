@@ -1,22 +1,26 @@
 package gin_inbound_adapter
 
 import (
+	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"go-template/internal/model"
 )
 
 // Helper to get routerID
-func getRouterID(c *gin.Context) (uint, error) {
+func getRouterID(c *gin.Context) (string, error) {
 	idStr := c.Query("router_id")
 	if idStr == "" {
-		return 0, strconv.ErrSyntax
+		return "", errors.New("router_id query parameter required")
 	}
-	id, err := strconv.Atoi(idStr)
-	return uint(id), err
+	_, err := uuid.Parse(idStr)
+	if err != nil {
+		return "", errors.New("Invalid router_id format")
+	}
+	return idStr, nil
 }
 
 // Secret Management
@@ -24,6 +28,10 @@ func getRouterID(c *gin.Context) (uint, error) {
 func (h *pppoeAdapter) CreateSecret(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -45,6 +53,10 @@ func (h *pppoeAdapter) CreateSecret(c *gin.Context) {
 func (h *pppoeAdapter) UpdateSecret(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -54,7 +66,7 @@ func (h *pppoeAdapter) UpdateSecret(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// ID might come from path or body, here path overrides body if present
+
 	id := c.Param("id")
 	if id != "" {
 		req.ID = id
@@ -71,6 +83,10 @@ func (h *pppoeAdapter) UpdateSecret(c *gin.Context) {
 func (h *pppoeAdapter) DeleteSecret(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -87,6 +103,10 @@ func (h *pppoeAdapter) DeleteSecret(c *gin.Context) {
 func (h *pppoeAdapter) GetSecret(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -104,6 +124,10 @@ func (h *pppoeAdapter) GetSecret(c *gin.Context) {
 func (h *pppoeAdapter) ListSecrets(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -113,6 +137,7 @@ func (h *pppoeAdapter) ListSecrets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, secrets)
 }
 
@@ -121,6 +146,10 @@ func (h *pppoeAdapter) ListSecrets(c *gin.Context) {
 func (h *pppoeAdapter) CreateProfile(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -142,6 +171,10 @@ func (h *pppoeAdapter) CreateProfile(c *gin.Context) {
 func (h *pppoeAdapter) UpdateProfile(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -151,6 +184,7 @@ func (h *pppoeAdapter) UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	id := c.Param("id")
 	if id != "" {
 		req.ID = id
@@ -167,6 +201,10 @@ func (h *pppoeAdapter) UpdateProfile(c *gin.Context) {
 func (h *pppoeAdapter) DeleteProfile(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -183,6 +221,10 @@ func (h *pppoeAdapter) DeleteProfile(c *gin.Context) {
 func (h *pppoeAdapter) GetProfile(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -200,6 +242,10 @@ func (h *pppoeAdapter) GetProfile(c *gin.Context) {
 func (h *pppoeAdapter) ListProfiles(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -209,6 +255,7 @@ func (h *pppoeAdapter) ListProfiles(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, profiles)
 }
 
@@ -217,6 +264,10 @@ func (h *pppoeAdapter) ListProfiles(c *gin.Context) {
 func (h *pppoeAdapter) ListActiveSessions(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -226,12 +277,17 @@ func (h *pppoeAdapter) ListActiveSessions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, sessions)
 }
 
 func (h *pppoeAdapter) ListInactiveSessions(c *gin.Context) {
 	routerID, err := getRouterID(c)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid router_id format"})
+		return
+	}
+	if routerID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
 		return
 	}
@@ -241,10 +297,10 @@ func (h *pppoeAdapter) ListInactiveSessions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, sessions)
 }
 
 func (h *pppoeAdapter) ListSessionHistory(c *gin.Context) {
-	// Not implemented in domain per revised plan (no local history)
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented"})
 }

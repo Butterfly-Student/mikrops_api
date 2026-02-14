@@ -8,10 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/casbin/casbin/v2"
-	casbinmodel "github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v3"
+	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	. "github.com/smartystreets/goconvey/convey"
 
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
@@ -34,7 +35,6 @@ func TestQueueAdapter(t *testing.T) {
 
 		mockDatabasePort.EXPECT().Mikrotik().Return(mockMikrotikDBPort).AnyTimes()
 
-		// Setup Casbin
 		m, _ := casbinmodel.NewModelFromString(`
 [request_definition]
 r = sub, obj, act
@@ -71,8 +71,8 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			queue.GET("", adapter.Queue().ListQueues)
 		}
 
-		routerID := uint(1)
-		routerModel := &model.MikrotikRouter{ID: 1, Name: "TestRouter", Address: "192.168.88.1:8728"}
+		routerID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
+		routerModel := &model.MikrotikRouter{ID: routerID, Name: "TestRouter", Address: "192.168.88.1:8728"}
 
 		Convey("CreateQueue", func() {
 			queueItem := model.PppoeQueue{
@@ -82,11 +82,11 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			}
 
 			Convey("Success", func() {
-				mockMikrotikDBPort.EXPECT().FindByID(routerID).Return(routerModel, nil).Times(1)
+				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(routerModel, nil).Times(1)
 				mockMikrotikPort.EXPECT().CreateQueue(routerModel, gomock.Any()).Return(nil).Times(1)
 
 				body, _ := json.Marshal(queueItem)
-				req := httptest.NewRequest(http.MethodPost, "/queues?router_id=1", bytes.NewReader(body))
+				req := httptest.NewRequest(http.MethodPost, "/queues?router_id="+routerID.String(), bytes.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()
@@ -96,10 +96,10 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			})
 
 			Convey("Router Not Found", func() {
-				mockMikrotikDBPort.EXPECT().FindByID(routerID).Return(nil, errors.New("not found")).Times(1)
+				mockMikrotikDBPort.EXPECT().FindByID(routerID.String()).Return(nil, errors.New("not found")).Times(1)
 
 				body, _ := json.Marshal(queueItem)
-				req := httptest.NewRequest(http.MethodPost, "/queues?router_id=1", bytes.NewReader(body))
+				req := httptest.NewRequest(http.MethodPost, "/queues?router_id="+routerID.String(), bytes.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 
 				w := httptest.NewRecorder()

@@ -1,6 +1,7 @@
 package gin_inbound_adapter
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -126,4 +127,86 @@ func (h *queueAdapter) StartStreaming(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Streaming started"})
+}
+
+// Enhanced Streaming with context
+
+func (h *queueAdapter) StartStreamingAll(c *gin.Context) {
+	routerID, err := getRouterID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
+		return
+	}
+
+	// Create context that will be cancelled when request is cancelled
+	ctx := c.Request.Context()
+
+	if err := h.domain.Queue().StartStreamingAll(ctx, routerID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Streaming started for all queues"})
+}
+
+func (h *queueAdapter) StartStreamingByName(c *gin.Context) {
+	routerID, err := getRouterID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
+		return
+	}
+
+	queueName := c.Param("name")
+	if queueName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "queue name is required"})
+		return
+	}
+
+	// Create a background context for the stream
+	// Note: This will run until the application stops
+	// For production, consider storing context in a manager for cancellation
+	ctx := context.Background()
+
+	if err := h.domain.Queue().StartStreamingByName(ctx, routerID, queueName); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Streaming started for queue: " + queueName})
+}
+
+func (h *queueAdapter) StopStreamingAll(c *gin.Context) {
+	routerID, err := getRouterID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
+		return
+	}
+
+	if err := h.domain.Queue().StopStreamingAll(routerID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "All queue streaming stopped"})
+}
+
+func (h *queueAdapter) StopStreamingByName(c *gin.Context) {
+	routerID, err := getRouterID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "router_id query parameter required"})
+		return
+	}
+
+	queueName := c.Param("name")
+	if queueName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "queue name is required"})
+		return
+	}
+
+	if err := h.domain.Queue().StopStreamingByName(routerID, queueName); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Streaming stopped for queue: " + queueName})
 }

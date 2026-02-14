@@ -6,7 +6,7 @@ import (
 
 	"go-template/internal/model"
 
-	"github.com/go-routeros/routeros/v3"
+	"github.com/go-routeros/routeros/v3/proto"
 )
 
 // Queue Management
@@ -164,7 +164,7 @@ func (a *mikrotikClientAdapter) ListQueues(router *model.MikrotikRouter) ([]mode
 	return queues, nil
 }
 
-func parseQueue(re *routeros.ReplyPair) *model.PppoeQueue {
+func parseQueue(re *proto.Sentence) *model.PppoeQueue {
 	return &model.PppoeQueue{
 		ID:             re.Map[".id"],
 		Name:           re.Map["name"],

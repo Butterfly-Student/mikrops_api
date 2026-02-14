@@ -13,4 +13,10 @@ type QueueHttpPort interface {
 	// Streaming
 	StartStreaming(c *gin.Context)
 	HandleWebSocket(c *gin.Context)
+
+	// Enhanced Streaming
+	StartStreamingAll(c *gin.Context)
+	StartStreamingByName(c *gin.Context)
+	StopStreamingAll(c *gin.Context)
+	StopStreamingByName(c *gin.Context)
 }

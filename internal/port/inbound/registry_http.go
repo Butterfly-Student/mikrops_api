@@ -8,4 +8,6 @@ type HttpPort interface {
 	User() UserHttpPort
 	Pppoe() PppoeHttpPort
 	Queue() QueueHttpPort
+	Interface() InterfaceHttpPort
+	IpPool() IpPoolHttpPort
 }

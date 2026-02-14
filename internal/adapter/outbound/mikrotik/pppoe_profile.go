@@ -6,7 +6,7 @@ import (
 
 	"go-template/internal/model"
 
-	"github.com/go-routeros/routeros/v3"
+	"github.com/go-routeros/routeros/v3/proto"
 )
 
 // PppoeProfile
@@ -145,7 +145,7 @@ func (a *mikrotikClientAdapter) ListProfiles(router *model.MikrotikRouter) ([]mo
 	return profiles, nil
 }
 
-func parseProfile(re *routeros.ReplyPair) *model.PppoeProfile {
+func parseProfile(re *proto.Sentence) *model.PppoeProfile {
 	return &model.PppoeProfile{
 		ID:            re.Map[".id"],
 		Name:          re.Map["name"],

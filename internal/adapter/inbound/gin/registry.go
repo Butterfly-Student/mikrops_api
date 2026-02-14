@@ -42,3 +42,11 @@ func (s *adapter) Pppoe() inbound_port.PppoeHttpPort {
 func (s *adapter) Queue() inbound_port.QueueHttpPort {
 	return NewQueueAdapter(s.domain)
 }
+
+func (s *adapter) Interface() inbound_port.InterfaceHttpPort {
+	return NewInterfaceAdapter(s.domain)
+}
+
+func (s *adapter) IpPool() inbound_port.IpPoolHttpPort {
+	return NewIpPoolAdapter(s.domain)
+}

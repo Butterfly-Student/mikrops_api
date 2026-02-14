@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+
+	"go-template/internal/model"
 )
 
 func (h *queueAdapter) HandleWebSocket(c *gin.Context) {
@@ -16,10 +18,25 @@ func (h *queueAdapter) HandleWebSocket(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	eventChan, err := h.domain.Queue().SubscribeToStats(ctx)
-	if err != nil {
-		log.Printf("Failed to subscribe to queue stats: %v", err)
-		return
+	// Check if filtering by queue name
+	queueName := c.Query("name")
+
+	var eventChan <-chan model.WebSocketMessage
+
+	if queueName != "" {
+		// Subscribe to specific queue stats
+		eventChan, err = h.domain.Queue().SubscribeToStatsByName(ctx, queueName)
+		if err != nil {
+			log.Printf("Failed to subscribe to queue stats for %s: %v", queueName, err)
+			return
+		}
+	} else {
+		// Subscribe to all queue stats
+		eventChan, err = h.domain.Queue().SubscribeToStats(ctx)
+		if err != nil {
+			log.Printf("Failed to subscribe to queue stats: %v", err)
+			return
+		}
 	}
 
 	for {

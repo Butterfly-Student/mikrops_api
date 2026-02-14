@@ -124,9 +124,9 @@ To install `fzf` (optional):
   make migration-postgres VAL=name
   ```
 
-- `inbound-http-fiber`: Creates HTTP handlers using Fiber framework (requires VAL parameter)
+- `inbound-http-gin`: Creates HTTP handlers using gin framework (requires VAL parameter)
   ```sh
-  make inbound-http-fiber VAL=name
+  make inbound-http-gin VAL=name
   ```
 
 - `inbound-message-rabbitmq`: Creates RabbitMQ message consumers (requires VAL parameter)

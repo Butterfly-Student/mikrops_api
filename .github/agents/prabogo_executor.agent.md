@@ -41,7 +41,7 @@ GoTemplate implements hexagonal architecture (ports and adapters) with these key
 
 ### Directory Structure
 - **`cmd/`**: Application entry point and main initialization
-- **`internal/adapter/inbound/`**: Input adapters (HTTP/Fiber, RabbitMQ consumers, CLI commands, Temporal workers)
+- **`internal/adapter/inbound/`**: Input adapters (HTTP/Gin, RabbitMQ consumers, CLI commands, Temporal workers)
 - **`internal/adapter/outbound/`**: Output adapters (PostgreSQL, HTTP clients, RabbitMQ producers, Redis cache, Temporal starters)
 - **`internal/domain/`**: Core business logic (independent of external systems)
 - **`internal/port/`**: Interface definitions (contracts between domain and adapters)
@@ -62,7 +62,7 @@ GoTemplate implements hexagonal architecture (ports and adapters) with these key
 - **Database:** PostgreSQL with migration support
 - **Message Queue:** RabbitMQ for async messaging
 - **Cache:** Redis for high-performance caching
-- **HTTP Framework:** Fiber for REST APIs
+- **HTTP Framework:** Gin for REST APIs
 - **Workflow Engine:** Temporal for complex workflows
 - **Authorization:** Internal bearer tokens (mTLS recommended) or Authentik JWT (enterprise-grade)
 - **Container:** Docker and Docker Compose for external services
@@ -80,7 +80,7 @@ Use Makefile targets for code generation and operations:
 - `make migration-postgres VAL=name` - Create PostgreSQL migration files
 
 **Inbound Adapters (Request Receivers):**
-- `make inbound-http-fiber VAL=name` - Create HTTP handlers using Fiber
+- `make inbound-http-gin VAL=name` - Create HTTP handlers using Gin
 - `make inbound-message-rabbitmq VAL=name` - Create RabbitMQ message consumers
 - `make inbound-command VAL=name` - Create CLI command handlers
 - `make inbound-workflow-temporal VAL=name` - Create Temporal workflow workers

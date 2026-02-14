@@ -1,6 +1,7 @@
 package mikrotik_outbound_adapter
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"go-template/internal/model"
 
 	"github.com/go-routeros/routeros/v3"
+	"github.com/go-routeros/routeros/v3/proto"
 )
 
 // Streaming Stats
@@ -26,38 +28,23 @@ func (a *mikrotikClientAdapter) ListenQueueStats(router *model.MikrotikRouter) (
 		defer close(statsCh)
 
 		for {
-			// Correct usage of ListenArgs: returns (chan *Reply, error)
-			// It accepts variadic string args
-			// v3.0.1: func (c *Client) ListenArgs(args ...string) (chan *Reply, error)
-			// Wait, if it returns 2 values, where is the error channel?
-			// The channel returns *Reply. Error is returned immediately if start fails.
-			// Async errors might come in the channel?
-			// Checking common patterns: ListenArgs returns a channel that emits replies.
-			// When command finishes, channel closes? Or keeps open?
-
-			// Command: /queue/simple/print stats
-			// Args: "/queue/simple/print", "stats" -> passed as individual strings
-
-			// Note: "stats" is a parameter without value, usually passed as "stats" in CLI, but in API often just "stats".
-			// Or "=stats=". Let's try "stats".
-
-			replyChan, err := client.ListenArgs("/queue/simple/print", "stats")
+			// ListenArgs accepts sentence []string
+			listenReply, err := client.ListenArgs([]string{"/queue/simple/print", "stats"})
 			if err != nil {
 				return
 			}
 
 			var batch []model.QueueStats
+			replyChan := listenReply.Chan()
 
 			for re := range replyChan {
-				if re.Done {
-					// Command finished
-					statsCh <- batch
-					batch = nil
-					break
-				}
-				// Reply sentence
+				// Collect all reply sentences
+				// Channel closes when command completes
 				batch = append(batch, *parseQueueStats(re))
 			}
+
+			// Send batch when channel closes
+			statsCh <- batch
 
 			// Poll interval
 			time.Sleep(1 * time.Second)
@@ -67,7 +54,7 @@ func (a *mikrotikClientAdapter) ListenQueueStats(router *model.MikrotikRouter) (
 	return statsCh, nil
 }
 
-func parseQueueStats(re *routeros.Reply) *model.QueueStats {
+func parseQueueStats(re *proto.Sentence) *model.QueueStats {
 	bytes := parseSlashPair(re.Map["bytes"])
 	packets := parseSlashPair(re.Map["packets"])
 	rate := parseSlashPair(re.Map["rate"])
@@ -99,4 +86,97 @@ func parseSlashPair(s string) [2]int64 {
 		res[1], _ = strconv.ParseInt(parts[1], 10, 64)
 	}
 	return res
+}
+
+// ListenQueueStatsWithContext streams all queue stats with context support
+func (a *mikrotikClientAdapter) ListenQueueStatsWithContext(ctx context.Context, router *model.MikrotikRouter) (<-chan []model.QueueStats, error) {
+	client, err := routeros.Dial(router.Address, router.Username, router.Password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to dial router for streaming: %w", err)
+	}
+
+	statsCh := make(chan []model.QueueStats, 10)
+
+	go func() {
+		defer client.Close()
+		defer close(statsCh)
+
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				listenReply, err := client.ListenArgs([]string{"/queue/simple/print", "stats"})
+				if err != nil {
+					return
+				}
+
+				var batch []model.QueueStats
+				replyChan := listenReply.Chan()
+
+				for re := range replyChan {
+					batch = append(batch, *parseQueueStats(re))
+				}
+
+				select {
+				case statsCh <- batch:
+				case <-ctx.Done():
+					return
+				}
+			}
+		}
+	}()
+
+	return statsCh, nil
+}
+
+// ListenQueueStatsByName streams specific queue stats by name with context support
+func (a *mikrotikClientAdapter) ListenQueueStatsByName(ctx context.Context, router *model.MikrotikRouter, queueName string) (<-chan model.QueueStats, error) {
+	client, err := routeros.Dial(router.Address, router.Username, router.Password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to dial router for streaming: %w", err)
+	}
+
+	statsCh := make(chan model.QueueStats, 10)
+
+	go func() {
+		defer client.Close()
+		defer close(statsCh)
+
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				// Filter by queue name
+				listenReply, err := client.ListenArgs([]string{
+					"/queue/simple/print",
+					"stats",
+					fmt.Sprintf("?name=%s", queueName),
+				})
+				if err != nil {
+					return
+				}
+
+				replyChan := listenReply.Chan()
+
+				for re := range replyChan {
+					stats := parseQueueStats(re)
+					select {
+					case statsCh <- *stats:
+					case <-ctx.Done():
+						return
+					}
+				}
+			}
+		}
+	}()
+
+	return statsCh, nil
 }

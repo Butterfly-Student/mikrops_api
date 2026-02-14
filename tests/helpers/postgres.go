@@ -9,6 +9,8 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go-template/internal/model"
+	"go-template/internal/seeds"
 	postgresDriver "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -29,6 +31,15 @@ func SetupPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to external database: %w", err)
 		}
+
+		// Auto-migrate models
+		if err := autoMigrate(db); err != nil {
+			return nil, fmt.Errorf("failed to auto-migrate: %w", err)
+		}
+
+		// Seed data is NOT loaded when using external DB to avoid conflicts
+		// Tests using TEST_DB_DSN should manage their own seed data
+
 		return &PostgresContainer{
 			Container: nil, // No container to manage
 			DB:        db,
@@ -43,9 +54,8 @@ func SetupPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),
 		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(5*time.Second)),
+			wait.ForExposedPort().
+				WithStartupTimeout(30*time.Second)),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start postgres container (ensure Docker is running): %w", err)
@@ -63,11 +73,30 @@ func SetupPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
+	// Auto-migrate models
+	if err := autoMigrate(db); err != nil {
+		return nil, fmt.Errorf("failed to auto-migrate: %w", err)
+	}
+
+	// Auto-load test seed data
+	if err := seeds.RunForTesting(db); err != nil {
+		return nil, fmt.Errorf("failed to seed test data: %w", err)
+	}
+
 	return &PostgresContainer{
 		Container: pgContainer,
 		DB:        db,
 		URI:       connStr,
 	}, nil
+}
+
+func autoMigrate(db *gorm.DB) error {
+	return db.AutoMigrate(
+		&model.Client{},
+		&model.User{},
+		&model.MikrotikRouter{},
+		&model.CasbinRule{},
+	)
 }
 
 func (c *PostgresContainer) Terminate(ctx context.Context) error {

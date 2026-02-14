@@ -25,7 +25,7 @@ GoTemplate is a Go framework designed to simplify project development by providi
 cmd/                          # Application entry point
 internal/
   ├── adapter/                # Adapter implementations
-  │   ├── inbound/            # Adapters receiving requests (command, fiber, rabbitmq, temporal)
+  │   ├── inbound/            # Adapters receiving requests (command, Gin, rabbitmq, temporal)
   │   └── outbound/           # Adapters to external systems (http, postgres, rabbitmq, redis, temporal)
   ├── domain/                 # Core business logic (independent of external systems)
   ├── port/                   # Interface definitions
@@ -42,7 +42,7 @@ design-docs/                  # Architecture and design documentation
 - **Database**: PostgreSQL
 - **Message Queue**: RabbitMQ  
 - **Cache**: Redis
-- **HTTP Framework**: Fiber
+- **HTTP Framework**: Gin
 - **Workflow Engine**: Temporal
 - **Authentication**: Internal bearer key (with mTLS recommended) or Authentik JWT (recommended)
 - **Container**: Docker & Docker Compose for external services
@@ -59,7 +59,7 @@ design-docs/                  # Architecture and design documentation
 ### Available Code Generation Targets
 - **Models**: `make model VAL=name`
 - **Migrations**: `make migration-postgres VAL=name`
-- **Inbound Adapters**: HTTP Fiber, RabbitMQ consumers, CLI commands, Temporal workflows
+- **Inbound Adapters**: HTTP Gin, RabbitMQ consumers, CLI commands, Temporal workflows
 - **Outbound Adapters**: PostgreSQL, HTTP clients, RabbitMQ producers, Redis cache, Temporal starters
 
 ### Authorization Strategies

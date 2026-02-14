@@ -3,13 +3,13 @@ package auth
 import (
 	"errors"
 	"fmt"
-	
+
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
-	"go-template/internal/utils/hash"
-	"go-template/internal/utils/token"
+	"go-template/utils/hash"
+	"go-template/utils/token"
 
-	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v3"
 )
 
 type AuthDomain interface {

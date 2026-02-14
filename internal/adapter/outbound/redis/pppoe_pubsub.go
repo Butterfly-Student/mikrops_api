@@ -68,3 +68,75 @@ func (a *pppoePubSubAdapter) subscribe(ctx context.Context, channel string) (<-c
 
 	return ch, nil
 }
+
+// Queue PubSub by name
+
+func (a *pppoePubSubAdapter) PublishQueueStatsByName(queueName string, data interface{}) error {
+	msg := model.WebSocketMessage{
+		Event: "queue_stats",
+		Data:  data,
+	}
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	return redis.Publish(context.Background(), "queue-stats:"+queueName, string(bytes))
+}
+
+func (a *pppoePubSubAdapter) SubscribeToQueueStatsByName(ctx context.Context, queueName string) (<-chan model.WebSocketMessage, error) {
+	return a.subscribe(ctx, "queue-stats:"+queueName)
+}
+
+// Interface PubSub
+
+func (a *pppoePubSubAdapter) PublishInterfaceStats(data interface{}) error {
+	msg := model.WebSocketMessage{
+		Event: "interface_stats",
+		Data:  data,
+	}
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	return redis.Publish(context.Background(), "interface-stats", string(bytes))
+}
+
+func (a *pppoePubSubAdapter) SubscribeToInterfaceStats(ctx context.Context) (<-chan model.WebSocketMessage, error) {
+	return a.subscribe(ctx, "interface-stats")
+}
+
+// Interface PubSub by name
+
+func (a *pppoePubSubAdapter) PublishInterfaceStatsByName(interfaceName string, data interface{}) error {
+	msg := model.WebSocketMessage{
+		Event: "interface_stats",
+		Data:  data,
+	}
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	return redis.Publish(context.Background(), "interface-stats:"+interfaceName, string(bytes))
+}
+
+func (a *pppoePubSubAdapter) SubscribeToInterfaceStatsByName(ctx context.Context, interfaceName string) (<-chan model.WebSocketMessage, error) {
+	return a.subscribe(ctx, "interface-stats:"+interfaceName)
+}
+
+// Ping PubSub
+
+func (a *pppoePubSubAdapter) PublishPingResult(address string, data interface{}) error {
+	msg := model.WebSocketMessage{
+		Event: "ping_result",
+		Data:  data,
+	}
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	return redis.Publish(context.Background(), "ping:"+address, string(bytes))
+}
+
+func (a *pppoePubSubAdapter) SubscribeToPingResults(ctx context.Context, address string) (<-chan model.WebSocketMessage, error) {
+	return a.subscribe(ctx, "ping:"+address)
+}

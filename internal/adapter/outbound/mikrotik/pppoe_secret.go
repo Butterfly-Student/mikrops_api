@@ -6,7 +6,7 @@ import (
 
 	"go-template/internal/model"
 
-	"github.com/go-routeros/routeros/v3"
+	"github.com/go-routeros/routeros/v3/proto"
 )
 
 // PppoeSecret
@@ -156,7 +156,7 @@ func (a *mikrotikClientAdapter) ListSecrets(router *model.MikrotikRouter) ([]mod
 	return secrets, nil
 }
 
-func parseSecret(re *routeros.ReplyPair) *model.PppoeSecret {
+func parseSecret(re *proto.Sentence) *model.PppoeSecret {
 	return &model.PppoeSecret{
 		ID:            re.Map[".id"],
 		Name:          re.Map["name"],

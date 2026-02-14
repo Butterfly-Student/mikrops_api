@@ -9,18 +9,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/casbin/casbin/v3"
+	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/casbin/casbin/v2"
-	casbinmodel "github.com/casbin/casbin/v2/model"
 
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
 	"go-template/internal/domain"
 	"go-template/internal/model"
 	mock_outbound_port "go-template/tests/mocks/port"
-	"go-template/internal/utils/hash"
-	"go-template/internal/utils/token"
+	"go-template/utils/hash"
+	"go-template/utils/token"
 )
 
 func TestAuthAdapter(t *testing.T) {
@@ -58,7 +58,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 `)
 		enforcer, _ := casbin.NewEnforcer(m)
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, enforcer)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, enforcer)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		gin.SetMode(gin.TestMode)
@@ -112,61 +112,61 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			})
 		})
 
-        Convey("Register", func() {
-            reqBody := model.RegisterRequest{Name: "New User", Email: "new@example.com", Password: "password"}
+		Convey("Register", func() {
+			reqBody := model.RegisterRequest{Name: "New User", Email: "new@example.com", Password: "password"}
 
-            Convey("Success", func() {
-                mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(nil, errors.New("not found")).Times(1)
-                mockUserDatabasePort.EXPECT().Create(gomock.Any()).Return(nil).Times(1)
+			Convey("Success", func() {
+				mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(nil, errors.New("not found")).Times(1)
+				mockUserDatabasePort.EXPECT().Create(gomock.Any()).Return(nil).Times(1)
 
-                body, _ := json.Marshal(reqBody)
-                req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewReader(body))
-                req.Header.Set("Content-Type", "application/json")
+				body, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewReader(body))
+				req.Header.Set("Content-Type", "application/json")
 
-                w := httptest.NewRecorder()
-                router.ServeHTTP(w, req)
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
 
-                So(w.Code, ShouldEqual, http.StatusCreated)
-            })
-        })
+				So(w.Code, ShouldEqual, http.StatusCreated)
+			})
+		})
 
-        Convey("RefreshToken", func() {
-            validToken, _ := token.GenerateRefreshToken(1)
-            reqBody := model.RefreshTokenRequest{RefreshToken: validToken}
-            user := &model.User{ID: 1, Role: "user", Status: "active"}
+		Convey("RefreshToken", func() {
+			validToken, _ := token.GenerateRefreshToken(1)
+			reqBody := model.RefreshTokenRequest{RefreshToken: validToken}
+			user := &model.User{ID: 1, Role: "user", Status: "active"}
 
-            Convey("Success", func() {
-                mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
+			Convey("Success", func() {
+				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
 
-                body, _ := json.Marshal(reqBody)
-                req := httptest.NewRequest(http.MethodPost, "/auth/refresh-token", bytes.NewReader(body))
-                req.Header.Set("Content-Type", "application/json")
+				body, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/auth/refresh-token", bytes.NewReader(body))
+				req.Header.Set("Content-Type", "application/json")
 
-                w := httptest.NewRecorder()
-                router.ServeHTTP(w, req)
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
 
-                So(w.Code, ShouldEqual, http.StatusOK)
-            })
-        })
+				So(w.Code, ShouldEqual, http.StatusOK)
+			})
+		})
 
-        Convey("ChangePassword", func() {
-            oldHash, _ := hash.HashPassword("old_password")
-            user := &model.User{ID: 1, Password: oldHash}
-            reqBody := model.ChangePasswordRequest{OldPassword: "old_password", NewPassword: "new_password"}
+		Convey("ChangePassword", func() {
+			oldHash, _ := hash.HashPassword("old_password")
+			user := &model.User{ID: 1, Password: oldHash}
+			reqBody := model.ChangePasswordRequest{OldPassword: "old_password", NewPassword: "new_password"}
 
-            Convey("Success", func() {
-                mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
-                mockUserDatabasePort.EXPECT().Update(gomock.Any()).Return(nil).Times(1)
+			Convey("Success", func() {
+				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
+				mockUserDatabasePort.EXPECT().Update(gomock.Any()).Return(nil).Times(1)
 
-                body, _ := json.Marshal(reqBody)
-                req := httptest.NewRequest(http.MethodPost, "/auth/change-password", bytes.NewReader(body))
-                req.Header.Set("Content-Type", "application/json")
+				body, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/auth/change-password", bytes.NewReader(body))
+				req.Header.Set("Content-Type", "application/json")
 
-                w := httptest.NewRecorder()
-                router.ServeHTTP(w, req)
+				w := httptest.NewRecorder()
+				router.ServeHTTP(w, req)
 
-                So(w.Code, ShouldEqual, http.StatusOK)
-            })
-        })
+				So(w.Code, ShouldEqual, http.StatusOK)
+			})
+		})
 	})
 }

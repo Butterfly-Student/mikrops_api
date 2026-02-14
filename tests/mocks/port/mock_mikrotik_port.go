@@ -5,6 +5,7 @@
 package mock_outbound_port
 
 import (
+	"context"
 	model "go-template/internal/model"
 	reflect "reflect"
 
@@ -34,78 +35,6 @@ func (m *MockMikrotikPort) EXPECT() *MockMikrotikPortMockRecorder {
 	return m.recorder
 }
 
-// CreateSecret mocks base method.
-func (m *MockMikrotikPort) CreateSecret(router *model.MikrotikRouter, secret *model.PppoeSecret) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSecret", router, secret)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateSecret indicates an expected call of CreateSecret.
-func (mr *MockMikrotikPortMockRecorder) CreateSecret(router, secret interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSecret", reflect.TypeOf((*MockMikrotikPort)(nil).CreateSecret), router, secret)
-}
-
-// UpdateSecret mocks base method.
-func (m *MockMikrotikPort) UpdateSecret(router *model.MikrotikRouter, secret *model.PppoeSecret) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSecret", router, secret)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateSecret indicates an expected call of UpdateSecret.
-func (mr *MockMikrotikPortMockRecorder) UpdateSecret(router, secret interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSecret", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateSecret), router, secret)
-}
-
-// DeleteSecret mocks base method.
-func (m *MockMikrotikPort) DeleteSecret(router *model.MikrotikRouter, id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSecret", router, id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteSecret indicates an expected call of DeleteSecret.
-func (mr *MockMikrotikPortMockRecorder) DeleteSecret(router, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteSecret), router, id)
-}
-
-// GetSecret mocks base method.
-func (m *MockMikrotikPort) GetSecret(router *model.MikrotikRouter, id string) (*model.PppoeSecret, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSecret", router, id)
-	ret0, _ := ret[0].(*model.PppoeSecret)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSecret indicates an expected call of GetSecret.
-func (mr *MockMikrotikPortMockRecorder) GetSecret(router, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSecret", reflect.TypeOf((*MockMikrotikPort)(nil).GetSecret), router, id)
-}
-
-// ListSecrets mocks base method.
-func (m *MockMikrotikPort) ListSecrets(router *model.MikrotikRouter) ([]model.PppoeSecret, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSecrets", router)
-	ret0, _ := ret[0].([]model.PppoeSecret)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListSecrets indicates an expected call of ListSecrets.
-func (mr *MockMikrotikPortMockRecorder) ListSecrets(router interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSecrets", reflect.TypeOf((*MockMikrotikPort)(nil).ListSecrets), router)
-}
-
 // CreateProfile mocks base method.
 func (m *MockMikrotikPort) CreateProfile(router *model.MikrotikRouter, profile *model.PppoeProfile) error {
 	m.ctrl.T.Helper()
@@ -120,18 +49,32 @@ func (mr *MockMikrotikPortMockRecorder) CreateProfile(router, profile interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProfile", reflect.TypeOf((*MockMikrotikPort)(nil).CreateProfile), router, profile)
 }
 
-// UpdateProfile mocks base method.
-func (m *MockMikrotikPort) UpdateProfile(router *model.MikrotikRouter, profile *model.PppoeProfile) error {
+// CreateQueue mocks base method.
+func (m *MockMikrotikPort) CreateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateProfile", router, profile)
+	ret := m.ctrl.Call(m, "CreateQueue", router, queue)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateProfile indicates an expected call of UpdateProfile.
-func (mr *MockMikrotikPortMockRecorder) UpdateProfile(router, profile interface{}) *gomock.Call {
+// CreateQueue indicates an expected call of CreateQueue.
+func (mr *MockMikrotikPortMockRecorder) CreateQueue(router, queue interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProfile", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateProfile), router, profile)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateQueue", reflect.TypeOf((*MockMikrotikPort)(nil).CreateQueue), router, queue)
+}
+
+// CreateSecret mocks base method.
+func (m *MockMikrotikPort) CreateSecret(router *model.MikrotikRouter, secret *model.PppoeSecret) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSecret", router, secret)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateSecret indicates an expected call of CreateSecret.
+func (mr *MockMikrotikPortMockRecorder) CreateSecret(router, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSecret", reflect.TypeOf((*MockMikrotikPort)(nil).CreateSecret), router, secret)
 }
 
 // DeleteProfile mocks base method.
@@ -148,49 +91,32 @@ func (mr *MockMikrotikPortMockRecorder) DeleteProfile(router, id interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProfile", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteProfile), router, id)
 }
 
-// GetProfile mocks base method.
-func (m *MockMikrotikPort) GetProfile(router *model.MikrotikRouter, id string) (*model.PppoeProfile, error) {
+// DeleteQueue mocks base method.
+func (m *MockMikrotikPort) DeleteQueue(router *model.MikrotikRouter, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProfile", router, id)
-	ret0, _ := ret[0].(*model.PppoeProfile)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "DeleteQueue", router, id)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// GetProfile indicates an expected call of GetProfile.
-func (mr *MockMikrotikPortMockRecorder) GetProfile(router, id interface{}) *gomock.Call {
+// DeleteQueue indicates an expected call of DeleteQueue.
+func (mr *MockMikrotikPortMockRecorder) DeleteQueue(router, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProfile", reflect.TypeOf((*MockMikrotikPort)(nil).GetProfile), router, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQueue", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteQueue), router, id)
 }
 
-// ListProfiles mocks base method.
-func (m *MockMikrotikPort) ListProfiles(router *model.MikrotikRouter) ([]model.PppoeProfile, error) {
+// DeleteSecret mocks base method.
+func (m *MockMikrotikPort) DeleteSecret(router *model.MikrotikRouter, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListProfiles", router)
-	ret0, _ := ret[0].([]model.PppoeProfile)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "DeleteSecret", router, id)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// ListProfiles indicates an expected call of ListProfiles.
-func (mr *MockMikrotikPortMockRecorder) ListProfiles(router interface{}) *gomock.Call {
+// DeleteSecret indicates an expected call of DeleteSecret.
+func (mr *MockMikrotikPortMockRecorder) DeleteSecret(router, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProfiles", reflect.TypeOf((*MockMikrotikPort)(nil).ListProfiles), router)
-}
-
-// ListActiveSessions mocks base method.
-func (m *MockMikrotikPort) ListActiveSessions(router *model.MikrotikRouter) ([]model.PppoeActive, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListActiveSessions", router)
-	ret0, _ := ret[0].([]model.PppoeActive)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListActiveSessions indicates an expected call of ListActiveSessions.
-func (mr *MockMikrotikPortMockRecorder) ListActiveSessions(router interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListActiveSessions", reflect.TypeOf((*MockMikrotikPort)(nil).ListActiveSessions), router)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteSecret), router, id)
 }
 
 // GetActiveSession mocks base method.
@@ -208,60 +134,19 @@ func (mr *MockMikrotikPortMockRecorder) GetActiveSession(router, id interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActiveSession", reflect.TypeOf((*MockMikrotikPort)(nil).GetActiveSession), router, id)
 }
 
-// RemoveActiveSession mocks base method.
-func (m *MockMikrotikPort) RemoveActiveSession(router *model.MikrotikRouter, id string) error {
+// GetProfile mocks base method.
+func (m *MockMikrotikPort) GetProfile(router *model.MikrotikRouter, id string) (*model.PppoeProfile, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveActiveSession", router, id)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "GetProfile", router, id)
+	ret0, _ := ret[0].(*model.PppoeProfile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// RemoveActiveSession indicates an expected call of RemoveActiveSession.
-func (mr *MockMikrotikPortMockRecorder) RemoveActiveSession(router, id interface{}) *gomock.Call {
+// GetProfile indicates an expected call of GetProfile.
+func (mr *MockMikrotikPortMockRecorder) GetProfile(router, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveActiveSession", reflect.TypeOf((*MockMikrotikPort)(nil).RemoveActiveSession), router, id)
-}
-
-// CreateQueue mocks base method.
-func (m *MockMikrotikPort) CreateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateQueue", router, queue)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateQueue indicates an expected call of CreateQueue.
-func (mr *MockMikrotikPortMockRecorder) CreateQueue(router, queue interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateQueue", reflect.TypeOf((*MockMikrotikPort)(nil).CreateQueue), router, queue)
-}
-
-// UpdateQueue mocks base method.
-func (m *MockMikrotikPort) UpdateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateQueue", router, queue)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateQueue indicates an expected call of UpdateQueue.
-func (mr *MockMikrotikPortMockRecorder) UpdateQueue(router, queue interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateQueue", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateQueue), router, queue)
-}
-
-// DeleteQueue mocks base method.
-func (m *MockMikrotikPort) DeleteQueue(router *model.MikrotikRouter, id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteQueue", router, id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteQueue indicates an expected call of DeleteQueue.
-func (mr *MockMikrotikPortMockRecorder) DeleteQueue(router, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQueue", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteQueue), router, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProfile", reflect.TypeOf((*MockMikrotikPort)(nil).GetProfile), router, id)
 }
 
 // GetQueue mocks base method.
@@ -279,6 +164,51 @@ func (mr *MockMikrotikPortMockRecorder) GetQueue(router, id interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQueue", reflect.TypeOf((*MockMikrotikPort)(nil).GetQueue), router, id)
 }
 
+// GetSecret mocks base method.
+func (m *MockMikrotikPort) GetSecret(router *model.MikrotikRouter, id string) (*model.PppoeSecret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSecret", router, id)
+	ret0, _ := ret[0].(*model.PppoeSecret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSecret indicates an expected call of GetSecret.
+func (mr *MockMikrotikPortMockRecorder) GetSecret(router, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSecret", reflect.TypeOf((*MockMikrotikPort)(nil).GetSecret), router, id)
+}
+
+// ListActiveSessions mocks base method.
+func (m *MockMikrotikPort) ListActiveSessions(router *model.MikrotikRouter) ([]model.PppoeActive, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListActiveSessions", router)
+	ret0, _ := ret[0].([]model.PppoeActive)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListActiveSessions indicates an expected call of ListActiveSessions.
+func (mr *MockMikrotikPortMockRecorder) ListActiveSessions(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListActiveSessions", reflect.TypeOf((*MockMikrotikPort)(nil).ListActiveSessions), router)
+}
+
+// ListProfiles mocks base method.
+func (m *MockMikrotikPort) ListProfiles(router *model.MikrotikRouter) ([]model.PppoeProfile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListProfiles", router)
+	ret0, _ := ret[0].([]model.PppoeProfile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListProfiles indicates an expected call of ListProfiles.
+func (mr *MockMikrotikPortMockRecorder) ListProfiles(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProfiles", reflect.TypeOf((*MockMikrotikPort)(nil).ListProfiles), router)
+}
+
 // ListQueues mocks base method.
 func (m *MockMikrotikPort) ListQueues(router *model.MikrotikRouter) ([]model.PppoeQueue, error) {
 	m.ctrl.T.Helper()
@@ -294,6 +224,21 @@ func (mr *MockMikrotikPortMockRecorder) ListQueues(router interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListQueues", reflect.TypeOf((*MockMikrotikPort)(nil).ListQueues), router)
 }
 
+// ListSecrets mocks base method.
+func (m *MockMikrotikPort) ListSecrets(router *model.MikrotikRouter) ([]model.PppoeSecret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSecrets", router)
+	ret0, _ := ret[0].([]model.PppoeSecret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListSecrets indicates an expected call of ListSecrets.
+func (mr *MockMikrotikPortMockRecorder) ListSecrets(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSecrets", reflect.TypeOf((*MockMikrotikPort)(nil).ListSecrets), router)
+}
+
 // ListenQueueStats mocks base method.
 func (m *MockMikrotikPort) ListenQueueStats(router *model.MikrotikRouter) (<-chan []model.QueueStats, error) {
 	m.ctrl.T.Helper()
@@ -307,6 +252,209 @@ func (m *MockMikrotikPort) ListenQueueStats(router *model.MikrotikRouter) (<-cha
 func (mr *MockMikrotikPortMockRecorder) ListenQueueStats(router interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenQueueStats", reflect.TypeOf((*MockMikrotikPort)(nil).ListenQueueStats), router)
+}
+
+// ListenQueueStatsWithContext mocks base method.
+func (m *MockMikrotikPort) ListenQueueStatsWithContext(ctx context.Context, router *model.MikrotikRouter) (<-chan []model.QueueStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListenQueueStatsWithContext", ctx, router)
+	ret0, _ := ret[0].(<-chan []model.QueueStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListenQueueStatsWithContext indicates an expected call of ListenQueueStatsWithContext.
+func (mr *MockMikrotikPortMockRecorder) ListenQueueStatsWithContext(ctx, router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenQueueStatsWithContext", reflect.TypeOf((*MockMikrotikPort)(nil).ListenQueueStatsWithContext), ctx, router)
+}
+
+// ListenQueueStatsByName mocks base method.
+func (m *MockMikrotikPort) ListenQueueStatsByName(ctx context.Context, router *model.MikrotikRouter, queueName string) (<-chan model.QueueStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListenQueueStatsByName", ctx, router, queueName)
+	ret0, _ := ret[0].(<-chan model.QueueStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListenQueueStatsByName indicates an expected call of ListenQueueStatsByName.
+func (mr *MockMikrotikPortMockRecorder) ListenQueueStatsByName(ctx, router, queueName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListenQueueStatsByName", reflect.TypeOf((*MockMikrotikPort)(nil).ListenQueueStatsByName), ctx, router, queueName)
+}
+
+// MonitorAllInterfaces mocks base method.
+func (m *MockMikrotikPort) MonitorAllInterfaces(ctx context.Context, router *model.MikrotikRouter) (<-chan []model.InterfaceStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MonitorAllInterfaces", ctx, router)
+	ret0, _ := ret[0].(<-chan []model.InterfaceStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MonitorAllInterfaces indicates an expected call of MonitorAllInterfaces.
+func (mr *MockMikrotikPortMockRecorder) MonitorAllInterfaces(ctx, router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MonitorAllInterfaces", reflect.TypeOf((*MockMikrotikPort)(nil).MonitorAllInterfaces), ctx, router)
+}
+
+// MonitorInterface mocks base method.
+func (m *MockMikrotikPort) MonitorInterface(ctx context.Context, router *model.MikrotikRouter, interfaceName string) (<-chan model.InterfaceStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MonitorInterface", ctx, router, interfaceName)
+	ret0, _ := ret[0].(<-chan model.InterfaceStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MonitorInterface indicates an expected call of MonitorInterface.
+func (mr *MockMikrotikPortMockRecorder) MonitorInterface(ctx, router, interfaceName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MonitorInterface", reflect.TypeOf((*MockMikrotikPort)(nil).MonitorInterface), ctx, router, interfaceName)
+}
+
+// CreateIpPool mocks base method.
+func (m *MockMikrotikPort) CreateIpPool(router *model.MikrotikRouter, pool *model.IpPool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateIpPool", router, pool)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateIpPool indicates an expected call of CreateIpPool.
+func (mr *MockMikrotikPortMockRecorder) CreateIpPool(router, pool interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIpPool", reflect.TypeOf((*MockMikrotikPort)(nil).CreateIpPool), router, pool)
+}
+
+// UpdateIpPool mocks base method.
+func (m *MockMikrotikPort) UpdateIpPool(router *model.MikrotikRouter, pool *model.IpPool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateIpPool", router, pool)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateIpPool indicates an expected call of UpdateIpPool.
+func (mr *MockMikrotikPortMockRecorder) UpdateIpPool(router, pool interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIpPool", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateIpPool), router, pool)
+}
+
+// DeleteIpPool mocks base method.
+func (m *MockMikrotikPort) DeleteIpPool(router *model.MikrotikRouter, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteIpPool", router, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteIpPool indicates an expected call of DeleteIpPool.
+func (mr *MockMikrotikPortMockRecorder) DeleteIpPool(router, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteIpPool", reflect.TypeOf((*MockMikrotikPort)(nil).DeleteIpPool), router, id)
+}
+
+// GetIpPool mocks base method.
+func (m *MockMikrotikPort) GetIpPool(router *model.MikrotikRouter, id string) (*model.IpPool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIpPool", router, id)
+	ret0, _ := ret[0].(*model.IpPool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetIpPool indicates an expected call of GetIpPool.
+func (mr *MockMikrotikPortMockRecorder) GetIpPool(router, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIpPool", reflect.TypeOf((*MockMikrotikPort)(nil).GetIpPool), router, id)
+}
+
+// ListIpPools mocks base method.
+func (m *MockMikrotikPort) ListIpPools(router *model.MikrotikRouter) ([]model.IpPool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListIpPools", router)
+	ret0, _ := ret[0].([]model.IpPool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListIpPools indicates an expected call of ListIpPools.
+func (mr *MockMikrotikPortMockRecorder) ListIpPools(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListIpPools", reflect.TypeOf((*MockMikrotikPort)(nil).ListIpPools), router)
+}
+
+// Ping mocks base method.
+func (m *MockMikrotikPort) Ping(ctx context.Context, router *model.MikrotikRouter, req model.PingRequest) (<-chan model.PingResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping", ctx, router, req)
+	ret0, _ := ret[0].(<-chan model.PingResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Ping indicates an expected call of Ping.
+func (mr *MockMikrotikPortMockRecorder) Ping(ctx, router, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockMikrotikPort)(nil).Ping), ctx, router, req)
+}
+
+// RemoveActiveSession mocks base method.
+func (m *MockMikrotikPort) RemoveActiveSession(router *model.MikrotikRouter, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveActiveSession", router, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveActiveSession indicates an expected call of RemoveActiveSession.
+func (mr *MockMikrotikPortMockRecorder) RemoveActiveSession(router, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveActiveSession", reflect.TypeOf((*MockMikrotikPort)(nil).RemoveActiveSession), router, id)
+}
+
+// UpdateProfile mocks base method.
+func (m *MockMikrotikPort) UpdateProfile(router *model.MikrotikRouter, profile *model.PppoeProfile) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProfile", router, profile)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateProfile indicates an expected call of UpdateProfile.
+func (mr *MockMikrotikPortMockRecorder) UpdateProfile(router, profile interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProfile", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateProfile), router, profile)
+}
+
+// UpdateQueue mocks base method.
+func (m *MockMikrotikPort) UpdateQueue(router *model.MikrotikRouter, queue *model.PppoeQueue) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateQueue", router, queue)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateQueue indicates an expected call of UpdateQueue.
+func (mr *MockMikrotikPortMockRecorder) UpdateQueue(router, queue interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateQueue", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateQueue), router, queue)
+}
+
+// UpdateSecret mocks base method.
+func (m *MockMikrotikPort) UpdateSecret(router *model.MikrotikRouter, secret *model.PppoeSecret) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSecret", router, secret)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSecret indicates an expected call of UpdateSecret.
+func (mr *MockMikrotikPortMockRecorder) UpdateSecret(router, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSecret", reflect.TypeOf((*MockMikrotikPort)(nil).UpdateSecret), router, secret)
 }
 
 // MockMikrotikDatabasePort is a mock of MikrotikDatabasePort interface.
@@ -346,19 +494,18 @@ func (mr *MockMikrotikDatabasePortMockRecorder) Create(router interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).Create), router)
 }
 
-// FindByID mocks base method.
-func (m *MockMikrotikDatabasePort) FindByID(id uint) (*model.MikrotikRouter, error) {
+// Delete mocks base method.
+func (m *MockMikrotikDatabasePort) Delete(id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(*model.MikrotikRouter)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// FindByID indicates an expected call of FindByID.
-func (mr *MockMikrotikDatabasePortMockRecorder) FindByID(id interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockMikrotikDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).Delete), id)
 }
 
 // FindAll mocks base method.
@@ -376,6 +523,21 @@ func (mr *MockMikrotikDatabasePortMockRecorder) FindAll() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).FindAll))
 }
 
+// FindByID mocks base method.
+func (m *MockMikrotikDatabasePort) FindByID(id string) (*model.MikrotikRouter, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByID", id)
+	ret0, _ := ret[0].(*model.MikrotikRouter)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByID indicates an expected call of FindByID.
+func (mr *MockMikrotikDatabasePortMockRecorder) FindByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).FindByID), id)
+}
+
 // Update mocks base method.
 func (m *MockMikrotikDatabasePort) Update(router *model.MikrotikRouter) error {
 	m.ctrl.T.Helper()
@@ -388,18 +550,4 @@ func (m *MockMikrotikDatabasePort) Update(router *model.MikrotikRouter) error {
 func (mr *MockMikrotikDatabasePortMockRecorder) Update(router interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).Update), router)
-}
-
-// Delete mocks base method.
-func (m *MockMikrotikDatabasePort) Delete(id uint) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete.
-func (mr *MockMikrotikDatabasePortMockRecorder) Delete(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockMikrotikDatabasePort)(nil).Delete), id)
 }

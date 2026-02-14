@@ -19,9 +19,9 @@ func (a *mikrotikAdapter) Create(router *model.MikrotikRouter) error {
 	return a.db.Create(router).Error
 }
 
-func (a *mikrotikAdapter) FindByID(id uint) (*model.MikrotikRouter, error) {
+func (a *mikrotikAdapter) FindByID(id string) (*model.MikrotikRouter, error) {
 	var router model.MikrotikRouter
-	err := a.db.First(&router, id).Error
+	err := a.db.Where("id = ?", id).First(&router).Error
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +38,6 @@ func (a *mikrotikAdapter) Update(router *model.MikrotikRouter) error {
 	return a.db.Save(router).Error
 }
 
-func (a *mikrotikAdapter) Delete(id uint) error {
-	return a.db.Delete(&model.MikrotikRouter{}, id).Error
+func (a *mikrotikAdapter) Delete(id string) error {
+	return a.db.Where("id = ?", id).Delete(&model.MikrotikRouter{}).Error
 }

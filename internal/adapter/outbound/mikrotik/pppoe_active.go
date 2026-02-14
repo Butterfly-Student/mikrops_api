@@ -6,7 +6,7 @@ import (
 
 	"go-template/internal/model"
 
-	"github.com/go-routeros/routeros/v3"
+	"github.com/go-routeros/routeros/v3/proto"
 )
 
 // PppoeActive
@@ -76,7 +76,7 @@ func (a *mikrotikClientAdapter) RemoveActiveSession(router *model.MikrotikRouter
 	return err
 }
 
-func parseActive(re *routeros.ReplyPair) *model.PppoeActive {
+func parseActive(re *proto.Sentence) *model.PppoeActive {
 	return &model.PppoeActive{
 		ID:        re.Map[".id"],
 		Name:      re.Map["name"],
