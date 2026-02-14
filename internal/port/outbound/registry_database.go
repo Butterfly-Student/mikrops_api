@@ -12,6 +12,7 @@ type DatabasePort interface {
 	Customer() CustomerDatabasePort
 	SystemSetting() SystemSettingDatabasePort
 	Invoice() InvoiceDatabasePort
+	Payment() PaymentDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 
