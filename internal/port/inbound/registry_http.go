@@ -10,4 +10,7 @@ type HttpPort interface {
 	Queue() QueueHttpPort
 	Interface() InterfaceHttpPort
 	IpPool() IpPoolHttpPort
+	BandwidthProfile() BandwidthProfileHttpPort
+	Customer() CustomerHttpPort
+	SystemSetting() SystemSettingHttpPort
 }

@@ -50,3 +50,15 @@ func (s *adapter) Interface() inbound_port.InterfaceHttpPort {
 func (s *adapter) IpPool() inbound_port.IpPoolHttpPort {
 	return NewIpPoolAdapter(s.domain)
 }
+
+func (s *adapter) BandwidthProfile() inbound_port.BandwidthProfileHttpPort {
+	return NewBandwidthProfileAdapter(s.domain)
+}
+
+func (s *adapter) Customer() inbound_port.CustomerHttpPort {
+	return NewCustomerAdapter(s.domain)
+}
+
+func (s *adapter) SystemSetting() inbound_port.SystemSettingHttpPort {
+	return NewSystemSettingAdapter(s.domain)
+}

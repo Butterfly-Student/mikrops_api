@@ -8,6 +8,9 @@ type DatabasePort interface {
 	Client() ClientDatabasePort
 	User() UserDatabasePort
 	Mikrotik() MikrotikDatabasePort
+	BandwidthProfile() BandwidthProfileDatabasePort
+	Customer() CustomerDatabasePort
+	SystemSetting() SystemSettingDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 

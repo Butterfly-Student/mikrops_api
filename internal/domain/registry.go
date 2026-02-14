@@ -2,12 +2,15 @@ package domain
 
 import (
 	"go-template/internal/domain/auth"
+	"go-template/internal/domain/bandwidth_profile"
 	"go-template/internal/domain/client"
+	"go-template/internal/domain/customer"
 	"go-template/internal/domain/iface"
 	"go-template/internal/domain/ippool"
 	"go-template/internal/domain/ping"
 	"go-template/internal/domain/pppoe"
 	"go-template/internal/domain/queue"
+	"go-template/internal/domain/system_setting"
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
 
@@ -23,6 +26,9 @@ type Domain interface {
 	Interface() iface.InterfaceDomain
 	IpPool() ippool.IpPoolDomain
 	Ping() ping.PingDomain
+	BandwidthProfile() bandwidth_profile.BandwidthProfileDomain
+	Customer() customer.CustomerDomain
+	SystemSetting() system_setting.SystemSettingDomain
 }
 
 type domain struct {
@@ -82,4 +88,16 @@ func (d *domain) IpPool() ippool.IpPoolDomain {
 
 func (d *domain) Ping() ping.PingDomain {
 	return ping.NewPingDomain(d.databasePort, d.cachePort, d.mikrotikPort)
+}
+
+func (d *domain) BandwidthProfile() bandwidth_profile.BandwidthProfileDomain {
+	return bandwidth_profile.NewBandwidthProfileDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) Customer() customer.CustomerDomain {
+	return customer.NewCustomerDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) SystemSetting() system_setting.SystemSettingDomain {
+	return system_setting.NewSystemSettingDomain(d.databasePort)
 }

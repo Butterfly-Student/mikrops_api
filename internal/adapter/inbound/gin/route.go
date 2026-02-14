@@ -142,4 +142,41 @@ func InitRoute(
 		ippool.PUT("/:id", port.IpPool().UpdateIpPool)
 		ippool.DELETE("/:id", port.IpPool().DeleteIpPool)
 	}
+
+	// Bandwidth Profile Management
+	bandwidthProfile := app.Group("/bandwidth-profiles")
+	bandwidthProfile.Use(port.Middleware().UserAuth())
+	{
+		bandwidthProfile.POST("", port.BandwidthProfile().Create)
+		bandwidthProfile.GET("", port.BandwidthProfile().List)
+		bandwidthProfile.GET("/:id", port.BandwidthProfile().Get)
+		bandwidthProfile.PUT("/:id", port.BandwidthProfile().Update)
+		bandwidthProfile.DELETE("/:id", port.BandwidthProfile().Delete)
+	}
+
+	// Customer Management
+	customer := app.Group("/customers")
+	customer.Use(port.Middleware().UserAuth())
+	{
+		customer.POST("", port.Customer().Create)
+		customer.GET("", port.Customer().List)
+		customer.GET("/:id", port.Customer().Get)
+		customer.PUT("/:id", port.Customer().Update)
+		customer.DELETE("/:id", port.Customer().Delete)
+		customer.GET("/:id/billing-info", port.Customer().GetBillingInfo)
+		customer.POST("/:id/isolate", port.Customer().Isolate)
+		customer.POST("/:id/activate", port.Customer().Activate)
+	}
+
+	// System Settings Management
+	settings := app.Group("/settings")
+	settings.Use(port.Middleware().UserAuth())
+	{
+		settings.GET("", port.SystemSetting().GetAll)
+		settings.GET("/:key", port.SystemSetting().GetByKey)
+		settings.PUT("/:key", port.SystemSetting().UpdateByKey)
+	}
+
+	// Public System Settings (no auth)
+	app.GET("/public/settings", port.SystemSetting().GetPublic)
 }
