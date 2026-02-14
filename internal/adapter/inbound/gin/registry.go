@@ -62,3 +62,7 @@ func (s *adapter) Customer() inbound_port.CustomerHttpPort {
 func (s *adapter) SystemSetting() inbound_port.SystemSettingHttpPort {
 	return NewSystemSettingAdapter(s.domain)
 }
+
+func (s *adapter) Billing() inbound_port.BillingHttpPort {
+	return NewBillingAdapter(s.domain)
+}

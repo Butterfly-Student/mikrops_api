@@ -13,4 +13,5 @@ type HttpPort interface {
 	BandwidthProfile() BandwidthProfileHttpPort
 	Customer() CustomerHttpPort
 	SystemSetting() SystemSettingHttpPort
+	Billing() BillingHttpPort
 }

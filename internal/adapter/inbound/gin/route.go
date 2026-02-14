@@ -179,4 +179,24 @@ func InitRoute(
 
 	// Public System Settings (no auth)
 	app.GET("/public/settings", port.SystemSetting().GetPublic)
+
+	// Billing & Invoice Management
+	billing := app.Group("/billing")
+	billing.Use(port.Middleware().UserAuth())
+	{
+		// Invoice endpoints
+		billing.POST("/invoices", port.Billing().CreateInvoice)
+		billing.GET("/invoices", port.Billing().ListInvoices)
+		billing.GET("/invoices/:id", port.Billing().GetInvoice)
+		billing.PUT("/invoices/:id/status", port.Billing().UpdateInvoiceStatus)
+		billing.POST("/invoices/:id/cancel", port.Billing().CancelInvoice)
+		billing.POST("/invoices/:id/payment", port.Billing().ApplyPayment)
+
+		// Invoice generation
+		billing.POST("/generate-monthly", port.Billing().GenerateMonthlyInvoices)
+
+		// Reports
+		billing.GET("/overdue", port.Billing().GetOverdueInvoices)
+		billing.GET("/revenue", port.Billing().GetMonthlyRevenue)
+	}
 }
