@@ -11,6 +11,7 @@ type DatabasePort interface {
 	BandwidthProfile() BandwidthProfileDatabasePort
 	Customer() CustomerDatabasePort
 	SystemSetting() SystemSettingDatabasePort
+	Invoice() InvoiceDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 

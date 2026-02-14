@@ -64,3 +64,7 @@ func (s *adapter) Customer() outbound_port.CustomerDatabasePort {
 func (s *adapter) SystemSetting() outbound_port.SystemSettingDatabasePort {
 	return NewSystemSettingAdapter(s.db)
 }
+
+func (s *adapter) Invoice() outbound_port.InvoiceDatabasePort {
+	return NewInvoiceAdapter(s.db)
+}

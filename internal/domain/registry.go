@@ -3,6 +3,7 @@ package domain
 import (
 	"go-template/internal/domain/auth"
 	"go-template/internal/domain/bandwidth_profile"
+	"go-template/internal/domain/billing"
 	"go-template/internal/domain/client"
 	"go-template/internal/domain/customer"
 	"go-template/internal/domain/iface"
@@ -29,6 +30,7 @@ type Domain interface {
 	BandwidthProfile() bandwidth_profile.BandwidthProfileDomain
 	Customer() customer.CustomerDomain
 	SystemSetting() system_setting.SystemSettingDomain
+	Billing() billing.BillingDomain
 }
 
 type domain struct {
@@ -100,4 +102,8 @@ func (d *domain) Customer() customer.CustomerDomain {
 
 func (d *domain) SystemSetting() system_setting.SystemSettingDomain {
 	return system_setting.NewSystemSettingDomain(d.databasePort)
+}
+
+func (d *domain) Billing() billing.BillingDomain {
+	return billing.NewBillingDomain(d.databasePort)
 }
