@@ -50,3 +50,31 @@ func (s *adapter) Interface() inbound_port.InterfaceHttpPort {
 func (s *adapter) IpPool() inbound_port.IpPoolHttpPort {
 	return NewIpPoolAdapter(s.domain)
 }
+
+func (s *adapter) BandwidthProfile() inbound_port.BandwidthProfileHttpPort {
+	return NewBandwidthProfileHandler(s.domain)
+}
+
+func (s *adapter) Customer() inbound_port.CustomerHttpPort {
+	return NewCustomerHandler(s.domain)
+}
+
+func (s *adapter) SystemSetting() inbound_port.SystemSettingHttpPort {
+	return NewSystemSettingHandler(s.domain)
+}
+
+func (s *adapter) Billing() inbound_port.BillingHttpPort {
+	return NewBillingHandler(s.domain)
+}
+
+func (s *adapter) Payment() inbound_port.PaymentHttpPort {
+	return NewPaymentAdapter(s.domain)
+}
+
+func (s *adapter) Cash() inbound_port.CashHttpPort {
+	return NewCashHandler(s.domain)
+}
+
+func (s *adapter) Notification() inbound_port.NotificationHttpPort {
+	return NewNotificationHandler(s.domain)
+}

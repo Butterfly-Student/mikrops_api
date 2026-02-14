@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Invoice Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .invoice-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .invoice-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .invoice-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .invoice-status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .invoice-amount {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .amount-label {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .amount-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .invoice-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .invoice-items {
+            margin-bottom: 20px;
+        }
+
+        .invoice-items h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-name {
+            flex: 1;
+            color: #333;
+        }
+
+        .item-quantity {
+            color: #666;
+            margin-right: 20px;
+        }
+
+        .item-amount {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .total-section {
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            margin-bottom: 10px;
+        }
+
+        .total-row:last-child {
+            margin-bottom: 0;
+            padding-top: 15px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .payment-methods {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .payment-methods h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .payment-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .payment-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .payment-option-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .payment-option-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .payment-option-desc {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0dcaf0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .payment-processing {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .payment-processing .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .amount-value {
+                font-size: 2em;
+            }
+
+            .payment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-btn">← Kembali ke Dashboard</a>
+            <h1>💳 Pembayaran Invoice</h1>
+        </div>
+
+        <div id="loading" class="loading">
+            Memuat detail invoice...
+        </div>
+
+        <div id="invoiceContent" style="display: none;">
+            <!-- Invoice details will be loaded here -->
+        </div>
+
+        <div id="paymentProcessing" style="display: none;">
+            <div class="payment-processing">
+                <div class="spinner"></div>
+                <h3>Memproses Pembayaran...</h3>
+                <p>Jangan tutup halaman ini</p>
+            </div>
+        </div>
+
+        <div id="paymentResult" style="display: none;">
+            <!-- Payment result will be shown here -->
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/v1';
+        const PAYMENT_API_BASE = '/v1';
+        const INVOICE_ID = new URLSearchParams(window.location.search).get('id');
+
+        let selectedPaymentMethod = null;
+        let currentInvoice = null;
+
+        // Load invoice details on page load
+        if (INVOICE_ID) {
+            loadInvoiceDetails(INVOICE_ID);
+        } else {
+            showError('Invoice ID tidak ditemukan');
+        }
+
+        function loadInvoiceDetails(invoiceId) {
+            fetch(`${API_BASE}/invoices/${invoiceId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Invoice tidak ditemukan');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    currentInvoice = data;
+                    displayInvoice(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Terjadi kesalahan saat memuat invoice: ' + error.message);
+                });
+        }
+
+        function displayInvoice(invoice) {
+            const invoiceDiv = document.getElementById('invoiceContent');
+            const loadingDiv = document.getElementById('loading');
+
+            loadingDiv.style.display = 'none';
+            invoiceDiv.style.display = 'block';
+
+            const statusClass = getStatusClass(invoice.status, invoice.due_date);
+            const isPaid = invoice.payment_status === 'paid';
+
+            let html = `
+                <div class="invoice-card">
+                    <div class="invoice-header">
+                        <div class="invoice-number">${invoice.invoice_number}</div>
+                        <div class="invoice-status ${statusClass}">
+                            ${isPaid ? 'Sudah Dibayar' : 
+                              statusClass === 'status-overdue' ? 'Terlambat' : 'Belum Dibayar'}
+                        </div>
+                    </div>
+
+                    ${isPaid ? `
+                        <div class="success" style="margin: 20px 0;">
+                            <strong>✅ Invoice sudah dibayar!</strong>
+                            <p style="margin-top: 10px;">Terima kasih atas pembayaran Anda.</p>
+                            <p><strong>Tanggal Bayar:</strong> ${formatDate(invoice.payment_date)}</p>
+                        </div>
+                    ` : `
+                        <div class="invoice-amount">
+                            <div class="amount-label">Total Tagihan</div>
+                            <div class="amount-value">${formatCurrency(invoice.total_amount)}</div>
+                        </div>
+
+                        <div class="invoice-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Kode Pelanggan</span>
+                                <span class="detail-value">${invoice.customer?.customer_code || '-'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Nama</span>
+                                <span class="detail-value">${invoice.customer?.full_name || '-'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Periode Tagihan</span>
+                                <span class="detail-value">${formatDate(invoice.issue_date)} - ${formatDate(invoice.due_date)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Jatuh Tempo</span>
+                                <span class="detail-value" style="color: ${statusClass === 'status-overdue' ? '#dc3545' : '#333'}">
+                                    ${formatDate(invoice.due_date)}
+                                </span>
+                            </div>
+                            ${invoice.payment_status === 'partial' ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Sudah Dibayar</span>
+                                    <span class="detail-value">${formatCurrency(invoice.paid_amount)}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Sisa Tagihan</span>
+                                    <span class="detail-value">${formatCurrency(invoice.total_amount - invoice.paid_amount)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="total-section">
+                            <div class="total-row">
+                                <span>Subtotal</span>
+                                <span>${formatCurrency(invoice.subtotal)}</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Pajak</span>
+                                <span>${formatCurrency(invoice.tax_amount)}</span>
+                            </div>
+                            ${invoice.discount_amount > 0 ? `
+                                <div class="total-row">
+                                    <span>Diskon</span>
+                                    <span>-${formatCurrency(invoice.discount_amount)}</span>
+                                </div>
+                            ` : ''}
+                            ${invoice.late_fee > 0 ? `
+                                <div class="total-row">
+                                    <span>Denda Keterlambatan</span>
+                                    <span>${formatCurrency(invoice.late_fee)}</span>
+                                </div>
+                            ` : ''}
+                            <div class="total-row">
+                                <span>Total</span>
+                                <span>${formatCurrency(invoice.total_amount)}</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-methods">
+                            <h2>Pilih Metode Pembayaran</h2>
+                            <div class="payment-grid">
+                                <div class="payment-option" onclick="selectPaymentMethod('va', this)">
+                                    <div class="payment-option-icon">🏦</div>
+                                    <div class="payment-option-name">Virtual Account</div>
+                                    <div class="payment-option-desc">BCA, Mandiri, BRI</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPaymentMethod('ewallet', this)">
+                                    <div class="payment-option-icon">📱</div>
+                                    <div class="payment-option-name">E-Wallet</div>
+                                    <div class="payment-option-desc">GoPay, OVO, Dana</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPaymentMethod('qris', this)">
+                                    <div class="payment-option-icon">📷</div>
+                                    <div class="payment-option-name">QRIS</div>
+                                    <div class="payment-option-desc">QR Code Payment</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPaymentMethod('credit_card', this)">
+                                    <div class="payment-option-icon">💳</div>
+                                    <div class="payment-option-name">Kartu Kredit</div>
+                                    <div class="payment-option-desc">Visa, Mastercard</div>
+                                </div>
+                            </div>
+                            <button id="payButton" class="btn btn-primary" disabled onclick="initiatePayment()">
+                                Bayar Sekarang
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `;
+
+            invoiceDiv.innerHTML = html;
+
+            // Add warning if overdue
+            if (!isPaid && statusClass === 'status-overdue') {
+                invoiceDiv.innerHTML += `
+                    <div class="warning" style="margin-top: 20px;">
+                        <strong>⚠️ Tagihan ini sudah melewati jatuh tempo!</strong>
+                        <p style="margin-top: 10px;">Mohon segera lakukan pembayaran untuk menghindari penutupan layanan.</p>
+                    </div>
+                `;
+            }
+
+            // Add info about partial payment
+            if (invoice.payment_status === 'partial' && !isPaid) {
+                invoiceDiv.innerHTML += `
+                    <div class="info" style="margin-top: 20px;">
+                        <strong>ℹ️ Pembayaran Sebagian</strong>
+                        <p style="margin-top: 10px;">Invoice ini sudah sebagian dibayar. Silakan lanjutkan pembayaran untuk melunasi tagihan.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function selectPaymentMethod(method, element) {
+            // Remove selected class from all options
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            selectedPaymentMethod = method;
+
+            // Enable pay button
+            document.getElementById('payButton').disabled = false;
+        }
+
+        function initiatePayment() {
+            if (!currentInvoice) {
+                showError('Invoice tidak ditemukan');
+                return;
+            }
+
+            if (!selectedPaymentMethod) {
+                showError('Silakan pilih metode pembayaran');
+                return;
+            }
+
+            // Show payment processing
+            document.getElementById('invoiceContent').style.display = 'none';
+            document.getElementById('paymentProcessing').style.display = 'block';
+
+            // Call API to create payment
+            createPayment();
+        }
+
+        function createPayment() {
+            const amountToPay = currentInvoice.total_amount - currentInvoice.paid_amount;
+            
+            const paymentData = {
+                customer_id: currentInvoice.customer_id,
+                invoice_id: currentInvoice.id,
+                amount: amountToPay,
+                payment_method: selectedPaymentMethod,
+                payment_date: new Date().toISOString()
+            };
+
+            fetch(`${PAYMENT_API_BASE}/payments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(paymentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Payment created successfully
+                if (data.payment_number) {
+                    showPaymentSuccess(data);
+                } else {
+                    throw new Error('Gagal membuat payment');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showPaymentError(error.message || 'Terjadi kesalahan saat membuat pembayaran');
+            });
+        }
+
+        function showPaymentSuccess(payment) {
+            document.getElementById('paymentProcessing').style.display = 'none';
+            const resultDiv = document.getElementById('paymentResult');
+            resultDiv.style.display = 'block';
+
+            resultDiv.innerHTML = `
+                <div class="success" style="margin: 20px 0;">
+                    <strong>✅ Payment Berhasil Dibuat!</strong>
+                    <p style="margin-top: 20px;"><strong>No. Payment:</strong> ${payment.payment_number}</p>
+                    <p><strong>Jumlah:</strong> ${formatCurrency(payment.amount)}</p>
+                    <p><strong>Metode:</strong> ${getPaymentMethodName(payment.payment_method)}</p>
+                    <p><strong>Status:</strong> ${payment.status === 'confirmed' ? 'Dikonfirmasi' : 'Menunggu Konfirmasi'}</p>
+                </div>
+
+                <div class="invoice-card" style="margin-top: 20px;">
+                    <h3 style="text-align: center; margin-bottom: 20px;">📋 Detail Pembayaran</h3>
+                    <div class="invoice-details">
+                        <div class="detail-row">
+                            <span class="detail-label">No. Invoice</span>
+                            <span class="detail-value">${currentInvoice.invoice_number}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">No. Payment</span>
+                            <span class="detail-value">${payment.payment_number}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Jumlah</span>
+                            <span class="detail-value">${formatCurrency(payment.amount)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Metode</span>
+                            <span class="detail-value">${getPaymentMethodName(payment.payment_method)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value" style="color: ${getStatusColor(payment.status)}">${getStatusLabel(payment.status)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info" style="margin-top: 20px;">
+                    <strong>ℹ️ Selanjutnya</strong>
+                    <p style="margin-top: 10px;">1. Lanjutkan pembayaran sesuai metode yang dipilih</p>
+                    <p>2. Payment akan otomatis dikonfirmasi setelah pembayaran diterima</p>
+                    <p>3. Invoice akan otomatis ditandai sebagai lunas</p>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <a href="index.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">Kembali ke Dashboard</a>
+                </div>
+            `;
+        }
+
+        function showPaymentError(message) {
+            document.getElementById('paymentProcessing').style.display = 'none';
+            const resultDiv = document.getElementById('paymentResult');
+            resultDiv.style.display = 'block';
+
+            resultDiv.innerHTML = `
+                <div class="error" style="margin: 20px 0;">
+                    <strong>❌ Gagal Membuat Payment</strong>
+                    <p style="margin-top: 20px;">${message}</p>
+                </div>
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="btn btn-primary" onclick="resetAndRetry()">Coba Lagi</button>
+                </div>
+            `;
+        }
+
+        function resetAndRetry() {
+            document.getElementById('paymentProcessing').style.display = 'none';
+            document.getElementById('paymentResult').style.display = 'none';
+            document.getElementById('invoiceContent').style.display = 'block';
+        }
+
+        function getPaymentMethodName(method) {
+            const methods = {
+                'va': 'Virtual Account',
+                'ewallet': 'E-Wallet',
+                'qris': 'QRIS',
+                'credit_card': 'Kartu Kredit',
+                'debit_card': 'Kartu Debit',
+                'check': 'Cek'
+            };
+            return methods[method] || method;
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'pending': 'Menunggu Konfirmasi',
+                'confirmed': 'Dikonfirmasi',
+                'rejected': 'Ditolak',
+                'refunded': 'Dikembalikan'
+            };
+            return labels[status] || status;
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'pending': '#ffc107',
+                'confirmed': '#28a745',
+                'rejected': '#dc3545',
+                'refunded': '#fd7e14'
+            };
+            return colors[status] || '#666';
+        }
+
+        function getStatusClass(status, dueDate) {
+            const today = new Date();
+            const due = new Date(dueDate);
+
+            if (status === 'paid') {
+                return 'status-paid';
+            }
+
+            if (due < today) {
+                return 'status-overdue';
+            }
+
+            return 'status-pending';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            const errorDiv = document.getElementById('invoiceContent');
+            errorDiv.innerHTML = `
+                <div class="error">
+                    <strong>⚠️ Error:</strong> ${message}
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="index.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">Kembali ke Dashboard</a>
+                </div>
+            `;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

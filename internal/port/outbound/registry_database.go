@@ -8,6 +8,17 @@ type DatabasePort interface {
 	Client() ClientDatabasePort
 	User() UserDatabasePort
 	Mikrotik() MikrotikDatabasePort
+	BandwidthProfile() BandwidthProfileDatabasePort
+	Customer() CustomerDatabasePort
+	SystemSetting() SystemSettingDatabasePort
+	Payment() PaymentDatabasePort
+	PaymentAllocation() PaymentAllocationDatabasePort
+	Invoice() InvoiceDatabasePort
+	InvoiceItem() InvoiceItemDatabasePort
+	CashCategory() CashCategoryDatabasePort
+	CashTransaction() CashTransactionDatabasePort
+	Notification() NotificationDatabasePort
+	NotificationTemplate() NotificationTemplateDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 

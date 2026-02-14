@@ -52,3 +52,47 @@ func (s *adapter) User() outbound_port.UserDatabasePort {
 func (s *adapter) Mikrotik() outbound_port.MikrotikDatabasePort {
 	return NewMikrotikAdapter(s.db)
 }
+
+func (s *adapter) BandwidthProfile() outbound_port.BandwidthProfileDatabasePort {
+	return NewBandwidthProfileAdapter(s.db)
+}
+
+func (s *adapter) Customer() outbound_port.CustomerDatabasePort {
+	return NewCustomerAdapter(s.db)
+}
+
+func (s *adapter) SystemSetting() outbound_port.SystemSettingDatabasePort {
+	return NewSystemSettingAdapter(s.db)
+}
+
+func (s *adapter) Payment() outbound_port.PaymentDatabasePort {
+	return NewPaymentAdapter(s.db)
+}
+
+func (s *adapter) PaymentAllocation() outbound_port.PaymentAllocationDatabasePort {
+	return NewPaymentAllocationAdapter(s.db)
+}
+
+func (s *adapter) Invoice() outbound_port.InvoiceDatabasePort {
+	return NewInvoiceAdapter(s.db)
+}
+
+func (s *adapter) InvoiceItem() outbound_port.InvoiceItemDatabasePort {
+	return NewInvoiceItemAdapter(s.db)
+}
+
+func (s *adapter) CashCategory() outbound_port.CashCategoryDatabasePort {
+	return NewCashCategoryAdapter(s.db)
+}
+
+func (s *adapter) CashTransaction() outbound_port.CashTransactionDatabasePort {
+	return NewCashTransactionAdapter(s.db)
+}
+
+func (s *adapter) Notification() outbound_port.NotificationDatabasePort {
+	return NewNotificationAdapter(s.db)
+}
+
+func (s *adapter) NotificationTemplate() outbound_port.NotificationTemplateDatabasePort {
+	return NewNotificationTemplateAdapter(s.db)
+}

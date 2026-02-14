@@ -2,14 +2,24 @@ package domain
 
 import (
 	"go-template/internal/domain/auth"
+	"go-template/internal/domain/bandwidth_profile"
+	"go-template/internal/domain/billing"
+	"go-template/internal/domain/cash"
 	"go-template/internal/domain/client"
+	"go-template/internal/domain/customer"
 	"go-template/internal/domain/iface"
 	"go-template/internal/domain/ippool"
+	"go-template/internal/domain/notification"
+	"go-template/internal/domain/payment"
 	"go-template/internal/domain/ping"
 	"go-template/internal/domain/pppoe"
 	"go-template/internal/domain/queue"
+	"go-template/internal/domain/system_setting"
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
+	"go-template/utils/email"
+	"go-template/utils/whatsapp"
+	"go-template/utils/xendit"
 
 	"github.com/casbin/casbin/v3"
 )
@@ -18,11 +28,18 @@ type Domain interface {
 	Client() client.ClientDomain
 	Auth() auth.AuthDomain
 	User() user.UserDomain
+	BandwidthProfile() bandwidth_profile.BandwidthProfileDomain
+	Customer() customer.CustomerDomain
+	SystemSetting() system_setting.SystemSettingDomain
 	Pppoe() pppoe.PppoeDomain
 	Queue() queue.QueueDomain
 	Interface() iface.InterfaceDomain
 	IpPool() ippool.IpPoolDomain
 	Ping() ping.PingDomain
+	Billing() billing.BillingDomain
+	Payment() payment.PaymentDomain
+	Cash() cash.CashDomain
+	Notification() notification.NotificationDomain
 }
 
 type domain struct {
@@ -31,6 +48,8 @@ type domain struct {
 	cachePort    outbound_port.CachePort
 	workflowPort outbound_port.WorkflowPort
 	mikrotikPort outbound_port.MikrotikPort
+	emailUtil    *email.EmailUtil
+	whatsappUtil *whatsapp.WhatsAppUtil
 	enforcer     *casbin.Enforcer
 }
 
@@ -40,6 +59,8 @@ func NewDomain(
 	cachePort outbound_port.CachePort,
 	workflowPort outbound_port.WorkflowPort,
 	mikrotikPort outbound_port.MikrotikPort,
+	emailUtil *email.EmailUtil,
+	whatsappUtil *whatsapp.WhatsAppUtil,
 	enforcer *casbin.Enforcer,
 ) Domain {
 	return &domain{
@@ -48,6 +69,8 @@ func NewDomain(
 		cachePort:    cachePort,
 		workflowPort: workflowPort,
 		mikrotikPort: mikrotikPort,
+		emailUtil:    emailUtil,
+		whatsappUtil: whatsappUtil,
 		enforcer:     enforcer,
 	}
 }
@@ -82,4 +105,32 @@ func (d *domain) IpPool() ippool.IpPoolDomain {
 
 func (d *domain) Ping() ping.PingDomain {
 	return ping.NewPingDomain(d.databasePort, d.cachePort, d.mikrotikPort)
+}
+
+func (d *domain) BandwidthProfile() bandwidth_profile.BandwidthProfileDomain {
+	return bandwidth_profile.NewBandwidthProfileDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) Customer() customer.CustomerDomain {
+	return customer.NewCustomerDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) SystemSetting() system_setting.SystemSettingDomain {
+	return system_setting.NewSystemSettingDomain(d.databasePort)
+}
+
+func (d *domain) Billing() billing.BillingDomain {
+	return billing.NewBillingDomain(d.databasePort, d.databasePort.SystemSetting())
+}
+
+func (d *domain) Payment() payment.PaymentDomain {
+	return payment.NewPaymentDomain(d.databasePort, xendit.GetClient())
+}
+
+func (d *domain) Cash() cash.CashDomain {
+	return cash.NewCashDomain(d.databasePort)
+}
+
+func (d *domain) Notification() notification.NotificationDomain {
+	return notification.NewNotificationDomain(d.databasePort, d.emailUtil, d.whatsappUtil)
 }

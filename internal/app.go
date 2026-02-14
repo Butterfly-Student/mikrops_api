@@ -21,13 +21,16 @@ import (
 	temporal_outbound_adapter "go-template/internal/adapter/outbound/temporal"
 	"go-template/internal/domain"
 	_ "go-template/internal/migration/postgres"
-	outbound_port "go-template/internal/port/outbound"
+	"go-template/internal/port/outbound"
 	"go-template/utils"
 	"go-template/utils/activity"
 	"go-template/utils/database"
+	"go-template/utils/email"
 	"go-template/utils/log"
 	"go-template/utils/rabbitmq"
 	"go-template/utils/redis"
+	"go-template/utils/whatsapp"
+	"go-template/utils/xendit"
 
 	"github.com/casbin/casbin/v3"
 )
@@ -61,13 +64,37 @@ func NewApp() *App {
 	inboundHttpDriver = os.Getenv("INBOUND_HTTP_DRIVER")
 	inboundMessageDriver = os.Getenv("INBOUND_MESSAGE_DRIVER")
 	inboundWorkflowDriver = os.Getenv("INBOUND_WORKFLOW_DRIVER")
+
+	xendit.InitClient()
+
 	dbPort, enforcer := databaseOutbound(ctx)
+
+	// Initialize email utility
+	emailUtil := email.NewEmailUtil(email.EmailConfig{
+		SMTPHost:     os.Getenv("SMTP_HOST"),
+		SMTPPort:     os.Getenv("SMTP_PORT"),
+		SMTPUser:     os.Getenv("SMTP_USER"),
+		SMTPPassword: os.Getenv("SMTP_PASSWORD"),
+		FromEmail:    os.Getenv("SMTP_FROM_EMAIL"),
+		FromName:     os.Getenv("SMTP_FROM_NAME"),
+		IsEnabled:    os.Getenv("SMTP_ENABLED") == "true",
+	})
+
+	// Initialize WhatsApp utility
+	whatsappUtil := whatsapp.NewWhatsAppUtil(whatsapp.WhatsAppConfig{
+		APIURL:  os.Getenv("WHATSAPP_API_URL"),
+		APIKey:  os.Getenv("WHATSAPP_API_KEY"),
+		Enabled: os.Getenv("WHATSAPP_ENABLED") == "true",
+	})
+
 	domain := domain.NewDomain(
 		dbPort,
 		messageOutbound(ctx),
 		cacheOutbound(ctx),
 		workflowOutbound(ctx),
 		mikrotikOutbound(),
+		emailUtil,
+		whatsappUtil,
 		enforcer,
 	)
 

@@ -61,6 +61,11 @@ type MikrotikPort interface {
 
 	// Ping
 	Ping(ctx context.Context, router *model.MikrotikRouter, req model.PingRequest) (<-chan model.PingResult, error)
+
+	// Firewall
+	AddFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
+	RemoveFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
+	ListFirewallRules(router *model.MikrotikRouter) ([]model.FirewallRule, error)
 }
 
 // MikrotikDatabasePort defines methods for managing MikroTik router configurations
@@ -70,4 +75,7 @@ type MikrotikDatabasePort interface {
 	FindAll() ([]model.MikrotikRouter, error)
 	Update(router *model.MikrotikRouter) error
 	Delete(id string) error
+	AddFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
+	RemoveFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
+	ListFirewallRules(router *model.MikrotikRouter) ([]model.FirewallRule, error)
 }

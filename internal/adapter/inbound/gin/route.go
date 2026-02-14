@@ -13,6 +13,12 @@ func InitRoute(
 	app *gin.Engine,
 	port inbound_port.HttpPort,
 ) {
+	// Static files for payment portal (public access, no auth required)
+	app.Static("/payment", "./public/payment")
+	app.GET("/payment", func(c *gin.Context) {
+		c.File("./public/payment/index.html")
+	})
+
 	// Internal routes with internal auth middleware
 	internal := app.Group("/internal")
 	internal.Use(port.Middleware().InternalAuth())
@@ -123,9 +129,9 @@ func InitRoute(
 	iface := app.Group("/interfaces")
 	iface.Use(port.Middleware().UserAuth())
 	{
-		iface.POST("/monitor", port.Interface().StartMonitoring)           // Start all
-		iface.POST("/monitor/:name", port.Interface().StartMonitoringByName) // Start by name
-		iface.DELETE("/monitor", port.Interface().StopMonitoring)          // Stop all
+		iface.POST("/monitor", port.Interface().StartMonitoring)              // Start all
+		iface.POST("/monitor/:name", port.Interface().StartMonitoringByName)  // Start by name
+		iface.DELETE("/monitor", port.Interface().StopMonitoring)             // Stop all
 		iface.DELETE("/monitor/:name", port.Interface().StopMonitoringByName) // Stop by name
 	}
 
@@ -141,5 +147,135 @@ func InitRoute(
 		ippool.GET("/:id", port.IpPool().GetIpPool)
 		ippool.PUT("/:id", port.IpPool().UpdateIpPool)
 		ippool.DELETE("/:id", port.IpPool().DeleteIpPool)
+	}
+
+	// Bandwidth Profile Management
+	bandwidthProfile := app.Group("/bandwidth-profiles")
+	bandwidthProfile.Use(port.Middleware().UserAuth())
+	{
+		bandwidthProfile.POST("", port.BandwidthProfile().CreateProfile)
+		bandwidthProfile.GET("", port.BandwidthProfile().ListProfiles)
+		bandwidthProfile.GET("/isolated", port.BandwidthProfile().GetIsolatedProfile)
+		bandwidthProfile.GET("/:id", port.BandwidthProfile().GetProfile)
+		bandwidthProfile.PUT("/:id", port.BandwidthProfile().UpdateProfile)
+		bandwidthProfile.DELETE("/:id", port.BandwidthProfile().DeleteProfile)
+		bandwidthProfile.POST("/:id/sync", port.BandwidthProfile().SyncToMikrotik)
+	}
+
+	// Customer Management
+	customer := app.Group("/customers")
+	customer.Use(port.Middleware().UserAuth())
+	{
+		customer.POST("", port.Customer().CreateCustomer)
+		customer.GET("", port.Customer().ListCustomers)
+		customer.GET("/:id", port.Customer().GetCustomer)
+		customer.PUT("/:id", port.Customer().UpdateCustomer)
+		customer.DELETE("/:id", port.Customer().DeleteCustomer)
+		customer.GET("/:id/billing-info", port.Customer().GetBillingInfo)
+		customer.POST("/:id/isolate", port.Customer().IsolateCustomer)
+		customer.POST("/:id/activate", port.Customer().ActivateCustomer)
+	}
+
+	// System Settings
+	settings := app.Group("/settings")
+	settings.Use(port.Middleware().UserAuth())
+	{
+		settings.GET("", port.SystemSetting().ListSettings)
+		settings.GET("/:key", port.SystemSetting().GetSetting)
+		settings.PUT("/:key", port.SystemSetting().UpdateSetting)
+	}
+
+	// Billing Management
+	billing := app.Group("/billing")
+	billing.Use(port.Middleware().UserAuth())
+	{
+		// Invoices
+		billing.POST("/invoices", port.Billing().CreateInvoice)
+		billing.GET("/invoices", port.Billing().ListInvoices)
+		billing.GET("/invoices/:id", port.Billing().GetInvoice)
+		billing.PUT("/invoices/:id", port.Billing().UpdateInvoice)
+		billing.DELETE("/invoices/:id", port.Billing().DeleteInvoice)
+
+		// Invoice Items
+		billing.POST("/invoice-items", port.Billing().CreateInvoiceItem)
+		billing.GET("/invoice-items", port.Billing().ListInvoiceItems)
+		billing.GET("/invoice-items/:id", port.Billing().GetInvoiceItem)
+
+		// Monthly Invoice Generation
+		billing.POST("/invoices/generate-monthly", port.Billing().GenerateMonthlyInvoices)
+
+		// Payment Application
+		billing.POST("/invoices/:id/apply-payment", port.Billing().ApplyPayment)
+
+		// Overdue Management
+		billing.GET("/invoices/overdue", port.Billing().CheckOverdueInvoices)
+		billing.GET("/invoices/:id/late-fee", port.Billing().CalculateLateFee)
+	}
+
+	// Payment Management
+	payment := app.Group("/payments")
+	payment.Use(port.Middleware().UserAuth())
+	{
+		payment.POST("", port.Payment().CreatePayment)
+		payment.GET("", port.Payment().ListPayments)
+		payment.GET("/:id", port.Payment().GetPayment)
+		payment.PUT("/:id", port.Payment().UpdatePayment)
+		payment.DELETE("/:id", port.Payment().DeletePayment)
+	}
+
+	// Public Payment Webhook (no auth required)
+	app.POST("/webhooks/xendit", port.Payment().ProcessXenditWebhook)
+
+	// Cash Category Management
+	cashCategories := app.Group("/cash/categories")
+	cashCategories.Use(port.Middleware().UserAuth())
+	{
+		cashCategories.POST("", port.Cash().CreateCashCategory)
+		cashCategories.GET("", port.Cash().ListCashCategories)
+		cashCategories.GET("/:id", port.Cash().GetCashCategory)
+		cashCategories.PUT("/:id", port.Cash().UpdateCashCategory)
+		cashCategories.DELETE("/:id", port.Cash().DeleteCashCategory)
+	}
+
+	// Cash Transaction Management
+	cashTransactions := app.Group("/cash/transactions")
+	cashTransactions.Use(port.Middleware().UserAuth())
+	{
+		cashTransactions.POST("", port.Cash().CreateCashTransaction)
+		cashTransactions.GET("", port.Cash().ListCashTransactions)
+		cashTransactions.GET("/:id", port.Cash().GetCashTransaction)
+		cashTransactions.PUT("/:id", port.Cash().UpdateCashTransaction)
+		cashTransactions.DELETE("/:id", port.Cash().DeleteCashTransaction)
+		cashTransactions.POST("/:id/approve", port.Cash().ApproveCashTransaction)
+		cashTransactions.POST("/:id/reject", port.Cash().RejectCashTransaction)
+	}
+
+	// Cash Balance (public or with RBAC)
+	app.GET("/cash/balance", port.Cash().GetCashBalance)
+
+	// Notification Management
+	notifications := app.Group("/notifications")
+	notifications.Use(port.Middleware().UserAuth())
+	{
+		// Notifications
+		notifications.POST("", port.Notification().CreateNotification)
+		notifications.GET("", port.Notification().ListNotifications)
+		notifications.GET("/:id", port.Notification().GetNotification)
+		notifications.POST("/:id/send", port.Notification().SendNotification)
+		notifications.POST("/retry-failed", port.Notification().RetryFailedNotifications)
+
+		// Notification Templates
+		templates := notifications.Group("/templates")
+		templates.POST("", port.Notification().CreateTemplate)
+		templates.GET("", port.Notification().ListTemplates)
+		templates.GET("/:id", port.Notification().GetTemplate)
+		templates.PUT("/:id", port.Notification().UpdateTemplate)
+		templates.DELETE("/:id", port.Notification().DeleteTemplate)
+
+		// Predefined Notification Types
+		notifications.POST("/payment-confirmation", port.Notification().SendPaymentConfirmationNotification)
+		notifications.POST("/invoice-reminder", port.Notification().SendInvoiceReminderNotification)
+		notifications.POST("/payment-failed", port.Notification().SendPaymentFailedNotification)
+		notifications.POST("/invoice-created", port.Notification().SendInvoiceCreatedNotification)
 	}
 }

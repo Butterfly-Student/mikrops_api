@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Portal - MikroTik Billing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-box h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .invoices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .invoice-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .invoice-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .invoice-number {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .invoice-status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .invoice-amount {
+            font-size: 2em;
+            font-weight: 700;
+            color: #333;
+            margin: 15px 0;
+        }
+
+        .invoice-details {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .invoice-details p {
+            margin: 8px 0;
+        }
+
+        .invoice-details strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 40px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #666;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .payment-method {
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .invoices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Payment Portal</h1>
+            <p>MikroTik Billing System</p>
+        </div>
+
+        <div class="search-box">
+            <h2>Cek Tagihan</h2>
+            <div class="form-group">
+                <label for="customerCode">Kode Pelanggan / No. Invoice</label>
+                <input type="text" id="customerCode" placeholder="Contoh: CUST001 atau INV-2025-001-1234">
+            </div>
+            <button class="btn btn-primary" onclick="searchInvoices()">Cari Tagihan</button>
+        </div>
+
+        <div id="searchResult">
+            <!-- Search results will appear here -->
+        </div>
+
+        <div id="invoiceList" style="display: none;">
+            <div id="invoiceGrid" class="invoices-grid">
+                <!-- Invoice cards will be loaded here -->
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 MikroTik Billing System. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/v1';
+
+        function searchInvoices() {
+            const customerCode = document.getElementById('customerCode').value.trim();
+            
+            if (!customerCode) {
+                showError('Masukkan kode pelanggan atau nomor invoice');
+                return;
+            }
+
+            showLoading();
+
+            // Try to find by customer code first
+            fetch(`${API_BASE}/customers?customer_code=${encodeURIComponent(customerCode)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        // Found customer, get their invoices
+                        loadCustomerInvoices(data[0].id);
+                    } else {
+                        // Try to find by invoice number
+                        loadInvoiceByNumber(customerCode);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Terjadi kesalahan saat mencari tagihan');
+                });
+        }
+
+        function loadCustomerInvoices(customerId) {
+            fetch(`${API_BASE}/invoices?customer_id=${customerId}`)
+                .then(response => response.json())
+                .then(invoices => {
+                    displayInvoices(invoices);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Terjadi kesalahan saat memuat tagihan');
+                });
+        }
+
+        function loadInvoiceByNumber(invoiceNumber) {
+            fetch(`${API_BASE}/invoices?search=${encodeURIComponent(invoiceNumber)}`)
+                .then(response => response.json())
+                .then(invoices => {
+                    if (invoices && invoices.length > 0) {
+                        displayInvoices(invoices);
+                    } else {
+                        showEmptyState('Tagihan tidak ditemukan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Terjadi kesalahan saat memuat tagihan');
+                });
+        }
+
+        function displayInvoices(invoices) {
+            const resultDiv = document.getElementById('searchResult');
+            const invoiceListDiv = document.getElementById('invoiceList');
+            const invoiceGrid = document.getElementById('invoiceGrid');
+
+            if (!invoices || invoices.length === 0) {
+                showEmptyState('Tidak ada tagihan yang perlu dibayar');
+                return;
+            }
+
+            // Filter only unpaid/pending invoices
+            const unpaidInvoices = invoices.filter(inv => 
+                inv.payment_status === 'unpaid' || inv.payment_status === 'partial'
+            );
+
+            if (unpaidInvoices.length === 0) {
+                showSuccess('Semua tagihan sudah lunas! 🎉');
+                invoiceListDiv.style.display = 'none';
+                return;
+            }
+
+            // Display invoices
+            invoiceGrid.innerHTML = unpaidInvoices.map(invoice => createInvoiceCard(invoice)).join('');
+            invoiceListDiv.style.display = 'block';
+            resultDiv.innerHTML = '';
+        }
+
+        function createInvoiceCard(invoice) {
+            const statusClass = getStatusClass(invoice.status, invoice.due_date);
+            const amountFormatted = formatCurrency(invoice.total_amount);
+            const dueDate = formatDate(invoice.due_date);
+
+            return `
+                <div class="invoice-card" onclick="viewPayment('${invoice.id}')">
+                    <div class="invoice-header">
+                        <div class="invoice-number">${invoice.invoice_number}</div>
+                        <div class="invoice-status ${statusClass}">
+                            ${statusClass === 'status-overdue' ? 'Terlambat' : 
+                              invoice.payment_status === 'partial' ? 'Sebagian' : 'Belum Dibayar'}
+                        </div>
+                    </div>
+                    
+                    <div class="invoice-amount">${amountFormatted}</div>
+                    
+                    <div class="invoice-details">
+                        <p><strong>Kode Pelanggan:</strong> ${invoice.customer?.customer_code || '-'}</p>
+                        <p><strong>Nama:</strong> ${invoice.customer?.full_name || '-'}</p>
+                        <p><strong>Periode Tagihan:</strong> ${formatDate(invoice.issue_date)} - ${dueDate}</p>
+                        <p><strong>Jatuh Tempo:</strong> ${dueDate}</p>
+                        ${invoice.payment_status === 'partial' ? 
+                          `<p><strong>Sudah Dibayar:</strong> ${formatCurrency(invoice.paid_amount)}</p>` : ''}
+                    </div>
+
+                    <div class="payment-methods">
+                        <span class="payment-method">VA</span>
+                        <span class="payment-method">E-Wallet</span>
+                        <span class="payment-method">QRIS</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewPayment(invoiceId) {
+            window.location.href = `payment.html?id=${invoiceId}`;
+        }
+
+        function getStatusClass(status, dueDate) {
+            const today = new Date();
+            const due = new Date(dueDate);
+
+            if (status === 'paid') {
+                return 'status-paid';
+            }
+
+            if (due < today) {
+                return 'status-overdue';
+            }
+
+            return 'status-pending';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        function showLoading() {
+            document.getElementById('searchResult').innerHTML = '<div class="loading">Memuat data...</div>';
+            document.getElementById('invoiceList').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('searchResult').innerHTML = `
+                <div class="error">
+                    <strong>⚠️ Error:</strong> ${message}
+                </div>
+            `;
+            document.getElementById('invoiceList').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('searchResult').innerHTML = `
+                <div class="success">
+                    <strong>✅ ${message}</strong>
+                </div>
+            `;
+            document.getElementById('invoiceList').style.display = 'none';
+        }
+
+        function showEmptyState(message) {
+            document.getElementById('searchResult').innerHTML = `
+                <div class="empty-state">
+                    <h3>📋 Tidak Ada Tagihan</h3>
+                    <p>${message}</p>
+                    <p style="margin-top: 10px;">Silakan periksa kode pelanggan atau nomor invoice Anda.</p>
+                </div>
+            `;
+            document.getElementById('invoiceList').style.display = 'none';
+        }
+
+        // Handle Enter key press
+        document.getElementById('customerCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchInvoices();
+            }
+        });
+    </script>
+</body>
+</html>
