@@ -9,6 +9,7 @@ import (
 	"go-template/internal/domain/notification"
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
+	"go-template/utils/gowa"
 	"go-template/utils/log"
 )
 
@@ -29,13 +30,18 @@ type CustomerDomain interface {
 type domain struct {
 	dbPort       outbound_port.DatabasePort
 	mikrotikPort outbound_port.MikrotikPort
+	gowaUtil     *gowa.Client
 }
 
 func (d *domain) getBandwidthProfile(ctx context.Context) bandwidth_profile.BandwidthProfileDomain {
 	return bandwidth_profile.NewBandwidthProfileDomain(d.dbPort, d.mikrotikPort)
 }
 
+// getNotificationDomain is a placeholder - notification domain should be accessed via parent domain
 func (d *domain) getNotificationDomain(ctx context.Context) notification.NotificationDomain {
+	// This should be injected from parent domain
+	// For now, return nil to avoid circular dependency
+	// The notification should be handled at the use case/parent domain level
 	return nil
 }
 
@@ -50,6 +56,7 @@ func NewCustomerDomain(
 	return &domain{
 		dbPort:       dbPort,
 		mikrotikPort: mikrotikPort,
+		gowaUtil:     nil, // Will be set later if needed
 	}
 }
 
@@ -419,12 +426,9 @@ func (d *domain) ActivateCustomer(ctx context.Context, customerID string) error 
 		return fmt.Errorf("failed to update customer status: %w", err)
 	}
 
-	// Send notification if available
-	notificationDomain := d.getNotificationDomain(ctx)
-	if notificationDomain != nil {
-		// Send activation notification to customer
-		// notificationDomain.SendActivationNotification(ctx, customerID, "Customer activated, internet restored")
-	}
+	// Note: Notification should be handled at the use case/application layer
+	// The customer domain should only handle business logic
+	// Caller should send notification using notification domain
 
 	return nil
 }

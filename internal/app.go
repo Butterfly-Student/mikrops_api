@@ -26,10 +26,11 @@ import (
 	"go-template/utils/activity"
 	"go-template/utils/database"
 	"go-template/utils/email"
+	"go-template/utils/gowa"
 	"go-template/utils/log"
 	"go-template/utils/rabbitmq"
 	"go-template/utils/redis"
-	"go-template/utils/whatsapp"
+	"go-template/utils/settings"
 	"go-template/utils/xendit"
 
 	"github.com/casbin/casbin/v3"
@@ -69,23 +70,26 @@ func NewApp() *App {
 
 	dbPort, enforcer := databaseOutbound(ctx)
 
-	// Initialize email utility
-	emailUtil := email.NewEmailUtil(email.EmailConfig{
-		SMTPHost:     os.Getenv("SMTP_HOST"),
-		SMTPPort:     os.Getenv("SMTP_PORT"),
-		SMTPUser:     os.Getenv("SMTP_USER"),
-		SMTPPassword: os.Getenv("SMTP_PASSWORD"),
-		FromEmail:    os.Getenv("SMTP_FROM_EMAIL"),
-		FromName:     os.Getenv("SMTP_FROM_NAME"),
-		IsEnabled:    os.Getenv("SMTP_ENABLED") == "true",
-	})
+	// Initialize email utility from database settings (with .env fallback)
+	emailConfig := email.EmailConfig{
+		SMTPHost:     settings.GetStringSettingWithDefault(dbPort, "email.smtp_host", os.Getenv("SMTP_HOST")),
+		SMTPPort:     settings.GetStringSettingWithDefault(dbPort, "email.smtp_port", os.Getenv("SMTP_PORT")),
+		SMTPUser:     settings.GetStringSettingWithDefault(dbPort, "email.smtp_user", os.Getenv("SMTP_USER")),
+		SMTPPassword: settings.GetStringSettingWithDefault(dbPort, "email.smtp_password", os.Getenv("SMTP_PASSWORD")),
+		FromEmail:    settings.GetStringSettingWithDefault(dbPort, "email.from_email", os.Getenv("SMTP_FROM_EMAIL")),
+		FromName:     settings.GetStringSettingWithDefault(dbPort, "email.from_name", os.Getenv("SMTP_FROM_NAME")),
+		IsEnabled:    settings.GetBoolSettingWithDefault(dbPort, "email.enabled", os.Getenv("SMTP_ENABLED") == "true"),
+	}
+	emailUtil := email.NewEmailUtil(emailConfig)
 
-	// Initialize WhatsApp utility
-	whatsappUtil := whatsapp.NewWhatsAppUtil(whatsapp.WhatsAppConfig{
-		APIURL:  os.Getenv("WHATSAPP_API_URL"),
-		APIKey:  os.Getenv("WHATSAPP_API_KEY"),
-		Enabled: os.Getenv("WHATSAPP_ENABLED") == "true",
-	})
+	// Initialize Gowa utility for WhatsApp from database settings (with .env fallback)
+	gowaConfig := gowa.GowaConfig{
+		BaseURL: settings.GetStringSettingWithDefault(dbPort, "gowa.api_url", os.Getenv("GOWA_API_URL")),
+		APIKey:  settings.GetStringSettingWithDefault(dbPort, "gowa.api_key", os.Getenv("GOWA_API_KEY")),
+		Timeout:  settings.GetIntSettingWithDefault(dbPort, "gowa.timeout", 30),
+		Enabled: settings.GetBoolSettingWithDefault(dbPort, "gowa.enabled", os.Getenv("GOWA_ENABLED") == "true"),
+	}
+	gowaUtil := gowa.NewClient(gowaConfig)
 
 	domain := domain.NewDomain(
 		dbPort,
@@ -94,7 +98,7 @@ func NewApp() *App {
 		workflowOutbound(ctx),
 		mikrotikOutbound(),
 		emailUtil,
-		whatsappUtil,
+		gowaUtil,
 		enforcer,
 	)
 

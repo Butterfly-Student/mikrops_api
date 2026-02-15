@@ -8,8 +8,9 @@ import (
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
 	"go-template/utils/email"
+	"go-template/utils/gowa"
 	"go-template/utils/log"
-	"go-template/utils/whatsapp"
+	"go-template/utils/settings"
 )
 
 type NotificationDomain interface {
@@ -31,23 +32,32 @@ type NotificationDomain interface {
 	SendInvoiceReminder(ctx context.Context, customerID string, invoiceID string, days int) error
 	SendPaymentFailed(ctx context.Context, customerID string, invoiceID string, reason string) error
 	SendInvoiceCreated(ctx context.Context, customerID string, invoiceID string) error
+
+	// Customer Status Notifications
+	SendActivationNotification(ctx context.Context, customerID string, message string) error
+	SendIsolationNotification(ctx context.Context, customerID string, reason string) error
+	SendReactivationNotification(ctx context.Context, customerID string, message string) error
+
+	// Group Notifications
+	SendToGroup(ctx context.Context, groupID string, message string) error
+	SendPPPoEConnectionNotification(ctx context.Context, customerID string, status string, details map[string]string) error
 }
 
 type domain struct {
-	dbPort       outbound_port.DatabasePort
-	emailUtil    *email.EmailUtil
-	whatsappUtil *whatsapp.WhatsAppUtil
+	dbPort    outbound_port.DatabasePort
+	emailUtil *email.EmailUtil
+	gowaUtil  *gowa.Client
 }
 
 func NewNotificationDomain(
 	dbPort outbound_port.DatabasePort,
 	emailUtil *email.EmailUtil,
-	whatsappUtil *whatsapp.WhatsAppUtil,
+	gowaUtil *gowa.Client,
 ) NotificationDomain {
 	return &domain{
-		dbPort:       dbPort,
-		emailUtil:    emailUtil,
-		whatsappUtil: whatsappUtil,
+		dbPort:    dbPort,
+		emailUtil: emailUtil,
+		gowaUtil:  gowaUtil,
 	}
 }
 
@@ -103,7 +113,7 @@ func (d *domain) SendNotification(ctx context.Context, id string) error {
 		sendErr = d.emailUtil.SendEmail(notification.Recipient, subject, notification.Content)
 	case "whatsapp":
 		message := notification.Content
-		sendErr = d.whatsappUtil.SendMessage(notification.Recipient, message)
+		_, sendErr = d.gowaUtil.SendTextMessage(notification.Recipient, message)
 	case "sms":
 		// SMS implementation can be added later
 		sendErr = fmt.Errorf("SMS not implemented yet")
@@ -460,4 +470,176 @@ Your Billing Team
 	}
 
 	return nil
+}
+
+// SendActivationNotification sends a notification when customer is activated/reactivated
+func (d *domain) SendActivationNotification(ctx context.Context, customerID string, message string) error {
+	customer, err := d.dbPort.Customer().FindByID(customerID)
+	if err != nil {
+		return fmt.Errorf("customer not found: %w", err)
+	}
+
+	portalURL := d.getPaymentPortalURL()
+	whatsappMessage := fmt.Sprintf(
+		"🟢 *AKUN DIAKTIFKAN*\n\n"+
+			"Nama: %s\n"+
+			"Kode Pelanggan: %s\n"+
+			"Status: Aktif\n"+
+			"Layanan internet telah diaktifkan kembali.\n\n"+
+			"%s\n\n"+
+			"Terima kasih!",
+		customer.FullName,
+		customer.CustomerCode,
+		message,
+		portalURL,
+	)
+
+	if customer.Phone != "" {
+		// Send directly to customer's WhatsApp
+		_, err = d.gowaUtil.SendTextMessage(customer.Phone, whatsappMessage)
+		if err != nil {
+			log.WithContext(ctx).Error(fmt.Sprintf("Failed to send WhatsApp activation notification: %v", err))
+			// Create pending notification for retry
+			whatsappInput := model.NotificationInput{
+				Type:      "whatsapp",
+				Recipient: customer.Phone,
+				Content:   whatsappMessage,
+			}
+			if customer.ID.String() != "" {
+				whatsappInput.CustomerID = &customer.ID
+			}
+			d.CreateNotification(ctx, whatsappInput)
+		} else {
+			log.WithContext(ctx).Info(fmt.Sprintf("Activation notification sent to %s", customer.Phone))
+		}
+	}
+
+	return nil
+}
+
+// SendIsolationNotification sends a notification when customer is isolated
+func (d *domain) SendIsolationNotification(ctx context.Context, customerID string, reason string) error {
+	customer, err := d.dbPort.Customer().FindByID(customerID)
+	if err != nil {
+		return fmt.Errorf("customer not found: %w", err)
+	}
+
+	portalURL := d.getPaymentPortalURL()
+	whatsappMessage := fmt.Sprintf(
+		"🔴 *AKUN TERISOLASI*\n\n"+
+			"Nama: %s\n"+
+			"Kode Pelanggan: %s\n"+
+			"Status: Terisolasi (terbatas)\n\n"+
+			"Alasan: %s\n\n"+
+			"Silakan lakukan pembayaran melalui portal:\n%s\n\n"+
+			"Terima kasih!",
+		customer.FullName,
+		customer.CustomerCode,
+		reason,
+		portalURL,
+	)
+
+	if customer.Phone != "" {
+		// Send directly to customer's WhatsApp
+		_, err = d.gowaUtil.SendTextMessage(customer.Phone, whatsappMessage)
+		if err != nil {
+			log.WithContext(ctx).Error(fmt.Sprintf("Failed to send WhatsApp isolation notification: %v", err))
+			// Create pending notification for retry
+			whatsappInput := model.NotificationInput{
+				Type:      "whatsapp",
+				Recipient: customer.Phone,
+				Content:   whatsappMessage,
+			}
+			if customer.ID.String() != "" {
+				whatsappInput.CustomerID = &customer.ID
+			}
+			d.CreateNotification(ctx, whatsappInput)
+		} else {
+			log.WithContext(ctx).Info(fmt.Sprintf("Isolation notification sent to %s", customer.Phone))
+		}
+	}
+
+	return nil
+}
+
+// SendReactivationNotification sends a notification when customer is reactivated after isolation
+func (d *domain) SendReactivationNotification(ctx context.Context, customerID string, message string) error {
+	return d.SendActivationNotification(ctx, customerID, message)
+}
+
+// SendToGroup sends a notification to a WhatsApp group
+func (d *domain) SendToGroup(ctx context.Context, groupID string, message string) error {
+	if !d.gowaUtil.IsEnabled() {
+		return fmt.Errorf("Gowa is disabled")
+	}
+
+	_, err := d.gowaUtil.SendToGroup(groupID, message)
+	if err != nil {
+		log.WithContext(ctx).Error(fmt.Sprintf("Failed to send group notification: %v", err))
+		return err
+	}
+
+	log.WithContext(ctx).Info(fmt.Sprintf("Group notification sent to %s", groupID))
+	return nil
+}
+
+// SendPPPoEConnectionNotification sends notification about PPPoE connection status
+func (d *domain) SendPPPoEConnectionNotification(ctx context.Context, customerID string, status string, details map[string]string) error {
+	customer, err := d.dbPort.Customer().FindByID(customerID)
+	if err != nil {
+		return fmt.Errorf("customer not found: %w", err)
+	}
+
+	groupID := d.getNotificationGroupID()
+	if groupID == "" {
+		return fmt.Errorf("notification group ID not configured")
+	}
+
+	// Build message based on status
+	var emoji, statusText string
+	if status == "up" || status == "active" {
+		emoji = "🟢"
+		statusText = "TERHUBUNG"
+	} else {
+		emoji = "🔴"
+		statusText = "TERPUTUS"
+	}
+
+	message := fmt.Sprintf(
+		"%s *STATUS KONEKSI PPPoE*\n\n"+
+			"Nama: %s\n"+
+			"Kode Pelanggan: %s\n"+
+			"Status: %s\n\n"+
+			"Detail:\n",
+		emoji,
+		customer.FullName,
+		customer.CustomerCode,
+		statusText,
+	)
+
+	// Add additional details
+	for key, value := range details {
+		message += fmt.Sprintf("- %s: %s\n", key, value)
+	}
+
+	// Send to group
+	return d.SendToGroup(ctx, groupID, message)
+}
+
+// Helper method to get payment portal URL
+func (d *domain) getPaymentPortalURL() string {
+	url, err := settings.GetStringSetting(d.dbPort, "payment.portal_url")
+	if err != nil {
+		return "https://portal.example.com"
+	}
+	return url
+}
+
+// Helper method to get notification group ID
+func (d *domain) getNotificationGroupID() string {
+	groupID, err := settings.GetStringSetting(d.dbPort, "whatsapp.group_notifications")
+	if err != nil {
+		return ""
+	}
+	return groupID
 }

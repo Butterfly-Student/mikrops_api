@@ -18,7 +18,7 @@ import (
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
 	"go-template/utils/email"
-	"go-template/utils/whatsapp"
+	"go-template/utils/gowa"
 	"go-template/utils/xendit"
 
 	"github.com/casbin/casbin/v3"
@@ -43,14 +43,14 @@ type Domain interface {
 }
 
 type domain struct {
-	databasePort outbound_port.DatabasePort
-	messagePort  outbound_port.MessagePort
-	cachePort    outbound_port.CachePort
-	workflowPort outbound_port.WorkflowPort
+	databasePort  outbound_port.DatabasePort
+	messagePort   outbound_port.MessagePort
+	cachePort     outbound_port.CachePort
+	workflowPort  outbound_port.WorkflowPort
 	mikrotikPort outbound_port.MikrotikPort
-	emailUtil    *email.EmailUtil
-	whatsappUtil *whatsapp.WhatsAppUtil
-	enforcer     *casbin.Enforcer
+	emailUtil     *email.EmailUtil
+	gowaUtil      *gowa.Client
+	enforcer       *casbin.Enforcer
 }
 
 func NewDomain(
@@ -60,18 +60,18 @@ func NewDomain(
 	workflowPort outbound_port.WorkflowPort,
 	mikrotikPort outbound_port.MikrotikPort,
 	emailUtil *email.EmailUtil,
-	whatsappUtil *whatsapp.WhatsAppUtil,
+	gowaUtil *gowa.Client,
 	enforcer *casbin.Enforcer,
 ) Domain {
 	return &domain{
-		databasePort: databasePort,
-		messagePort:  messagePort,
-		cachePort:    cachePort,
-		workflowPort: workflowPort,
+		databasePort:  databasePort,
+		messagePort:   messagePort,
+		cachePort:     cachePort,
+		workflowPort:  workflowPort,
 		mikrotikPort: mikrotikPort,
-		emailUtil:    emailUtil,
-		whatsappUtil: whatsappUtil,
-		enforcer:     enforcer,
+		emailUtil:     emailUtil,
+		gowaUtil:      gowaUtil,
+		enforcer:       enforcer,
 	}
 }
 
@@ -132,5 +132,5 @@ func (d *domain) Cash() cash.CashDomain {
 }
 
 func (d *domain) Notification() notification.NotificationDomain {
-	return notification.NewNotificationDomain(d.databasePort, d.emailUtil, d.whatsappUtil)
+	return notification.NewNotificationDomain(d.databasePort, d.emailUtil, d.gowaUtil)
 }
