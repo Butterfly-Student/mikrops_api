@@ -10,6 +10,7 @@ import (
 	"go-template/internal/domain/customer"
 	"go-template/internal/domain/iface"
 	"go-template/internal/domain/ippool"
+	"go-template/internal/domain/mikrotik"
 	"go-template/internal/domain/notification"
 	"go-template/internal/domain/payment"
 	"go-template/internal/domain/ping"
@@ -30,6 +31,7 @@ type Domain interface {
 	Client() client.ClientDomain
 	Auth() auth.AuthDomain
 	User() user.UserDomain
+	Mikrotik() mikrotik.MikrotikDomain
 	BandwidthProfile() bandwidth_profile.BandwidthProfileDomain
 	Customer() customer.CustomerDomain
 	SystemSetting() system_setting.SystemSettingDomain
@@ -92,6 +94,10 @@ func (d *domain) Auth() auth.AuthDomain {
 
 func (d *domain) User() user.UserDomain {
 	return user.NewUserDomain(d.databasePort)
+}
+
+func (d *domain) Mikrotik() mikrotik.MikrotikDomain {
+	return mikrotik.NewMikrotikDomain(d.databasePort.Mikrotik(), d.mikrotikPort)
 }
 
 func (d *domain) Pppoe() pppoe.PppoeDomain {

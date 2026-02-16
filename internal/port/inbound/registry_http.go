@@ -10,6 +10,7 @@ type HttpPort interface {
 	Queue() QueueHttpPort
 	Interface() InterfaceHttpPort
 	IpPool() IpPoolHttpPort
+	Mikrotik() MikrotikHttpPort
 	BandwidthProfile() BandwidthProfileHttpPort
 	Customer() CustomerHttpPort
 	SystemSetting() SystemSettingHttpPort

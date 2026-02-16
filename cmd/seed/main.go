@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/joho/godotenv"
 	"go-template/internal/seeds"
 	"go-template/utils/database"
 
@@ -13,6 +14,7 @@ import (
 )
 
 func main() {
+	_ = godotenv.Load(".env")
 	clean := flag.Bool("clean", false, "Clean seed data instead of seeding")
 	flag.Parse()
 

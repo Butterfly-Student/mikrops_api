@@ -22,10 +22,12 @@ func (s *CasbinSeeder) Seed(db *gorm.DB) error {
 		{Ptype: "p", V0: "admin", V1: "/api/v1/*", V2: "*"},
 		{Ptype: "p", V0: "admin", V1: "/api/v1/clients/*", V2: "*"},
 		{Ptype: "p", V0: "admin", V1: "/api/v1/users/*", V2: "*"},
+		{Ptype: "p", V0: "admin", V1: "/api/v1/mikrotik", V2: "*"},
 		{Ptype: "p", V0: "admin", V1: "/api/v1/mikrotik/*", V2: "*"},
 		{Ptype: "p", V0: "admin", V1: "/api/v1/pppoe/*", V2: "*"},
 		{Ptype: "p", V0: "admin", V1: "/api/v1/queues/*", V2: "*"},
 
+		{Ptype: "p", V0: "user", V1: "/api/v1/mikrotik", V2: "GET"},
 		{Ptype: "p", V0: "user", V1: "/api/v1/mikrotik/*", V2: "GET"},
 		{Ptype: "p", V0: "user", V1: "/api/v1/pppoe/secrets", V2: "GET"},
 		{Ptype: "p", V0: "user", V1: "/api/v1/queues", V2: "GET"},

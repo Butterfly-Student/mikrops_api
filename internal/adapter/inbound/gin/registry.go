@@ -51,6 +51,10 @@ func (s *adapter) IpPool() inbound_port.IpPoolHttpPort {
 	return NewIpPoolAdapter(s.domain)
 }
 
+func (s *adapter) Mikrotik() inbound_port.MikrotikHttpPort {
+	return NewMikrotikHandler(s.domain)
+}
+
 func (s *adapter) BandwidthProfile() inbound_port.BandwidthProfileHttpPort {
 	return NewBandwidthProfileHandler(s.domain)
 }

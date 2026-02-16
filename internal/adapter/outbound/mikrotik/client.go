@@ -45,3 +45,13 @@ func (a *mikrotikClientAdapter) getClient(router *model.MikrotikRouter) (*router
 	a.clients[router.ID] = client
 	return client, nil
 }
+
+func (a *mikrotikClientAdapter) TestConnection(router *model.MikrotikRouter) error {
+	client, err := a.getClient(router)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.Run("/system/identity/print")
+	return err
+}

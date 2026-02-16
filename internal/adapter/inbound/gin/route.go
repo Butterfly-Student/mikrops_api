@@ -165,6 +165,25 @@ func InitRoute(
 		bandwidthProfile.POST("/:id/sync", port.BandwidthProfile().SyncToMikrotik)
 	}
 
+	// MikroTik Router Management
+	mikrotik := app.Group("/mikrotik")
+	mikrotik.Use(port.Middleware().UserAuth())
+	{
+		// CRUD Operations
+		mikrotik.POST("", port.Mikrotik().CreateRouter)
+		mikrotik.GET("", port.Mikrotik().ListRouters)
+		mikrotik.GET("/:id", port.Mikrotik().FindRouterByID)
+		mikrotik.PUT("/:id", port.Mikrotik().UpdateRouter)
+		mikrotik.DELETE("/:id", port.Mikrotik().DeleteRouter)
+
+		// Active Router Management
+		mikrotik.POST("/:id/activate", port.Mikrotik().SetActiveRouter)
+		mikrotik.GET("/active", port.Mikrotik().GetActiveRouter)
+
+		// Health Check
+		mikrotik.POST("/:id/test", port.Mikrotik().TestRouterConnection)
+	}
+
 	// Customer Management
 	customer := app.Group("/customers")
 	{

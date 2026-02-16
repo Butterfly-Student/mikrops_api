@@ -1,5 +1,5 @@
 ### Variables
-@base_url = http://localhost:8081
+@base_url = http://localhost:8080
 @auth_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzEzMzg1ODIsImlhdCI6MTc3MTI1MjE4Miwicm9sZSI6InVzZXIiLCJzdWIiOjF9.sORwvxThLa5OowpbyerYLs4wkDxjX7Gc1l7lFReUxTQ
 
 ### 
@@ -22,8 +22,8 @@ POST {{base_url}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "john.doe@example.com",
-  "password": "password123"
+  "email": "admin@mikrotik.local",
+  "password": "Admin@123"
 }
 
 > {% 

@@ -109,5 +109,9 @@ func GetDatabaseString() string {
 }
 
 func GetMigrationDir() string {
-	return fmt.Sprintf("./internal/migration/%s", os.Getenv("OUTBOUND_DB_DRIVER"))
+	driver := os.Getenv("OUTBOUND_DATABASE_DRIVER")
+	if driver == "" {
+		driver = "postgres"
+	}
+	return fmt.Sprintf("./internal/migration/%s", driver)
 }

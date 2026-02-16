@@ -66,6 +66,9 @@ type MikrotikPort interface {
 	AddFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
 	RemoveFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
 	ListFirewallRules(router *model.MikrotikRouter) ([]model.FirewallRule, error)
+
+	// Router Management
+	TestConnection(router *model.MikrotikRouter) error
 }
 
 // MikrotikDatabasePort defines methods for managing MikroTik router configurations
@@ -78,4 +81,13 @@ type MikrotikDatabasePort interface {
 	AddFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
 	RemoveFirewallRule(router *model.MikrotikRouter, rule model.FirewallRule) error
 	ListFirewallRules(router *model.MikrotikRouter) ([]model.FirewallRule, error)
+
+	// Active Router Management
+	SetActive(id string) error
+	GetActive() (*model.MikrotikRouter, error)
+	DeactivateAll() error
+
+	// Health Management
+	UpdateLastSeen(id string) error
+	TestConnection(router *model.MikrotikRouter) error
 }

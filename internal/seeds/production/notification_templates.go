@@ -235,6 +235,9 @@ Silakan cek koneksi pelanggan.`,
 		result := db.Where("name = ?", tmpl.Name).First(&existing)
 
 		if result.Error != nil && result.Error == gorm.ErrRecordNotFound {
+			if tmpl.Variables == "" {
+				tmpl.Variables = "[]"
+			}
 			if err := db.Create(&tmpl).Error; err != nil {
 				return err
 			}

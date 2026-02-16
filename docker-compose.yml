@@ -17,11 +17,9 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgis/postgis:14-3.3-alpine
+    image: postgres:14-alpine
     ports:
       - 5432:5432
-    volumes:
-      - ~/apps/go-template:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
       - POSTGRES_USER=${POSTGRES_USER:-go-template}
