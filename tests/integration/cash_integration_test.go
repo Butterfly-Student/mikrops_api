@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/cash"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 )
@@ -42,7 +42,7 @@ func TestCashIntegration(t *testing.T) {
 	}
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
-	cashDomain := domain.NewCashDomain(dbAdapter)
+	cashDomain := cash.NewCashDomain(dbAdapter)
 
 	Convey("Test Cash Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -175,12 +175,13 @@ func TestCashIntegration(t *testing.T) {
 		})
 
 		Convey("Setup test data - Customer", func() {
+			isActiveProfile := true
 			profile := &model.BandwidthProfile{
 				Name:         "Cash Test Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActiveProfile,
 			}
 			err := pgContainer.DB.Create(profile).Error
 			So(err, ShouldBeNil)
@@ -411,7 +412,7 @@ func TestCashIntegration(t *testing.T) {
 				Convey("ApproveTransaction approves transaction", func() {
 					approvedBy := uuid.New()
 
-					err := cashDomain.ApproveTransaction(ctx, transaction.ID.String(), approvedBy)
+					err := cashDomain.ApproveTransaction(ctx, transaction.ID.String(), approvedBy.String())
 					So(err, ShouldBeNil)
 
 					updated, err := cashDomain.GetTransaction(ctx, transaction.ID.String())
@@ -425,7 +426,7 @@ func TestCashIntegration(t *testing.T) {
 				Convey("RejectTransaction rejects transaction", func() {
 					rejectedBy := uuid.New()
 
-					err := cashDomain.RejectTransaction(ctx, transaction.ID.String(), rejectedBy)
+					err := cashDomain.RejectTransaction(ctx, transaction.ID.String(), rejectedBy.String(), "Test rejection reason")
 					So(err, ShouldBeNil)
 
 					updated, err := cashDomain.GetTransaction(ctx, transaction.ID.String())
@@ -493,13 +494,13 @@ func TestCashIntegration(t *testing.T) {
 
 			Convey("ApproveTransaction with invalid ID returns error", func() {
 				approvedBy := uuid.New()
-				err := cashDomain.ApproveTransaction(ctx, uuid.New().String(), approvedBy)
+				err := cashDomain.ApproveTransaction(ctx, uuid.New().String(), approvedBy.String())
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("RejectTransaction with invalid ID returns error", func() {
 				rejectedBy := uuid.New()
-				err := cashDomain.RejectTransaction(ctx, uuid.New().String(), rejectedBy)
+				err := cashDomain.RejectTransaction(ctx, uuid.New().String(), rejectedBy.String(), "Test rejection")
 				So(err, ShouldNotBeNil)
 			})
 		})

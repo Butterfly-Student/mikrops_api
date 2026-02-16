@@ -139,12 +139,8 @@ func TestGetIsolatedProfile(t *testing.T) {
 			Category:    category,
 		}
 
-		filter := model.BandwidthProfileFilter{
-			Categories: []string{category},
-		}
-
 		mockBandwidthProfileDB.EXPECT().
-			Find(filter).
+			FindByCategory(category).
 			Return([]model.BandwidthProfile{*expectedProfile}, nil).
 			Times(1)
 
@@ -157,12 +153,9 @@ func TestGetIsolatedProfile(t *testing.T) {
 
 	t.Run("error - no isolated profile found", func(t *testing.T) {
 		category := "isolated"
-		filter := model.BandwidthProfileFilter{
-			Categories: []string{category},
-		}
 
 		mockBandwidthProfileDB.EXPECT().
-			Find(filter).
+			FindByCategory(category).
 			Return([]model.BandwidthProfile{}, nil).
 			Times(1)
 

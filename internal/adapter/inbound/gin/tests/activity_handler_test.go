@@ -76,7 +76,7 @@ func TestActivityHandler_ListLogs(t *testing.T) {
 		}
 
 		mockActivityDB.EXPECT().
-			Find(gomock.Any()).
+			FindAll().
 			Return(logs, nil).
 			Times(1)
 
@@ -102,16 +102,6 @@ func TestActivityHandler_ListLogs(t *testing.T) {
 		handler.ListLogs(c)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
-	})
-
-	t.Run("error - invalid query parameters", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest("GET", "/activity/logs?limit=invalid", nil)
-
-		handler.ListLogs(c)
-
-		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 }
 

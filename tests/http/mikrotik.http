@@ -1,0 +1,116 @@
+### Variables
+@base_url = http://localhost:8080
+@auth_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzEzMzg1ODIsImlhdCI6MTc3MTI1MjE4Miwicm9sZSI6InVzZXIiLCJzdWIiOjF9.sORwvxThLa5OowpbyerYLs4wkDxjX7Gc1l7lFReUxTQ
+@secret_id = secret_id_from_mikrotik
+@profile_id = profile_id_from_mikrotik
+
+### 
+### 1. Create PPPoE Secret
+### Model: PppoeSecret
+POST {{base_url}}/pppoe/secrets
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "user_pppoe_1",
+  "password": "secure_password",
+  "service": "pppoe",
+  "profile": "default_profile",
+  "comment": "Created via API"
+}
+
+### 
+### 2. List PPPoE Secrets
+### Model: PppoeSecret
+GET {{base_url}}/pppoe/secrets
+Authorization: Bearer {{auth_token}}
+
+### 
+### 3. Get PPPoE Secret
+GET {{base_url}}/pppoe/secrets/{{secret_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 4. Update PPPoE Secret
+PUT {{base_url}}/pppoe/secrets/{{secret_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "password": "new_secure_password",
+  "comment": "Updated comment"
+}
+
+### 
+### 5. Delete PPPoE Secret
+DELETE {{base_url}}/pppoe/secrets/{{secret_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 6. Create PPPoE Profile
+### Model: PppoeProfile
+POST {{base_url}}/pppoe/profiles
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "profile_10mbps",
+  "rate_limit": "10M/10M",
+  "bridge": "bridge_local",
+  "comment": "10 Mbps Profile"
+}
+
+### 
+### 7. List PPPoE Profiles
+GET {{base_url}}/pppoe/profiles
+Authorization: Bearer {{auth_token}}
+
+### 
+### 8. List Active Sessions
+### Model: PppoeActive
+GET {{base_url}}/pppoe/sessions/active
+Authorization: Bearer {{auth_token}}
+
+### 
+### 9. List Inactive Sessions
+GET {{base_url}}/pppoe/sessions/inactive
+Authorization: Bearer {{auth_token}}
+
+### 
+### 10. Webhook: PPPoE On Up
+### Model: PppoeCallbackData
+POST {{base_url}}/webhooks/pppoe/on-up
+Content-Type: application/json
+
+{
+  "user": "user_pppoe_1",
+  "ip-address": "192.168.10.5",
+  "caller-id": "AA:BB:CC:DD:EE:FF",
+  "session-id": "0x12345",
+  "interface": "pppoe-out1",
+  "uptime": "10s",
+  "bytes-in": 1024,
+  "bytes-out": 2048,
+  "packets-in": 10,
+  "packets-out": 20,
+  "router_id": 1
+}
+
+### 
+### 11. Webhook: PPPoE On Down
+POST {{base_url}}/webhooks/pppoe/on-down
+Content-Type: application/json
+
+{
+  "user": "user_pppoe_1",
+  "ip-address": "192.168.10.5",
+  "caller-id": "AA:BB:CC:DD:EE:FF",
+  "session-id": "0x12345",
+  "interface": "pppoe-out1",
+  "uptime": "1h",
+  "bytes-in": 1024000,
+  "bytes-out": 2048000,
+  "packets-in": 1000,
+  "packets-out": 2000,
+  "router_id": 1
+}

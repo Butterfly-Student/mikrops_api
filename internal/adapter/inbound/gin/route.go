@@ -169,7 +169,7 @@ func InitRoute(
 	customer := app.Group("/customers")
 	{
 		// Public route for payment portal
-		customer.GET("/:code", port.Customer().GetCustomerByCode)
+		customer.GET("/by-code/:code", port.Customer().GetCustomerByCode)
 
 		// Authenticated routes
 		customerAuth := customer.Use(port.Middleware().UserAuth())

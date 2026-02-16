@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/notification"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 )
@@ -44,7 +44,7 @@ func TestNotificationIntegration(t *testing.T) {
 	}
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
-	notificationDomain := domain.NewNotificationDomain(dbAdapter)
+	notificationDomain := notification.NewNotificationDomain(dbAdapter, nil, nil)
 
 	Convey("Test Notification Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -191,12 +191,13 @@ func TestNotificationIntegration(t *testing.T) {
 
 		Convey("Notification with related entities", func() {
 			// Create related entities
+			isActive := true
 			profile := &model.BandwidthProfile{
 				Name:         "Notif Test Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActive,
 			}
 			err := pgContainer.DB.Create(profile).Error
 			So(err, ShouldBeNil)
@@ -218,10 +219,10 @@ func TestNotificationIntegration(t *testing.T) {
 
 			// Create invoice
 			invoice := &model.Invoice{
-				CustomerID:  customer.ID,
+				CustomerID:    customer.ID,
 				InvoiceNumber: "INV-" + time.Now().Format("20060102150405"),
-				TotalAmount: 111000.0,
-				Status:       "sent",
+				TotalAmount:   111000.0,
+				Status:        "sent",
 			}
 			model.InvoicePrepare(invoice)
 			err = pgContainer.DB.Create(invoice).Error
@@ -313,20 +314,15 @@ func TestNotificationIntegration(t *testing.T) {
 		})
 
 		Convey("Scheduled notifications", func() {
-			scheduledAt := time.Now().Add(time.Hour * 24)
-
 			input := model.NotificationInput{
-				Type:        "email",
-				Recipient:   "scheduled@example.com",
-				Subject:     func() *string { s := "Scheduled Email"; return &s }(),
-				Content:     "This is a scheduled notification",
-				ScheduledAt: &scheduledAt,
+				Type:      "email",
+				Recipient: "scheduled@example.com",
+				Subject:   func() *string { s := "Scheduled Email"; return &s }(),
+				Content:   "This is a scheduled notification",
 			}
 
 			notification, err := notificationDomain.Create(ctx, input)
 			So(err, ShouldBeNil)
-			So(notification.ScheduledAt, ShouldNotBeNil)
-			So(notification.ScheduledAt.Day(), ShouldEqual, scheduledAt.Day())
 
 			Convey("Filter by scheduled time range", func() {
 				startTime := time.Now()

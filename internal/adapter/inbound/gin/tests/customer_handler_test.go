@@ -27,8 +27,10 @@ func TestCustomerHandler(t *testing.T) {
 		mockDatabasePort := mock_outbound_port.NewMockDatabasePort(mockCtrl)
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
 		mockCustomerDB := mock_outbound_port.NewMockCustomerDatabasePort(mockCtrl)
+		mockBandwidthProfileDB := mock_outbound_port.NewMockBandwidthProfileDatabasePort(mockCtrl)
 
 		mockDatabasePort.EXPECT().Customer().Return(mockCustomerDB).AnyTimes()
+		mockDatabasePort.EXPECT().BandwidthProfile().Return(mockBandwidthProfileDB).AnyTimes()
 
 		dom := domain.NewDomain(mockDatabasePort, nil, nil, nil, mockMikrotikPort, nil, nil, nil)
 		handler := gin_inbound_adapter.NewCustomerHandler(dom)

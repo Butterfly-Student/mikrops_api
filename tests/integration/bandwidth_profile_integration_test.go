@@ -13,8 +13,9 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"gorm.io/gorm"
 
+	mikrotik_outbound_adapter "go-template/internal/adapter/outbound/mikrotik"
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/bandwidth_profile"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 )
@@ -38,7 +39,8 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 	}
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
-	bandwidthProfileDomain := domain.NewBandwidthProfileDomain(dbAdapter)
+	mikrotikAdapter := mikrotik_outbound_adapter.NewMikrotikClientAdapter()
+	bandwidthProfileDomain := bandwidth_profile.NewBandwidthProfileDomain(dbAdapter, mikrotikAdapter)
 
 	Convey("Test BandwidthProfile Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -73,7 +75,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				IsVisible:         &isVisible,
 			}
 
-			profile, err := bandwidthProfileDomain.Create(ctx, input)
+			profile, err := bandwidthProfileDomain.CreateProfile(ctx, input)
 			So(err, ShouldBeNil)
 			So(profile, ShouldNotBeNil)
 			So(profile.ProfileCode, ShouldEqual, profileCode)
@@ -95,7 +97,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 			So(*profile.Priority, ShouldEqual, 8)
 
 			Convey("GetBandwidthProfile retrieves created profile", func() {
-				found, err := bandwidthProfileDomain.Get(ctx, profile.ID.String())
+				found, err := bandwidthProfileDomain.GetProfile(ctx, profile.ID.String())
 				So(err, ShouldBeNil)
 				So(found.ID, ShouldEqual, profile.ID)
 				So(found.ProfileCode, ShouldEqual, profileCode)
@@ -103,7 +105,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 
 			Convey("ListBandwidthProfiles returns profiles", func() {
 				filter := model.BandwidthProfileFilter{}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 1)
 			})
@@ -112,7 +114,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				filter := model.BandwidthProfileFilter{
 					Categories: []string{"pppoe"},
 				}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 1)
 				for _, p := range profiles {
@@ -124,7 +126,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				filter := model.BandwidthProfileFilter{
 					IsActive: &isActive,
 				}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 1)
 				for _, p := range profiles {
@@ -137,7 +139,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				filter := model.BandwidthProfileFilter{
 					IsVisible: &isVisible,
 				}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 1)
 				for _, p := range profiles {
@@ -157,7 +159,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 					PriceMonthly: newPrice,
 				}
 
-				updated, err := bandwidthProfileDomain.Update(ctx, profile.ID.String(), input)
+				updated, err := bandwidthProfileDomain.UpdateProfile(ctx, profile.ID.String(), input)
 				So(err, ShouldBeNil)
 				So(updated.Name, ShouldEqual, "Updated Profile 10Mbps")
 				So(updated.Description, ShouldNotBeNil)
@@ -166,11 +168,11 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 			})
 
 			Convey("DeleteBandwidthProfile soft deletes profile", func() {
-				err := bandwidthProfileDomain.Delete(ctx, profile.ID.String())
+				err := bandwidthProfileDomain.DeleteProfile(ctx, profile.ID.String())
 				So(err, ShouldBeNil)
 
 				// Verify soft delete
-				_, err = bandwidthProfileDomain.Get(ctx, profile.ID.String())
+				_, err = bandwidthProfileDomain.GetProfile(ctx, profile.ID.String())
 				So(err, ShouldNotBeNil)
 			})
 		})
@@ -196,7 +198,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 					PriceMonthly:   priceMonthly,
 				}
 
-				profile, err := bandwidthProfileDomain.Create(ctx, input)
+				profile, err := bandwidthProfileDomain.CreateProfile(ctx, input)
 				So(err, ShouldBeNil)
 				So(profile.Category, ShouldEqual, category)
 			}
@@ -205,7 +207,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				filter := model.BandwidthProfileFilter{
 					Categories: []string{"pppoe", "ip-static"},
 				}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 2)
 			})
@@ -238,7 +240,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				PriceMonthly:   priceMonthly,
 			}
 
-			profile, err := bandwidthProfileDomain.Create(ctx, input)
+			profile, err := bandwidthProfileDomain.CreateProfile(ctx, input)
 			So(err, ShouldBeNil)
 			So(profile.BurstDownload, ShouldNotBeNil)
 			So(*profile.BurstDownload, ShouldEqual, int64(20480))
@@ -277,7 +279,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				PriceMonthly:   priceMonthly,
 			}
 
-			profile, err := bandwidthProfileDomain.Create(ctx, input)
+			profile, err := bandwidthProfileDomain.CreateProfile(ctx, input)
 			So(err, ShouldBeNil)
 			So(profile.Priority, ShouldNotBeNil)
 			So(*profile.Priority, ShouldEqual, 5)
@@ -308,7 +310,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				PriceMonthly:   priceMonthly,
 			}
 
-			_, err := bandwidthProfileDomain.Create(ctx, input)
+			_, err := bandwidthProfileDomain.CreateProfile(ctx, input)
 			So(err, ShouldBeNil)
 
 			// Try to create duplicate
@@ -322,12 +324,12 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				PriceMonthly:   priceMonthly,
 			}
 
-			_, err = bandwidthProfileDomain.Create(ctx, input2)
+			_, err = bandwidthProfileDomain.CreateProfile(ctx, input2)
 			So(err, ShouldNotBeNil)
 		})
 
 		Convey("GetBandwidthProfile with invalid ID returns error", func() {
-			_, err := bandwidthProfileDomain.Get(ctx, uuid.New().String())
+			_, err := bandwidthProfileDomain.GetProfile(ctx, uuid.New().String())
 			So(err, ShouldNotBeNil)
 		})
 
@@ -335,12 +337,12 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 			input := model.BandwidthProfileInput{
 				Name: "Updated Name",
 			}
-			_, err := bandwidthProfileDomain.Update(ctx, uuid.New().String(), input)
+			_, err := bandwidthProfileDomain.UpdateProfile(ctx, uuid.New().String(), input)
 			So(err, ShouldNotBeNil)
 		})
 
 		Convey("DeleteBandwidthProfile with invalid ID returns error", func() {
-			err := bandwidthProfileDomain.Delete(ctx, uuid.New().String())
+			err := bandwidthProfileDomain.DeleteProfile(ctx, uuid.New().String())
 			So(err, ShouldNotBeNil)
 		})
 
@@ -367,13 +369,13 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 					SortOrder:      &sortOrder,
 				}
 
-				_, err := bandwidthProfileDomain.Create(ctx, input)
+				_, err := bandwidthProfileDomain.CreateProfile(ctx, input)
 				So(err, ShouldBeNil)
 			}
 
 			Convey("List all profiles", func() {
 				filter := model.BandwidthProfileFilter{}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 3)
 			})
@@ -394,7 +396,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				IsActive:       &active,
 			}
 
-			activeProfile, err := bandwidthProfileDomain.Create(ctx, activeInput)
+			activeProfile, err := bandwidthProfileDomain.CreateProfile(ctx, activeInput)
 			So(err, ShouldBeNil)
 
 			// Create inactive profile
@@ -411,7 +413,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				IsActive:       &inactive,
 			}
 
-			inactiveProfile, err := bandwidthProfileDomain.Create(ctx, inactiveInput)
+			inactiveProfile, err := bandwidthProfileDomain.CreateProfile(ctx, inactiveInput)
 			So(err, ShouldBeNil)
 
 			Convey("Filter active profiles", func() {
@@ -419,7 +421,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				filter := model.BandwidthProfileFilter{
 					IsActive: &isActive,
 				}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(profiles), ShouldBeGreaterThanOrEqualTo, 1)
 
@@ -439,7 +441,7 @@ func TestBandwidthProfileIntegration(t *testing.T) {
 				filter := model.BandwidthProfileFilter{
 					IsActive: &isActive,
 				}
-				profiles, err := bandwidthProfileDomain.List(ctx, filter)
+				profiles, err := bandwidthProfileDomain.ListProfiles(ctx, filter)
 				So(err, ShouldBeNil)
 
 				// Verify our inactive profile is in the list

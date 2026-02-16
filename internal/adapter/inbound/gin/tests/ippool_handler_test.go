@@ -26,6 +26,9 @@ func TestIpPoolHandler(t *testing.T) {
 
 		mockDatabasePort := mock_outbound_port.NewMockDatabasePort(mockCtrl)
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
+		mockMikrotikDB := mock_outbound_port.NewMockMikrotikDatabasePort(mockCtrl)
+
+		mockDatabasePort.EXPECT().Mikrotik().Return(mockMikrotikDB).AnyTimes()
 
 		dom := domain.NewDomain(mockDatabasePort, nil, nil, nil, mockMikrotikPort, nil, nil, nil)
 		handler := gin_inbound_adapter.NewIpPoolAdapter(dom)
@@ -55,8 +58,13 @@ func TestIpPoolHandler(t *testing.T) {
 				req.Header.Set("Content-Type", "application/json")
 				w := httptest.NewRecorder()
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					CreateIpPool(routerID, gomock.Any()).
+					CreateIpPool(gomock.Any(), gomock.Any()).
 					Return(nil).
 					Times(1)
 
@@ -102,8 +110,13 @@ func TestIpPoolHandler(t *testing.T) {
 					Ranges: "192.168.1.100-192.168.1.200",
 				}
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					GetIpPool(routerID, poolID).
+					GetIpPool(gomock.Any(), poolID).
 					Return(expectedPool, nil).
 					Times(1)
 
@@ -122,8 +135,13 @@ func TestIpPoolHandler(t *testing.T) {
 			Convey("Not Found", func() {
 				poolID := "*1"
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					GetIpPool(routerID, poolID).
+					GetIpPool(gomock.Any(), poolID).
 					Return(nil, errors.New("pool not found")).
 					Times(1)
 
@@ -162,8 +180,13 @@ func TestIpPoolHandler(t *testing.T) {
 					},
 				}
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					ListIpPools(routerID).
+					ListIpPools(gomock.Any()).
 					Return(pools, nil).
 					Times(1)
 
@@ -205,8 +228,13 @@ func TestIpPoolHandler(t *testing.T) {
 				req.Header.Set("Content-Type", "application/json")
 				w := httptest.NewRecorder()
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					UpdateIpPool(routerID, gomock.Any()).
+					UpdateIpPool(gomock.Any(), gomock.Any()).
 					Return(nil).
 					Times(1)
 
@@ -220,8 +248,13 @@ func TestIpPoolHandler(t *testing.T) {
 			Convey("Success", func() {
 				poolID := "*1"
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					DeleteIpPool(routerID, poolID).
+					DeleteIpPool(gomock.Any(), poolID).
 					Return(nil).
 					Times(1)
 
@@ -236,8 +269,13 @@ func TestIpPoolHandler(t *testing.T) {
 			Convey("Error", func() {
 				poolID := "*1"
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
-					DeleteIpPool(routerID, poolID).
+					DeleteIpPool(gomock.Any(), poolID).
 					Return(errors.New("failed to delete pool")).
 					Times(1)
 

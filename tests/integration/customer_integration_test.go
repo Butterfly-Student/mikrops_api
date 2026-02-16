@@ -13,8 +13,9 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"gorm.io/gorm"
 
+	mikrotik_outbound_adapter "go-template/internal/adapter/outbound/mikrotik"
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/customer"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 )
@@ -42,7 +43,9 @@ func TestCustomerIntegration(t *testing.T) {
 	}
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
-	customerDomain := domain.NewCustomerDomain(dbAdapter)
+	mikrotikAdapter := mikrotik_outbound_adapter.NewMikrotikClientAdapter()
+	bandwidthProfileAdapter := postgres_outbound_adapter.NewBandwidthProfileAdapter(pgContainer.DB)
+	customerDomain := customer.NewCustomerDomain(dbAdapter, mikrotikAdapter, bandwidthProfileAdapter)
 
 	Convey("Test Customer Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -52,12 +55,13 @@ func TestCustomerIntegration(t *testing.T) {
 
 		Convey("Setup test data", func() {
 			// Create bandwidth profile
+			isActiveProfile := true
 			profile := &model.BandwidthProfile{
 				Name:         "Test Customer Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActiveProfile,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -110,7 +114,7 @@ func TestCustomerIntegration(t *testing.T) {
 					GracePeriodDays:   &gracePeriodDays,
 				}
 
-				customer, err := customerDomain.Create(ctx, input)
+				customer, err := customerDomain.CreateCustomer(ctx, input)
 				So(err, ShouldBeNil)
 				So(customer, ShouldNotBeNil)
 				So(customer.CustomerCode, ShouldEqual, customerCode)
@@ -123,7 +127,7 @@ func TestCustomerIntegration(t *testing.T) {
 				So(*customer.RouterID, ShouldEqual, routerID)
 
 				Convey("GetCustomer retrieves created customer", func() {
-					found, err := customerDomain.Get(ctx, customer.ID.String())
+					found, err := customerDomain.GetCustomer(ctx, customer.ID.String())
 					So(err, ShouldBeNil)
 					So(found.ID, ShouldEqual, customer.ID)
 					So(found.CustomerCode, ShouldEqual, customerCode)
@@ -131,7 +135,7 @@ func TestCustomerIntegration(t *testing.T) {
 
 				Convey("ListCustomers returns customers", func() {
 					filter := model.CustomerFilter{}
-					customers, err := customerDomain.List(ctx, filter)
+					customers, err := customerDomain.ListCustomers(ctx, filter)
 					So(err, ShouldBeNil)
 					So(len(customers), ShouldBeGreaterThanOrEqualTo, 1)
 				})
@@ -140,7 +144,7 @@ func TestCustomerIntegration(t *testing.T) {
 					filter := model.CustomerFilter{
 						ProfileIDs: []uuid.UUID{profile.ID},
 					}
-					customers, err := customerDomain.List(ctx, filter)
+					customers, err := customerDomain.ListCustomers(ctx, filter)
 					So(err, ShouldBeNil)
 					So(len(customers), ShouldBeGreaterThanOrEqualTo, 1)
 				})
@@ -149,7 +153,7 @@ func TestCustomerIntegration(t *testing.T) {
 					filter := model.CustomerFilter{
 						Status: []string{"active"},
 					}
-					customers, err := customerDomain.List(ctx, filter)
+					customers, err := customerDomain.ListCustomers(ctx, filter)
 					So(err, ShouldBeNil)
 					So(len(customers), ShouldBeGreaterThanOrEqualTo, 1)
 				})
@@ -165,7 +169,7 @@ func TestCustomerIntegration(t *testing.T) {
 						Status: &newStatus,
 					}
 
-					updated, err := customerDomain.Update(ctx, customer.ID.String(), input)
+					updated, err := customerDomain.UpdateCustomer(ctx, customer.ID.String(), input)
 					So(err, ShouldBeNil)
 					So(updated.Email, ShouldNotBeNil)
 					So(*updated.Email, ShouldEqual, "updated@test.com")
@@ -174,11 +178,11 @@ func TestCustomerIntegration(t *testing.T) {
 				})
 
 				Convey("DeleteCustomer soft deletes customer", func() {
-					err := customerDomain.Delete(ctx, customer.ID.String())
+					err := customerDomain.DeleteCustomer(ctx, customer.ID.String())
 					So(err, ShouldBeNil)
 
 					// Verify soft delete
-					_, err = customerDomain.Get(ctx, customer.ID.String())
+					_, err = customerDomain.GetCustomer(ctx, customer.ID.String())
 					So(err, ShouldNotBeNil)
 				})
 			})
@@ -200,7 +204,7 @@ func TestCustomerIntegration(t *testing.T) {
 					ProfileID:    &profile.ID,
 				}
 
-				_, err := customerDomain.Create(ctx, input1)
+				_, err := customerDomain.CreateCustomer(ctx, input1)
 				So(err, ShouldBeNil)
 
 				// Try to create second customer with same code
@@ -214,7 +218,7 @@ func TestCustomerIntegration(t *testing.T) {
 					ProfileID:    &profile.ID,
 				}
 
-				_, err = customerDomain.Create(ctx, input2)
+				_, err = customerDomain.CreateCustomer(ctx, input2)
 				So(err, ShouldNotBeNil)
 			})
 
@@ -235,7 +239,7 @@ func TestCustomerIntegration(t *testing.T) {
 					ProfileID:    &profile.ID,
 				}
 
-				_, err := customerDomain.Create(ctx, input1)
+				_, err := customerDomain.CreateCustomer(ctx, input1)
 				So(err, ShouldBeNil)
 
 				// Try to create second customer with same email
@@ -249,7 +253,7 @@ func TestCustomerIntegration(t *testing.T) {
 					ProfileID:    &profile.ID,
 				}
 
-				_, err = customerDomain.Create(ctx, input2)
+				_, err = customerDomain.CreateCustomer(ctx, input2)
 				So(err, ShouldNotBeNil)
 			})
 
@@ -267,12 +271,12 @@ func TestCustomerIntegration(t *testing.T) {
 					ProfileID:    &invalidProfileID,
 				}
 
-				_, err := customerDomain.Create(ctx, input)
+				_, err := customerDomain.CreateCustomer(ctx, input)
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("GetCustomer with invalid ID returns error", func() {
-				_, err := customerDomain.Get(ctx, uuid.New().String())
+				_, err := customerDomain.GetCustomer(ctx, uuid.New().String())
 				So(err, ShouldNotBeNil)
 			})
 
@@ -280,34 +284,36 @@ func TestCustomerIntegration(t *testing.T) {
 				input := model.CustomerInput{
 					FullName: "Updated Name",
 				}
-				_, err := customerDomain.Update(ctx, uuid.New().String(), input)
+				_, err := customerDomain.UpdateCustomer(ctx, uuid.New().String(), input)
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("DeleteCustomer with invalid ID returns error", func() {
-				err := customerDomain.Delete(ctx, uuid.New().String())
+				err := customerDomain.DeleteCustomer(ctx, uuid.New().String())
 				So(err, ShouldNotBeNil)
 			})
 		})
 
 		Convey("Customer Filtering", func() {
 			// Create test data
+			isActiveFilter := true
 			profile := &model.BandwidthProfile{
 				Name:         "Filter Test Profile",
 				Category:     "pppoe",
 				PriceMonthly: 150000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActiveFilter,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
 
+			isActiveFilter2 := true
 			profile2 := &model.BandwidthProfile{
 				Name:         "Filter Test Profile 2",
 				Category:     "pppoe",
 				PriceMonthly: 200000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActiveFilter2,
 			}
 			err = dbAdapter.BandwidthProfile().Create(profile2)
 			So(err, ShouldBeNil)
@@ -348,10 +354,10 @@ func TestCustomerIntegration(t *testing.T) {
 					Status:       &status,
 					ExpiryDate:   &expiryDate,
 					RouterID:     &routerID,
-					ProfileID:    profileID,
+					ProfileID:    &profileID,
 				}
 
-				_, err := customerDomain.Create(ctx, input)
+				_, err := customerDomain.CreateCustomer(ctx, input)
 				So(err, ShouldBeNil)
 			}
 
@@ -359,7 +365,7 @@ func TestCustomerIntegration(t *testing.T) {
 				filter := model.CustomerFilter{
 					Status: []string{"active", "pending"},
 				}
-				customers, err := customerDomain.List(ctx, filter)
+				customers, err := customerDomain.ListCustomers(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(customers), ShouldBeGreaterThanOrEqualTo, 3)
 			})
@@ -368,7 +374,7 @@ func TestCustomerIntegration(t *testing.T) {
 				filter := model.CustomerFilter{
 					ProfileIDs: []uuid.UUID{profile.ID},
 				}
-				customers, err := customerDomain.List(ctx, filter)
+				customers, err := customerDomain.ListCustomers(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(customers), ShouldBeGreaterThanOrEqualTo, 2)
 			})
@@ -378,7 +384,7 @@ func TestCustomerIntegration(t *testing.T) {
 				filter := model.CustomerFilter{
 					Search: &searchTerm,
 				}
-				customers, err := customerDomain.List(ctx, filter)
+				customers, err := customerDomain.ListCustomers(ctx, filter)
 				So(err, ShouldBeNil)
 				So(len(customers), ShouldBeGreaterThanOrEqualTo, 3)
 			})
@@ -386,12 +392,13 @@ func TestCustomerIntegration(t *testing.T) {
 
 		Convey("Customer Status Changes", func() {
 			// Create test data
+			isActiveStatus := true
 			profile := &model.BandwidthProfile{
 				Name:         "Status Test Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActiveStatus,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -422,10 +429,10 @@ func TestCustomerIntegration(t *testing.T) {
 				ActivationDate: &activationDate,
 				ExpiryDate:     &expiryDate,
 				RouterID:       &routerID,
-				ProfileID:      profile.ID,
+				ProfileID:      &profile.ID,
 			}
 
-			customer, err := customerDomain.Create(ctx, input)
+			customer, err := customerDomain.CreateCustomer(ctx, input)
 			So(err, ShouldBeNil)
 
 			Convey("Activate customer", func() {
@@ -434,7 +441,7 @@ func TestCustomerIntegration(t *testing.T) {
 					Status: &activeStatus,
 				}
 
-				updated, err := customerDomain.Update(ctx, customer.ID.String(), input)
+				updated, err := customerDomain.UpdateCustomer(ctx, customer.ID.String(), input)
 				So(err, ShouldBeNil)
 				So(updated.Status, ShouldEqual, "active")
 			})
@@ -445,7 +452,7 @@ func TestCustomerIntegration(t *testing.T) {
 					Status: &suspendedStatus,
 				}
 
-				updated, err := customerDomain.Update(ctx, customer.ID.String(), input)
+				updated, err := customerDomain.UpdateCustomer(ctx, customer.ID.String(), input)
 				So(err, ShouldBeNil)
 				So(updated.Status, ShouldEqual, "suspended")
 			})
@@ -456,7 +463,7 @@ func TestCustomerIntegration(t *testing.T) {
 					Status: &isolatedStatus,
 				}
 
-				updated, err := customerDomain.Update(ctx, customer.ID.String(), input)
+				updated, err := customerDomain.UpdateCustomer(ctx, customer.ID.String(), input)
 				So(err, ShouldBeNil)
 				So(updated.Status, ShouldEqual, "isolated")
 			})

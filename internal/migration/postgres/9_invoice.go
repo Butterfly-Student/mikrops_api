@@ -40,8 +40,8 @@ func upInvoice(ctx context.Context, tx *sql.Tx) error {
 		last_reminder_sent TIMESTAMP,
 		notes TEXT,
 		internal_notes TEXT,
-		created_by UUID REFERENCES users(id),
-		updated_by UUID REFERENCES users(id),
+		created_by INTEGER REFERENCES users(id),
+		updated_by INTEGER REFERENCES users(id),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		deleted_at TIMESTAMP

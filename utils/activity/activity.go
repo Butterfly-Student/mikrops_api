@@ -64,6 +64,11 @@ func GetResult(ctx context.Context) interface{} {
 func GetFields(ctx context.Context) map[string]interface{} {
 	fields := make(map[string]interface{})
 
+	// Handle nil context gracefully (e.g., during initialization)
+	if ctx == nil {
+		return fields
+	}
+
 	if id, ok := GetTransactionID(ctx); ok {
 		fields["transaction_id"] = id
 	}

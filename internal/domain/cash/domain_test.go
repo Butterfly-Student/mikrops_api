@@ -215,33 +215,22 @@ func TestGetBalance(t *testing.T) {
 		startDate := time.Now().Add(-30 * 24 * time.Hour)
 		endDate := time.Now()
 
-		incomeTransactions := []model.CashTransaction{
-			{Amount: 100000.0, ApprovalStatus: "approved"},
-			{Amount: 150000.0, ApprovalStatus: "approved"},
-		}
-
-		expenseTransactions := []model.CashTransaction{
-			{Amount: 50000.0, ApprovalStatus: "approved"},
-		}
-
-		mockCashCategoryDB.EXPECT().
-			Find(gomock.Any()).
-			Return([]model.CashCategory{}, nil).
-			Times(2)
+		incomeTotal := 250000.0
+		expenseTotal := 50000.0
 
 		mockCashTransactionDB.EXPECT().
-			Find(gomock.Any()).
-			Return(incomeTransactions, nil).
+			GetIncomeTotal(startDate, endDate).
+			Return(incomeTotal, nil).
 			Times(1)
 
 		mockCashTransactionDB.EXPECT().
-			Find(gomock.Any()).
-			Return(expenseTransactions, nil).
+			GetExpenseTotal(startDate, endDate).
+			Return(expenseTotal, nil).
 			Times(1)
 
 		balance, err := domain.GetBalance(ctx, startDate, endDate)
 
 		assert.NoError(t, err)
-		assert.GreaterOrEqual(t, balance, 0.0)
+		assert.Equal(t, 200000.0, balance)
 	})
 }

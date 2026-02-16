@@ -158,11 +158,13 @@ func TestSendPaymentConfirmation(t *testing.T) {
 	mockPaymentDB := mock_outbound_port.NewMockPaymentDatabasePort(ctrl)
 	mockNotificationDB := mock_outbound_port.NewMockNotificationDatabasePort(ctrl)
 	mockNotificationTemplateDB := mock_outbound_port.NewMockNotificationTemplateDatabasePort(ctrl)
+	mockSystemSettingDB := mock_outbound_port.NewMockSystemSettingDatabasePort(ctrl)
 
 	mockDB.EXPECT().Customer().Return(mockCustomerDB).AnyTimes()
 	mockDB.EXPECT().Payment().Return(mockPaymentDB).AnyTimes()
 	mockDB.EXPECT().Notification().Return(mockNotificationDB).AnyTimes()
 	mockDB.EXPECT().NotificationTemplate().Return(mockNotificationTemplateDB).AnyTimes()
+	mockDB.EXPECT().SystemSetting().Return(mockSystemSettingDB).AnyTimes()
 
 	domain := NewNotificationDomain(mockDB, nil, nil)
 	ctx := context.Background()
@@ -202,6 +204,11 @@ func TestSendPaymentConfirmation(t *testing.T) {
 			Return(nil, errors.New("template not found")).
 			AnyTimes()
 
+		mockSystemSettingDB.EXPECT().
+			FindByKey("payment.portal_url").
+			Return(nil, errors.New("setting not found")).
+			AnyTimes()
+
 		mockNotificationDB.EXPECT().
 			Create(gomock.Any()).
 			Return(nil).
@@ -228,22 +235,23 @@ func TestRetryFailedNotifications(t *testing.T) {
 	t.Run("success - retry failed notifications", func(t *testing.T) {
 		failedNotifications := []model.Notification{
 			{
-				ID:        uuid.New(),
-				Type:      "email",
-				Recipient: "test@example.com",
-				Content:   "Test content",
-				Status:    "failed",
+				ID:         uuid.New(),
+				Type:       "email",
+				Recipient:  "test@example.com",
+				Content:    "Test content",
+				Status:     "failed",
+				RetryCount: 3, // Already at max retries, will be skipped
 			},
 		}
 
 		mockNotificationDB.EXPECT().
-			Find(gomock.Any()).
+			FindByStatus([]string{"failed", "retrying"}).
 			Return(failedNotifications, nil).
 			Times(1)
 
 		result, err := domain.RetryFailedNotifications(ctx)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, result)
+		assert.Equal(t, 0, len(result)) // No notifications retried since already at max
 	})
 }

@@ -176,7 +176,7 @@ func TestCheckOverdueInvoices(t *testing.T) {
 		}
 
 		mockInvoiceDB.EXPECT().
-			Find(gomock.Any()).
+			FindOverdue().
 			Return(overdueInvoices, nil).
 			Times(1)
 
@@ -206,6 +206,27 @@ func TestCalculateLateFee(t *testing.T) {
 			TotalAmount: 100000.0,
 			Status:      "pending",
 		}
+
+		lateFeeEnabledValue := "true"
+		lateFeeAmountValue := "5000"
+		lateFeeEnabledSetting := &model.SystemSetting{
+			Key:   "invoice.late_fee_enabled",
+			Value: &lateFeeEnabledValue,
+		}
+		lateFeeAmountSetting := &model.SystemSetting{
+			Key:   "invoice.late_fee_amount",
+			Value: &lateFeeAmountValue,
+		}
+
+		mockSystemSetting.EXPECT().
+			FindByKey("invoice.late_fee_enabled").
+			Return(lateFeeEnabledSetting, nil).
+			Times(1)
+
+		mockSystemSetting.EXPECT().
+			FindByKey("invoice.late_fee_amount").
+			Return(lateFeeAmountSetting, nil).
+			Times(1)
 
 		fee := domain.CalculateLateFee(ctx, invoice)
 

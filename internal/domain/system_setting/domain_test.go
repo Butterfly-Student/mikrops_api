@@ -45,7 +45,7 @@ func TestGetSetting(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		assert.Equal(t, key, result.Key)
-		assert.Equal(t, value, result.Value)
+		assert.Equal(t, value, *result.Value)
 	})
 
 	t.Run("error - setting not found", func(t *testing.T) {

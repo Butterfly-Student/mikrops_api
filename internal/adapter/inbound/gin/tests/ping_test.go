@@ -3,6 +3,7 @@ package gin_inbound_adapter_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,6 +26,9 @@ func TestPingHandler(t *testing.T) {
 
 		mockDatabasePort := mock_outbound_port.NewMockDatabasePort(mockCtrl)
 		mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(mockCtrl)
+		mockMikrotikDB := mock_outbound_port.NewMockMikrotikDatabasePort(mockCtrl)
+
+		mockDatabasePort.EXPECT().Mikrotik().Return(mockMikrotikDB).AnyTimes()
 
 		dom := domain.NewDomain(mockDatabasePort, nil, nil, nil, mockMikrotikPort, nil, nil, nil)
 		handler := gin_inbound_adapter.NewPingAdapter(dom)
@@ -66,9 +70,14 @@ func TestPingHandler(t *testing.T) {
 				req.Header.Set("Content-Type", "application/json")
 				w := httptest.NewRecorder()
 
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(&model.MikrotikRouter{}, nil).
+					Times(1)
+
 				mockMikrotikPort.EXPECT().
 					Ping(gomock.Any(), gomock.Any(), reqBody).
-					Return(nil).
+					Return(nil, nil).
 					Times(1)
 
 				router.ServeHTTP(w, req)
@@ -115,9 +124,9 @@ func TestPingHandler(t *testing.T) {
 				req.Header.Set("Content-Type", "application/json")
 				w := httptest.NewRecorder()
 
-				mockDatabasePort.EXPECT().
-					Mikrotik().
-					Return(mock_outbound_port.NewMockMikrotikDatabasePort(mockCtrl)).
+				mockMikrotikDB.EXPECT().
+					FindByID(routerID).
+					Return(nil, errors.New("router not found")).
 					Times(1)
 
 				router.ServeHTTP(w, req)

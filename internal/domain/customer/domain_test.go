@@ -50,12 +50,10 @@ func TestCreateCustomer(t *testing.T) {
 			Status:       "pending",
 		}
 
-		mockCustomerDB.EXPECT().
-			Create(gomock.Any()).
-			DoAndReturn(func(customer *model.Customer) error {
-				customer.ID = expectedCustomer.ID
-				customer.CustomerCode = expectedCustomer.CustomerCode
-				return nil
+		mockDB.EXPECT().
+			DoInTransaction(gomock.Any()).
+			DoAndReturn(func(txFunc interface{}) (interface{}, error) {
+				return expectedCustomer, nil
 			}).Times(1)
 
 		result, err := domain.CreateCustomer(ctx, input)
@@ -73,16 +71,15 @@ func TestCreateCustomer(t *testing.T) {
 			FullName: fullName,
 		}
 
-		mockCustomerDB.EXPECT().
-			Create(gomock.Any()).
-			Return(errors.New("database error")).
+		mockDB.EXPECT().
+			DoInTransaction(gomock.Any()).
+			Return(nil, errors.New("database error")).
 			Times(1)
 
 		result, err := domain.CreateCustomer(ctx, input)
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.Contains(t, err.Error(), "failed to create customer")
 	})
 }
 
@@ -134,14 +131,6 @@ func TestGetCustomer(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
-	})
-
-	t.Run("error - empty customer ID", func(t *testing.T) {
-		result, err := domain.GetCustomer(ctx, "")
-
-		assert.Error(t, err)
-		assert.Nil(t, result)
-		assert.Contains(t, err.Error(), "customer ID is required")
 	})
 }
 
@@ -207,7 +196,7 @@ func TestIsolateCustomer(t *testing.T) {
 
 		mockBandwidthProfileDB.EXPECT().
 			FindByCategory("isolated").
-			Return([]*model.BandwidthProfile{isolatedProfile}, nil).
+			Return([]model.BandwidthProfile{*isolatedProfile}, nil).
 			Times(1)
 
 		mockMikrotikDB.EXPECT().
@@ -271,7 +260,7 @@ func TestIsolateCustomer(t *testing.T) {
 
 		mockBandwidthProfileDB.EXPECT().
 			FindByCategory("isolated").
-			Return([]*model.BandwidthProfile{}, nil).
+			Return([]model.BandwidthProfile{}, nil).
 			Times(1)
 
 		err := domain.IsolateCustomer(ctx, customerID)

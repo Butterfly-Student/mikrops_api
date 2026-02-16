@@ -21,8 +21,6 @@ import (
 	"go-template/tests/helpers"
 	"go-template/utils/hash"
 	"go-template/utils/token"
-	"go-template/utils/email"
-	"go-template/utils/gowa"
 )
 
 func TestAuthIntegration(t *testing.T) {

@@ -668,6 +668,7 @@ func (d *domain) SendIsolationNotification(ctx context.Context, customerID strin
 		customer.CustomerCode,
 		reason,
 		portalURL,
+		portalURL,
 	)
 
 	if customer.Phone != "" {

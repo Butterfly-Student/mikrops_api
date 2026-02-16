@@ -19,7 +19,8 @@ func upCustomer(ctx context.Context, tx *sql.Tx) error {
 		email VARCHAR(100) UNIQUE,
 		phone VARCHAR(20) NOT NULL,
 		address TEXT,
-		coordinates GEOGRAPHY(Point, 4326),
+		latitude DECIMAL(10, 8),
+		longitude DECIMAL(11, 8),
 		status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'suspended', 'isolated', 'terminated')),
 		activation_date DATE,
 		installation_date DATE,
@@ -39,8 +40,8 @@ func upCustomer(ctx context.Context, tx *sql.Tx) error {
 		grace_period_days INTEGER DEFAULT 3,
 		notes TEXT,
 		tags JSONB DEFAULT '{}'::jsonb,
-		created_by UUID REFERENCES users(id),
-		updated_by UUID REFERENCES users(id),
+		created_by INTEGER REFERENCES users(id),
+		updated_by INTEGER REFERENCES users(id),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		deleted_at TIMESTAMP
@@ -89,7 +90,12 @@ func upCustomer(ctx context.Context, tx *sql.Tx) error {
 		return err
 	}
 
-	_, err = tx.Exec(`CREATE INDEX idx_customers_coordinates ON customers USING GIST(coordinates) WHERE coordinates IS NOT NULL;`)
+	_, err = tx.Exec(`CREATE INDEX idx_customers_latitude ON customers(latitude) WHERE latitude IS NOT NULL;`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`CREATE INDEX idx_customers_longitude ON customers(longitude) WHERE longitude IS NOT NULL;`)
 	if err != nil {
 		return err
 	}

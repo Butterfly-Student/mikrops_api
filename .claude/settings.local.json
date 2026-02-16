@@ -22,7 +22,32 @@
       "Bash(git checkout:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git mv:*)",
+      "Bash(go run:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(sudo lsof:*)",
+      "Bash(netstat:*)",
+      "Bash(systemctl status:*)",
+      "Bash(for domain in activity auth bandwidth_profile billing cash client customer iface ippool notification payment ping pppoe queue refund system_setting user)",
+      "Bash(do)",
+      "Bash(if [ -f \"internal/domain/$domain/domain_test.go\" ])",
+      "Bash(then)",
+      "Bash(__NEW_LINE_c29b5cf44b0b2911__ else)",
+      "Bash(__NEW_LINE_c29b5cf44b0b2911__ fi)",
+      "Bash(__NEW_LINE_c29b5cf44b0b2911__ done)",
+      "Bash(for handler in activity bandwidth_profile billing cash client customer ippool notification payment ping pppoe queue refund system_setting user)",
+      "Bash(if [ -f \"internal/adapter/inbound/gin/tests/$handler_handler_test.go\" ])",
+      "Bash([ -f \"internal/adapter/inbound/gin/tests/$handler_test.go\" ])",
+      "Bash(__NEW_LINE_c2ea9d8fbd147c58__ else)",
+      "Bash(__NEW_LINE_c2ea9d8fbd147c58__ fi)",
+      "Bash(__NEW_LINE_c2ea9d8fbd147c58__ done)",
+      "Bash(for integration in activity auth bandwidth_profile billing cash client customer iface ippool notification payment ping pppoe queue refund system_setting user)",
+      "Bash(if [ -f \"tests/integration/$integration_integration_test.go\" ])",
+      "Bash(__NEW_LINE_380ab77999ca1815__ else)",
+      "Bash(__NEW_LINE_380ab77999ca1815__ fi)",
+      "Bash(__NEW_LINE_380ab77999ca1815__ done)"
     ]
   }
 }

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/payment"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 	"go-template/utils/xendit"
@@ -47,7 +47,7 @@ func TestPaymentIntegration(t *testing.T) {
 	}
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
-	paymentDomain := domain.NewPaymentDomain(dbAdapter, nil)
+	paymentDomain := payment.NewPaymentDomain(dbAdapter, nil)
 
 	Convey("Test Payment Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -60,12 +60,13 @@ func TestPaymentIntegration(t *testing.T) {
 
 		Convey("Setup test data", func() {
 			// Create bandwidth profile
+			isActive := true
 			profile := &model.BandwidthProfile{
 				Name:         "Test Payment Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActive,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -231,12 +232,13 @@ func TestPaymentIntegration(t *testing.T) {
 
 		Convey("Payment Allocation", func() {
 			// Setup test data
+			isActive := true
 			profile := &model.BandwidthProfile{
 				Name:         "Allocation Test Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActive,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -397,12 +399,13 @@ func TestPaymentIntegration(t *testing.T) {
 
 			Convey("ProcessWebhook with paid status updates payment", func() {
 				// Create test data
+				isActive := true
 				profile := &model.BandwidthProfile{
 					Name:         "Webhook Test Profile",
 					Category:     "pppoe",
 					PriceMonthly: 100000,
 					TaxRate:      0.11,
-					IsActive:     true,
+					IsActive:     &isActive,
 				}
 				err := dbAdapter.BandwidthProfile().Create(profile)
 				So(err, ShouldBeNil)
@@ -444,11 +447,11 @@ func TestPaymentIntegration(t *testing.T) {
 
 				// Process webhook
 				webhookData := &xendit.WebhookData{
-					ExternalID:  externalID,
-					Status:      "PAID",
-					PaymentID:   "pay-test-123",
+					ExternalID:    externalID,
+					Status:        "PAID",
+					PaymentID:     "pay-test-123",
 					PaymentMethod: "VA",
-					PaidAmount:  100000.0,
+					PaidAmount:    100000.0,
 				}
 
 				err = paymentDomain.ProcessWebhook(ctx, webhookData)

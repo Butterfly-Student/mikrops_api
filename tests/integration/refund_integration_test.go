@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/refund"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 )
@@ -44,7 +44,7 @@ func TestRefundIntegration(t *testing.T) {
 	}
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
-	refundDomain := domain.NewRefundDomain(dbAdapter)
+	refundDomain := refund.NewRefundDomain(dbAdapter.Refund())
 
 	Convey("Test Refund Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -56,12 +56,13 @@ func TestRefundIntegration(t *testing.T) {
 
 		Convey("Setup test data", func() {
 			// Create bandwidth profile
+			isActive := true
 			profile := &model.BandwidthProfile{
 				Name:         "Test Refund Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActive,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -454,12 +455,13 @@ func TestRefundIntegration(t *testing.T) {
 
 		Convey("Refund filtering", func() {
 			// Create test data
+			isActive := true
 			profile := &model.BandwidthProfile{
 				Name:         "Filter Refund Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActive,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -557,12 +559,13 @@ func TestRefundIntegration(t *testing.T) {
 
 		Convey("Refund statistics", func() {
 			// Create test data
+			isActive := true
 			profile := &model.BandwidthProfile{
 				Name:         "Stats Refund Profile",
 				Category:     "pppoe",
 				PriceMonthly: 100000,
 				TaxRate:      0.11,
-				IsActive:     true,
+				IsActive:     &isActive,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)

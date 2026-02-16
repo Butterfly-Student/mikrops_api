@@ -20,7 +20,7 @@ func upSystemSetting(ctx context.Context, tx *sql.Tx) error {
 		category VARCHAR(50),
 		description TEXT,
 		is_public BOOLEAN DEFAULT false,
-		updated_by UUID REFERENCES users(id),
+		updated_by INTEGER REFERENCES users(id),
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 	);`)
 	if err != nil {
@@ -69,7 +69,7 @@ func upSystemSetting(ctx context.Context, tx *sql.Tx) error {
 
 	-- Payment Portal Settings
 	('payment.portal_url', 'https://portal.example.com', 'string', 'payment', 'URL Payment Portal'),
-	('payment.portal_enabled', 'true', 'boolean', 'payment', 'Enable Payment Portal'`)
+	('payment.portal_enabled', 'true', 'boolean', 'payment', 'Enable Payment Portal');`)
 	if err != nil {
 		return err
 	}

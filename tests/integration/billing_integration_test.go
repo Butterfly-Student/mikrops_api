@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
-	"go-template/internal/domain"
+	"go-template/internal/domain/billing"
 	"go-template/internal/model"
 	"go-template/tests/helpers"
 )
@@ -45,7 +45,7 @@ func TestBillingIntegration(t *testing.T) {
 
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
 	systemSettingAdapter := postgres_outbound_adapter.NewSystemSettingAdapter(pgContainer.DB)
-	billingDomain := domain.NewBillingDomain(dbAdapter, systemSettingAdapter)
+	billingDomain := billing.NewBillingDomain(dbAdapter, systemSettingAdapter)
 
 	Convey("Test Billing Integration with PostgreSQL", t, func() {
 		// Cleanup before test
@@ -57,14 +57,15 @@ func TestBillingIntegration(t *testing.T) {
 
 		Convey("Setup test data", func() {
 			// Create bandwidth profile
+			isActive := true
 			profile := &model.BandwidthProfile{
-				Name:                "Test Profile",
-				Category:            "pppoe",
-				PriceMonthly:        100000,
-				TaxRate:             0.11,
-				DownloadSpeed:       "10Mbps",
-				UploadSpeed:         "5Mbps",
-				IsActive:            true,
+				Name:          "Test Profile",
+				Category:      "pppoe",
+				PriceMonthly:  100000,
+				TaxRate:       0.11,
+				DownloadSpeed: 10240,
+				UploadSpeed:   5120,
+				IsActive:      &isActive,
 			}
 			err := dbAdapter.BandwidthProfile().Create(profile)
 			So(err, ShouldBeNil)
@@ -295,12 +296,13 @@ func TestBillingIntegration(t *testing.T) {
 
 			Convey("DeleteInvoice with non-empty items returns error", func() {
 				// First create an invoice with items
+				isActiveDelete := true
 				profile := &model.BandwidthProfile{
 					Name:         "Delete Test Profile",
 					Category:     "pppoe",
 					PriceMonthly: 100000,
 					TaxRate:      0.11,
-					IsActive:     true,
+					IsActive:     &isActiveDelete,
 				}
 				err := dbAdapter.BandwidthProfile().Create(profile)
 				So(err, ShouldBeNil)
