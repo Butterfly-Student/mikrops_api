@@ -19,12 +19,12 @@ Tanggal analisis: 2026-02-16
 | 5     | Outbound Database Adapters    | SELESAI        | 100%     |
 | 6     | Cache + MikroTik Adapters     | SELESAI        | 100%     |
 | 7     | Domain Logic                  | SELESAI        | 100%     |
-| 8     | Inbound Port Interfaces       | HAMPIR SELESAI | 90%      |
-| 9     | Inbound Gin HTTP Adapters     | HAMPIR SELESAI | 90%      |
+| 8     | Inbound Port Interfaces       | SELESAI        | 100%     |
+| 9     | Inbound Gin HTTP Adapters     | SELESAI        | 100%     |
 | 10    | Tests                         | SELESAI        | 100%     |
 | 11    | Configuration                 | SELESAI        | 100%     |
 
-**Overall Progress: ~97%**
+**Overall Progress: 100%**
 
 ---
 
@@ -144,7 +144,7 @@ Semua 12 domain packages telah dibuat dengan business logic lengkap:
 - [x] 7.11 `mikrotik` - Orchestration sync subscription↔MikroTik, bandwidth monitoring
 - [x] `registry.go` - Domain interface + constructor dengan httpPort
 
-### Phase 8: Inbound Port Interfaces - HAMPIR SELESAI (90%)
+### Phase 8: Inbound Port Interfaces - SELESAI
 
 Yang sudah selesai:
 - [x] `middleware.go` - InternalAuth, ClientAuth, StaffAuth, CustomerAuth, RequirePermission
@@ -160,12 +160,13 @@ Yang sudah selesai:
 - [x] `mikrotik.go` - Semua MikroTik operations
 - [x] `registry_http.go` - Semua entity accessors
 
-Yang BELUM selesai:
-- [ ] **8.1** `nas.go` - KURANG method `GetIdentity` (ada di plan: NasHttpPort{..., GetIdentity})
-- [ ] **8.2** `customer.go` - KURANG method `GetConnectionStatus` (ada di plan: CustomerHttpPort{..., GetConnectionStatus})
-- [ ] **8.3** `portal.go` - KURANG methods: `GetSubscriptionHistory`, `UpgradeSubscription`, `DowngradeSubscription`, `RequestVacation` (sesuai portal routes di plan)
+Selesai (ditambahkan pada 2026-02-16):
+- [x] **8.1** `nas.go` - Ditambah method `GetIdentity`
+- [x] **8.2** `customer.go` - Ditambah method `GetConnectionStatus`
+- [x] **8.3** `portal.go` - Ditambah methods: `GetSubscriptionHistory`, `UpgradeSubscription`, `DowngradeSubscription`, `RequestVacation`
+- [x] **8.4** `tenant.go` - Ditambah method `Upsert`
 
-### Phase 9: Inbound Gin HTTP Adapters - HAMPIR SELESAI (90%)
+### Phase 9: Inbound Gin HTTP Adapters - SELESAI
 
 Yang sudah selesai:
 - [x] `auth.go`, `tenant.go`, `staff.go`, `internet_package.go`
@@ -175,18 +176,20 @@ Yang sudah selesai:
 - [x] `registry.go` - Semua adapter registrations
 - [x] `route.go` - Auth, Internal, Client, Staff Admin API, MikroTik, Portal (sebagian besar)
 
-Yang BELUM selesai di route.go dan adapter:
-- [ ] **9.1** Route `GET /api/v1/nas/:id/identity` - BELUM ADA di route.go
-- [ ] **9.2** Route `GET /api/v1/customers/:id/connection` - BELUM ADA di route.go
-- [ ] **9.3** Route `POST /internal/tenant-upsert` - ADA di plan tapi BELUM ADA di route.go
-- [ ] **9.4** Portal routes BELUM ADA:
+Selesai (ditambahkan pada 2026-02-16):
+- [x] **9.1** Route `GET /api/v1/nas/:id/identity` - Ditambahkan
+- [x] **9.2** Route `GET /api/v1/customers/:id/connection` - Ditambahkan
+- [x] **9.3** Route `POST /internal/tenant-upsert` - Ditambahkan
+- [x] **9.4** Portal routes ditambahkan:
   - `GET /portal/v1/subscription/history`
   - `POST /portal/v1/subscription/upgrade`
   - `POST /portal/v1/subscription/downgrade`
   - `POST /portal/v1/subscription/vacation`
-- [ ] **9.5** Gin adapter `nas.go` - KURANG handler `GetIdentity`
-- [ ] **9.6** Gin adapter `customer.go` - KURANG handler `GetConnectionStatus`
-- [ ] **9.7** Gin adapter `portal.go` - KURANG handlers untuk subscription history/upgrade/downgrade/vacation
+- [x] **9.5** Gin adapter `nas.go` - Handler `GetIdentity` diimplementasi
+- [x] **9.6** Gin adapter `customer.go` - Handler `GetConnectionStatus` diimplementasi
+- [x] **9.7** Gin adapter `portal.go` - Handlers subscription history/upgrade/downgrade/vacation diimplementasi
+- [x] **9.8** Gin adapter `tenant.go` - Handler `Upsert` diimplementasi
+- [x] **9.9** Domain `nas/domain.go` - Method `GetIdentity` ditambahkan ke NasDomain interface + implementasi
 
 ### Phase 10: Tests - SELESAI
 

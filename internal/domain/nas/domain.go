@@ -18,6 +18,7 @@ type NasDomain interface {
 	Delete(ctx context.Context, id string) error
 	CountByTenantID(ctx context.Context, tenantID string) (int, error)
 	TestConnection(ctx context.Context, id string) error
+	GetIdentity(ctx context.Context, id string) (string, error)
 }
 
 type nasDomain struct {
@@ -184,4 +185,28 @@ func (d *nasDomain) TestConnection(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (d *nasDomain) GetIdentity(ctx context.Context, id string) (string, error) {
+	if id == "" {
+		return "", stacktrace.NewError("id is empty")
+	}
+
+	nas, err := d.databasePort.Nas().FindByID(id)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to find NAS")
+	}
+
+	password, err := crypto.Decrypt(nas.PasswordEncrypted)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to decrypt password")
+	}
+
+	mikrotikPort := d.httpPort.Mikrotik()
+	identity, err := mikrotikPort.GetIdentity(nas.Host, nas.ApiPort, nas.Username, password, nas.UseSSL)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to get identity from MikroTik")
+	}
+
+	return identity, nil
 }

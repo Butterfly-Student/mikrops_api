@@ -132,3 +132,19 @@ func (h *nasAdapter) TestConnection(a any) error {
 	c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"message": "Connection successful"}})
 	return nil
 }
+
+func (h *nasAdapter) GetIdentity(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_nas_get_identity")
+
+	id := c.Param("id")
+
+	identity, err := h.domain.Nas().GetIdentity(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"identity": identity}})
+	return nil
+}

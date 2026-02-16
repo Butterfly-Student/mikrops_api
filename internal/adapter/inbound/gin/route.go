@@ -26,6 +26,7 @@ func InitRoute(
 	internal.POST("/client-upsert", func(c *gin.Context) { port.Client().Upsert(c) })
 	internal.POST("/client-find", func(c *gin.Context) { port.Client().Find(c) })
 	internal.DELETE("/client-delete", func(c *gin.Context) { port.Client().Delete(c) })
+	internal.POST("/tenant-upsert", func(c *gin.Context) { port.Tenant().Upsert(c) })
 
 	// ========== Client Auth (existing) ==========
 	client := router.Group("/v1")
@@ -93,6 +94,7 @@ func InitRoute(
 		}
 	})
 	nas.POST("/:id/test", func(c *gin.Context) { port.Nas().TestConnection(c) })
+	nas.GET("/:id/identity", func(c *gin.Context) { port.Nas().GetIdentity(c) })
 
 	// MikroTik Operations via NAS
 	nas.GET("/:id/pppoe/secrets", func(c *gin.Context) { port.Mikrotik().ListPPPoESecrets(c) })
@@ -161,6 +163,7 @@ func InitRoute(
 			port.Customer().Delete(c)
 		}
 	})
+	customers.GET("/:id/connection", func(c *gin.Context) { port.Customer().GetConnectionStatus(c) })
 
 	// Subscriptions
 	subscriptions := api.Group("/subscriptions")
@@ -279,6 +282,10 @@ func InitRoute(
 	portal.PUT("/profile", func(c *gin.Context) { port.Portal().UpdateProfile(c) })
 	portal.PUT("/profile/password", func(c *gin.Context) { port.Portal().UpdatePassword(c) })
 	portal.GET("/subscription", func(c *gin.Context) { port.Portal().GetSubscription(c) })
+	portal.GET("/subscription/history", func(c *gin.Context) { port.Portal().GetSubscriptionHistory(c) })
+	portal.POST("/subscription/upgrade", func(c *gin.Context) { port.Portal().UpgradeSubscription(c) })
+	portal.POST("/subscription/downgrade", func(c *gin.Context) { port.Portal().DowngradeSubscription(c) })
+	portal.POST("/subscription/vacation", func(c *gin.Context) { port.Portal().RequestVacation(c) })
 	portal.GET("/connection/status", func(c *gin.Context) { port.Portal().GetConnectionStatus(c) })
 	portal.GET("/connection/bandwidth", func(c *gin.Context) { port.Portal().GetBandwidth(c) })
 	portal.GET("/invoices", func(c *gin.Context) { port.Portal().ListInvoices(c) })

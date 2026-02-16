@@ -7,4 +7,5 @@ type NasHttpPort interface {
 	Update(a any) error
 	Delete(a any) error
 	TestConnection(a any) error
+	GetIdentity(a any) error
 }

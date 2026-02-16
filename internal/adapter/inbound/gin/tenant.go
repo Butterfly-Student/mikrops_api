@@ -59,3 +59,39 @@ func (h *tenantAdapter) Update(a any) error {
 	c.JSON(http.StatusOK, model.Response{Success: true})
 	return nil
 }
+
+func (h *tenantAdapter) Upsert(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_tenant_upsert")
+
+	var payload model.TenantInput
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return nil
+	}
+
+	// Try to find existing tenant by slug
+	if payload.Slug != "" {
+		existing, err := h.domain.Tenant().FindByFilter(ctx, model.TenantFilter{Slugs: []string{payload.Slug}})
+		if err == nil && len(existing) > 0 {
+			// Update existing
+			err = h.domain.Tenant().Update(ctx, existing[0].ID, payload)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+				return nil
+			}
+			c.JSON(http.StatusOK, model.Response{Success: true, Data: existing[0]})
+			return nil
+		}
+	}
+
+	// Create new
+	result, err := h.domain.Tenant().Create(ctx, payload)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	c.JSON(http.StatusCreated, model.Response{Success: true, Data: result})
+	return nil
+}

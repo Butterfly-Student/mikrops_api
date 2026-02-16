@@ -6,4 +6,5 @@ type CustomerHttpPort interface {
 	Get(a any) error
 	Update(a any) error
 	Delete(a any) error
+	GetConnectionStatus(a any) error
 }

@@ -2,6 +2,7 @@ package gin_inbound_adapter
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/palantir/stacktrace"
@@ -190,6 +191,171 @@ func (h *portalAdapter) GetSubscription(a any) error {
 	}
 
 	c.JSON(http.StatusOK, model.Response{Success: true, Data: results})
+	return nil
+}
+
+func (h *portalAdapter) GetSubscriptionHistory(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_portal_subscription_history")
+
+	customerID, _ := c.Get("customer_id")
+	cid, _ := customerID.(string)
+	tenantID, _ := c.Get("tenant_id")
+	tid, _ := tenantID.(string)
+
+	results, err := h.domain.Subscription().FindByFilter(ctx, model.SubscriptionFilter{
+		CustomerIDs: []string{cid},
+		TenantIDs:   []string{tid},
+		WithPackage: true,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	c.JSON(http.StatusOK, model.Response{Success: true, Data: results})
+	return nil
+}
+
+func (h *portalAdapter) UpgradeSubscription(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_portal_subscription_upgrade")
+
+	customerID, _ := c.Get("customer_id")
+	cid, _ := customerID.(string)
+	tenantID, _ := c.Get("tenant_id")
+	tid, _ := tenantID.(string)
+
+	var payload struct {
+		SubscriptionID string `json:"subscription_id" binding:"required"`
+		NewPackageID   string `json:"new_package_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return nil
+	}
+
+	// Verify subscription belongs to customer
+	sub, err := h.domain.Subscription().FindByID(ctx, payload.SubscriptionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+	if sub.CustomerID != cid || sub.TenantID != tid {
+		c.JSON(http.StatusForbidden, model.Response{Success: false, Error: "subscription does not belong to customer"})
+		return nil
+	}
+
+	// Update package
+	err = h.domain.Subscription().Update(ctx, payload.SubscriptionID, model.SubscriptionInput{
+		PackageID: payload.NewPackageID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	// Sync to MikroTik
+	_ = h.domain.Mikrotik().SyncSubscription(ctx, payload.SubscriptionID)
+
+	c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"message": "subscription upgraded"}})
+	return nil
+}
+
+func (h *portalAdapter) DowngradeSubscription(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_portal_subscription_downgrade")
+
+	customerID, _ := c.Get("customer_id")
+	cid, _ := customerID.(string)
+	tenantID, _ := c.Get("tenant_id")
+	tid, _ := tenantID.(string)
+
+	var payload struct {
+		SubscriptionID string `json:"subscription_id" binding:"required"`
+		NewPackageID   string `json:"new_package_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return nil
+	}
+
+	// Verify subscription belongs to customer
+	sub, err := h.domain.Subscription().FindByID(ctx, payload.SubscriptionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+	if sub.CustomerID != cid || sub.TenantID != tid {
+		c.JSON(http.StatusForbidden, model.Response{Success: false, Error: "subscription does not belong to customer"})
+		return nil
+	}
+
+	// Update package
+	err = h.domain.Subscription().Update(ctx, payload.SubscriptionID, model.SubscriptionInput{
+		PackageID: payload.NewPackageID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	// Sync to MikroTik
+	_ = h.domain.Mikrotik().SyncSubscription(ctx, payload.SubscriptionID)
+
+	c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"message": "subscription downgraded"}})
+	return nil
+}
+
+func (h *portalAdapter) RequestVacation(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_portal_subscription_vacation")
+
+	customerID, _ := c.Get("customer_id")
+	cid, _ := customerID.(string)
+	tenantID, _ := c.Get("tenant_id")
+	tid, _ := tenantID.(string)
+
+	var payload struct {
+		SubscriptionID string `json:"subscription_id" binding:"required"`
+		StartDate      string `json:"start_date" binding:"required"`
+		EndDate        string `json:"end_date" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return nil
+	}
+
+	// Verify subscription belongs to customer
+	sub, err := h.domain.Subscription().FindByID(ctx, payload.SubscriptionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+	if sub.CustomerID != cid || sub.TenantID != tid {
+		c.JSON(http.StatusForbidden, model.Response{Success: false, Error: "subscription does not belong to customer"})
+		return nil
+	}
+
+	// Parse dates
+	startDate, err := time.Parse("2006-01-02", payload.StartDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: "invalid start_date format, use YYYY-MM-DD"})
+		return nil
+	}
+	endDate, err := time.Parse("2006-01-02", payload.EndDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: "invalid end_date format, use YYYY-MM-DD"})
+		return nil
+	}
+
+	err = h.domain.Subscription().SetVacation(ctx, payload.SubscriptionID, startDate, endDate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"message": "vacation mode activated"}})
 	return nil
 }
 

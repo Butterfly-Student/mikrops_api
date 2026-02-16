@@ -6,6 +6,10 @@ type PortalHttpPort interface {
 	UpdateProfile(a any) error
 	UpdatePassword(a any) error
 	GetSubscription(a any) error
+	GetSubscriptionHistory(a any) error
+	UpgradeSubscription(a any) error
+	DowngradeSubscription(a any) error
+	RequestVacation(a any) error
 	GetConnectionStatus(a any) error
 	GetBandwidth(a any) error
 	ListInvoices(a any) error

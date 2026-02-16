@@ -116,3 +116,40 @@ func (h *customerAdapter) Delete(a any) error {
 	c.JSON(http.StatusOK, model.Response{Success: true})
 	return nil
 }
+
+func (h *customerAdapter) GetConnectionStatus(a any) error {
+	c := a.(*gin.Context)
+	ctx := activity.NewContext("http_customer_connection_status")
+
+	id := c.Param("id")
+
+	customer, err := h.domain.Customer().FindByID(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	if customer.NasID == nil {
+		c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"connected": false}})
+		return nil
+	}
+
+	connections, err := h.domain.Mikrotik().GetActiveConnections(ctx, *customer.NasID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: stacktrace.RootCause(err).Error()})
+		return nil
+	}
+
+	for _, conn := range connections {
+		if conn.Name == customer.PppoeUsername {
+			c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{
+				"connected":  true,
+				"connection": conn,
+			}})
+			return nil
+		}
+	}
+
+	c.JSON(http.StatusOK, model.Response{Success: true, Data: gin.H{"connected": false}})
+	return nil
+}
