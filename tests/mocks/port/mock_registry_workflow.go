@@ -5,6 +5,7 @@
 package mock_outbound_port
 
 import (
+	inbound_port "go-template/internal/port/inbound"
 	outbound_port "go-template/internal/port/outbound"
 	reflect "reflect"
 
@@ -34,6 +35,20 @@ func (m *MockWorkflowPort) EXPECT() *MockWorkflowPortMockRecorder {
 	return m.recorder
 }
 
+// Billing mocks base method.
+func (m *MockWorkflowPort) Billing() inbound_port.BillingWorkflowPort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Billing")
+	ret0, _ := ret[0].(inbound_port.BillingWorkflowPort)
+	return ret0
+}
+
+// Billing indicates an expected call of Billing.
+func (mr *MockWorkflowPortMockRecorder) Billing() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Billing", reflect.TypeOf((*MockWorkflowPort)(nil).Billing))
+}
+
 // Client mocks base method.
 func (m *MockWorkflowPort) Client() outbound_port.ClientWorkflowPort {
 	m.ctrl.T.Helper()
@@ -46,4 +61,18 @@ func (m *MockWorkflowPort) Client() outbound_port.ClientWorkflowPort {
 func (mr *MockWorkflowPortMockRecorder) Client() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Client", reflect.TypeOf((*MockWorkflowPort)(nil).Client))
+}
+
+// Isolation mocks base method.
+func (m *MockWorkflowPort) Isolation() inbound_port.IsolationWorkflowPort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Isolation")
+	ret0, _ := ret[0].(inbound_port.IsolationWorkflowPort)
+	return ret0
+}
+
+// Isolation indicates an expected call of Isolation.
+func (mr *MockWorkflowPortMockRecorder) Isolation() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Isolation", reflect.TypeOf((*MockWorkflowPort)(nil).Isolation))
 }

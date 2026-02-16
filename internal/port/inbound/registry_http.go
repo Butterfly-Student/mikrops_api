@@ -17,4 +17,6 @@ type HttpPort interface {
 	Payment() PaymentHttpPort
 	Cash() CashHttpPort
 	Notification() NotificationHttpPort
+	Activity() ActivityHttpPort
+	Refund() RefundHttpPort
 }

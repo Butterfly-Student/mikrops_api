@@ -19,6 +19,8 @@ type DatabasePort interface {
 	CashTransaction() CashTransactionDatabasePort
 	Notification() NotificationDatabasePort
 	NotificationTemplate() NotificationTemplateDatabasePort
+	ActivityLog() ActivityLogDatabasePort
+	Refund() RefundDatabasePort
 	DoInTransaction(txFunc InTransaction) (out interface{}, err error)
 }
 

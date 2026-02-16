@@ -78,3 +78,11 @@ func (s *adapter) Cash() inbound_port.CashHttpPort {
 func (s *adapter) Notification() inbound_port.NotificationHttpPort {
 	return NewNotificationHandler(s.domain)
 }
+
+func (s *adapter) Activity() inbound_port.ActivityHttpPort {
+	return NewActivityHandler(s.domain)
+}
+
+func (s *adapter) Refund() inbound_port.RefundHttpPort {
+	return NewRefundHttpHandler(s.domain)
+}

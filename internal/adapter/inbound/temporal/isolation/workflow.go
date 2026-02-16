@@ -132,10 +132,21 @@ func ReactivateCustomerWorkflow(ctx workflow.Context, input ReactivateCustomerIn
 		return result, err
 	}
 
-	// Step 2: Reactivate customer on MikroTik
+	// Step 2: Get original profile
+	var originalProfile GetOriginalProfileResult
+	err = workflow.ExecuteActivity(ctx, "GetOriginalProfileActivity", GetOriginalProfileInput{
+		CustomerID: input.CustomerID,
+	}).Get(ctx, &originalProfile)
+	if err != nil {
+		logger.Error("Failed to get original profile", "error", err)
+		return result, err
+	}
+
+	// Step 3: Reactivate customer on MikroTik
 	var reactivateResult ReactivateOnMikrotikResult
 	err = workflow.ExecuteActivity(ctx, "ReactivateOnMikrotikActivity", ReactivateOnMikrotikInput{
 		CustomerID: input.CustomerID,
+		ProfileID:  originalProfile.ProfileID,
 	}).Get(ctx, &reactivateResult)
 	if err != nil {
 		logger.Error("Failed to reactivate customer on MikroTik", "error", err)
@@ -248,6 +259,7 @@ type GetCustomerDetailsResult struct {
 // ReactivateOnMikrotik activity
 type ReactivateOnMikrotikInput struct {
 	CustomerID string
+	ProfileID  string
 }
 
 type ReactivateOnMikrotikResult struct {

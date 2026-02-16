@@ -21,10 +21,11 @@ func TestCreateCustomer(t *testing.T) {
 	mockDB := mock_outbound_port.NewMockDatabasePort(ctrl)
 	mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(ctrl)
 	mockCustomerDB := mock_outbound_port.NewMockCustomerDatabasePort(ctrl)
+	mockBandwidthProfileDB := mock_outbound_port.NewMockBandwidthProfileDatabasePort(ctrl)
 
 	mockDB.EXPECT().Customer().Return(mockCustomerDB).AnyTimes()
 
-	domain := NewCustomerDomain(mockDB, mockMikrotikPort)
+	domain := NewCustomerDomain(mockDB, mockMikrotikPort, mockBandwidthProfileDB)
 	ctx := context.Background()
 
 	t.Run("success - create customer", func(t *testing.T) {
@@ -92,10 +93,11 @@ func TestGetCustomer(t *testing.T) {
 	mockDB := mock_outbound_port.NewMockDatabasePort(ctrl)
 	mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(ctrl)
 	mockCustomerDB := mock_outbound_port.NewMockCustomerDatabasePort(ctrl)
+	mockBandwidthProfileDB := mock_outbound_port.NewMockBandwidthProfileDatabasePort(ctrl)
 
 	mockDB.EXPECT().Customer().Return(mockCustomerDB).AnyTimes()
 
-	domain := NewCustomerDomain(mockDB, mockMikrotikPort)
+	domain := NewCustomerDomain(mockDB, mockMikrotikPort, mockBandwidthProfileDB)
 	ctx := context.Background()
 
 	t.Run("success - get customer", func(t *testing.T) {
@@ -157,7 +159,7 @@ func TestIsolateCustomer(t *testing.T) {
 	mockDB.EXPECT().Mikrotik().Return(mockMikrotikDB).AnyTimes()
 	mockDB.EXPECT().BandwidthProfile().Return(mockBandwidthProfileDB).AnyTimes()
 
-	domain := NewCustomerDomain(mockDB, mockMikrotikPort)
+	domain := NewCustomerDomain(mockDB, mockMikrotikPort, mockBandwidthProfileDB)
 	ctx := context.Background()
 
 	t.Run("success - isolate customer", func(t *testing.T) {
@@ -293,7 +295,7 @@ func TestActivateCustomer(t *testing.T) {
 	mockDB.EXPECT().Mikrotik().Return(mockMikrotikDB).AnyTimes()
 	mockDB.EXPECT().BandwidthProfile().Return(mockBandwidthProfileDB).AnyTimes()
 
-	domain := NewCustomerDomain(mockDB, mockMikrotikPort)
+	domain := NewCustomerDomain(mockDB, mockMikrotikPort, mockBandwidthProfileDB)
 	ctx := context.Background()
 
 	t.Run("success - activate customer", func(t *testing.T) {
@@ -397,10 +399,11 @@ func TestFindExpired(t *testing.T) {
 	mockDB := mock_outbound_port.NewMockDatabasePort(ctrl)
 	mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(ctrl)
 	mockCustomerDB := mock_outbound_port.NewMockCustomerDatabasePort(ctrl)
+	mockBandwidthProfileDB := mock_outbound_port.NewMockBandwidthProfileDatabasePort(ctrl)
 
 	mockDB.EXPECT().Customer().Return(mockCustomerDB).AnyTimes()
 
-	domain := NewCustomerDomain(mockDB, mockMikrotikPort)
+	domain := NewCustomerDomain(mockDB, mockMikrotikPort, mockBandwidthProfileDB)
 	ctx := context.Background()
 
 	t.Run("success - find expired customers", func(t *testing.T) {
@@ -455,10 +458,11 @@ func TestFindExpiringSoon(t *testing.T) {
 	mockDB := mock_outbound_port.NewMockDatabasePort(ctrl)
 	mockMikrotikPort := mock_outbound_port.NewMockMikrotikPort(ctrl)
 	mockCustomerDB := mock_outbound_port.NewMockCustomerDatabasePort(ctrl)
+	mockBandwidthProfileDB := mock_outbound_port.NewMockBandwidthProfileDatabasePort(ctrl)
 
 	mockDB.EXPECT().Customer().Return(mockCustomerDB).AnyTimes()
 
-	domain := NewCustomerDomain(mockDB, mockMikrotikPort)
+	domain := NewCustomerDomain(mockDB, mockMikrotikPort, mockBandwidthProfileDB)
 	ctx := context.Background()
 
 	t.Run("success - find expiring soon", func(t *testing.T) {

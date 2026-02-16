@@ -34,6 +34,20 @@ func (m *MockDatabasePort) EXPECT() *MockDatabasePortMockRecorder {
 	return m.recorder
 }
 
+// ActivityLog mocks base method.
+func (m *MockDatabasePort) ActivityLog() outbound_port.ActivityLogDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivityLog")
+	ret0, _ := ret[0].(outbound_port.ActivityLogDatabasePort)
+	return ret0
+}
+
+// ActivityLog indicates an expected call of ActivityLog.
+func (mr *MockDatabasePortMockRecorder) ActivityLog() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivityLog", reflect.TypeOf((*MockDatabasePort)(nil).ActivityLog))
+}
+
 // BandwidthProfile mocks base method.
 func (m *MockDatabasePort) BandwidthProfile() outbound_port.BandwidthProfileDatabasePort {
 	m.ctrl.T.Helper()
@@ -215,6 +229,20 @@ func (m *MockDatabasePort) PaymentAllocation() outbound_port.PaymentAllocationDa
 func (mr *MockDatabasePortMockRecorder) PaymentAllocation() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PaymentAllocation", reflect.TypeOf((*MockDatabasePort)(nil).PaymentAllocation))
+}
+
+// Refund mocks base method.
+func (m *MockDatabasePort) Refund() outbound_port.RefundDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Refund")
+	ret0, _ := ret[0].(outbound_port.RefundDatabasePort)
+	return ret0
+}
+
+// Refund indicates an expected call of Refund.
+func (mr *MockDatabasePortMockRecorder) Refund() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Refund", reflect.TypeOf((*MockDatabasePort)(nil).Refund))
 }
 
 // SystemSetting mocks base method.

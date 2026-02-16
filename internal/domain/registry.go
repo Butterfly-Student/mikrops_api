@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"go-template/internal/domain/activity"
 	"go-template/internal/domain/auth"
 	"go-template/internal/domain/bandwidth_profile"
 	"go-template/internal/domain/billing"
@@ -14,6 +15,7 @@ import (
 	"go-template/internal/domain/ping"
 	"go-template/internal/domain/pppoe"
 	"go-template/internal/domain/queue"
+	"go-template/internal/domain/refund"
 	"go-template/internal/domain/system_setting"
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
@@ -39,18 +41,22 @@ type Domain interface {
 	Billing() billing.BillingDomain
 	Payment() payment.PaymentDomain
 	Cash() cash.CashDomain
+	Refund() refund.RefundDomain
+	Activity() activity.ActivityDomain
 	Notification() notification.NotificationDomain
+	Workflow() outbound_port.WorkflowPort
 }
 
 type domain struct {
-	databasePort  outbound_port.DatabasePort
-	messagePort   outbound_port.MessagePort
-	cachePort     outbound_port.CachePort
-	workflowPort  outbound_port.WorkflowPort
-	mikrotikPort outbound_port.MikrotikPort
-	emailUtil     *email.EmailUtil
-	gowaUtil      *gowa.Client
+	databasePort   outbound_port.DatabasePort
+	messagePort    outbound_port.MessagePort
+	cachePort      outbound_port.CachePort
+	workflowPort   outbound_port.WorkflowPort
+	mikrotikPort   outbound_port.MikrotikPort
+	emailUtil      *email.EmailUtil
+	gowaUtil       *gowa.Client
 	enforcer       *casbin.Enforcer
+	activityDomain activity.ActivityDomain
 }
 
 func NewDomain(
@@ -64,14 +70,15 @@ func NewDomain(
 	enforcer *casbin.Enforcer,
 ) Domain {
 	return &domain{
-		databasePort:  databasePort,
-		messagePort:   messagePort,
-		cachePort:     cachePort,
-		workflowPort:  workflowPort,
-		mikrotikPort: mikrotikPort,
-		emailUtil:     emailUtil,
-		gowaUtil:      gowaUtil,
+		databasePort:   databasePort,
+		messagePort:    messagePort,
+		cachePort:      cachePort,
+		workflowPort:   workflowPort,
+		mikrotikPort:   mikrotikPort,
+		emailUtil:      emailUtil,
+		gowaUtil:       gowaUtil,
 		enforcer:       enforcer,
+		activityDomain: activity.NewActivityDomain(databasePort),
 	}
 }
 
@@ -112,7 +119,7 @@ func (d *domain) BandwidthProfile() bandwidth_profile.BandwidthProfileDomain {
 }
 
 func (d *domain) Customer() customer.CustomerDomain {
-	return customer.NewCustomerDomain(d.databasePort, d.mikrotikPort)
+	return customer.NewCustomerDomain(d.databasePort, d.mikrotikPort, d.databasePort.BandwidthProfile())
 }
 
 func (d *domain) SystemSetting() system_setting.SystemSettingDomain {
@@ -133,4 +140,16 @@ func (d *domain) Cash() cash.CashDomain {
 
 func (d *domain) Notification() notification.NotificationDomain {
 	return notification.NewNotificationDomain(d.databasePort, d.emailUtil, d.gowaUtil)
+}
+
+func (d *domain) Activity() activity.ActivityDomain {
+	return d.activityDomain
+}
+
+func (d *domain) Refund() refund.RefundDomain {
+	return refund.NewRefundDomain(d.databasePort.Refund())
+}
+
+func (d *domain) Workflow() outbound_port.WorkflowPort {
+	return d.workflowPort
 }

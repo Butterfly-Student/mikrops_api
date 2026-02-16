@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Checkout - ISP</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .checkout-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        .checkout-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .checkout-header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .invoice-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        .summary-row.total {
+            border-top: 2px solid #3498db;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .summary-label {
+            font-weight: 500;
+            color: #7f8c8d;
+        }
+        .summary-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .summary-value.large {
+            font-size: 24px;
+            color: #3498db;
+        }
+        .payment-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+        .payment-iframe-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .payment-iframe-container p {
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .error-banner {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+        }
+        .back-link {
+            display: inline-block;
+            color: #3498db;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <a href="/" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="checkout-header">
+            <i class="fas fa-credit-card" style="font-size: 48px; color: #3498db; margin-bottom: 15px;"></i>
+            <h1>Complete Your Payment</h1>
+            <p>Secure payment powered by Xendit</p>
+        </div>
+
+        <div id="error-banner" class="error-banner hidden">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="error-message"></span>
+        </div>
+
+        <div class="invoice-summary">
+            <h3>Invoice Summary</h3>
+            <div class="summary-row">
+                <span class="summary-label">Invoice Number:</span>
+                <span class="summary-value" id="invoice-number">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Customer:</span>
+                <span class="summary-value" id="customer-name">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Issue Date:</span>
+                <span class="summary-value" id="issue-date">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Due Date:</span>
+                <span class="summary-value" id="due-date">-</span>
+            </div>
+            <hr>
+            <div class="summary-row">
+                <span class="summary-label">Subtotal:</span>
+                <span class="summary-value" id="subtotal">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Tax (11%):</span>
+                <span class="summary-value" id="tax">-</span>
+            </div>
+            <div class="summary-row total">
+                <span class="summary-label">Total Amount:</span>
+                <span class="summary-value large" id="total-amount">-</span>
+            </div>
+        </div>
+
+        <div class="payment-iframe-container">
+            <p>Complete your payment below</p>
+            <iframe id="xendit-iframe" class="payment-iframe" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #7f8c8d; font-size: 14px;">
+                <i class="fas fa-lock"></i> Your payment is secure and encrypted
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Get invoice details from URL or local storage
+        const urlParams = new URLSearchParams(window.location.search);
+        const invoiceId = urlParams.get('invoice_id');
+        const paymentMethod = urlParams.get('payment_method');
+
+        // Load invoice details
+        async function loadInvoiceDetails() {
+            if (!invoiceId) {
+                showError('Invoice ID not provided');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/billing/invoices/${invoiceId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load invoice');
+                }
+
+                const result = await response.json();
+                const invoice = result.data;
+
+                document.getElementById('invoice-number').textContent = invoice.invoice_number;
+                document.getElementById('customer-name').textContent = invoice.customer?.full_name || 'N/A';
+                document.getElementById('issue-date').textContent = new Date(invoice.issue_date).toLocaleDateString('id-ID');
+                document.getElementById('due-date').textContent = new Date(invoice.due_date).toLocaleDateString('id-ID');
+                document.getElementById('subtotal').textContent = formatCurrency(invoice.subtotal);
+                document.getElementById('tax').textContent = formatCurrency(invoice.tax_amount);
+                document.getElementById('total-amount').textContent = formatCurrency(invoice.total_amount);
+
+                // Initialize payment
+                await initializePayment(invoice);
+            } catch (error) {
+                showError(error.message || 'Failed to load invoice details');
+            }
+        }
+
+        async function initializePayment(invoice) {
+            try {
+                const response = await fetch('/api/v1/payments/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        invoice_id: invoiceId,
+                        payment_method: paymentMethod || 'VA',
+                        amount: invoice.total_amount,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to initialize payment');
+                }
+
+                const result = await response.json();
+                
+                if (result.data && result.data.payment_url) {
+                    // Load Xendit iframe
+                    const iframe = document.getElementById('xendit-iframe');
+                    iframe.src = result.data.payment_url;
+                } else {
+                    throw new Error('Payment URL not received');
+                }
+            } catch (error) {
+                showError(error.message || 'Failed to initialize payment');
+            }
+        }
+
+        function showError(message) {
+            const errorBanner = document.getElementById('error-banner');
+            const errorMessage = document.getElementById('error-message');
+            
+            errorBanner.classList.remove('hidden');
+            errorMessage.textContent = message;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(amount);
+        }
+
+        // Listen for payment completion
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.status) {
+                if (event.data.status === 'success') {
+                    window.location.href = `/index.html?status=success&invoice_id=${invoiceId}`;
+                } else if (event.data.status === 'failed' || event.data.status === 'cancelled') {
+                    window.location.href = `/index.html?status=${event.data.status}&invoice_id=${invoiceId}`;
+                }
+            }
+        });
+
+        // Load invoice details on page load
+        loadInvoiceDetails();
+    </script>
+</body>
+</html>

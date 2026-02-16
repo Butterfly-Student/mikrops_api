@@ -1,13 +1,13 @@
-.idea/
-.misc/
-coverage.html
-coverage.profile
-.env
-.env.*
-__debug_bin*
-var
-etc
-cover 
-cover.out
-.DS_Store
+# .idea/
+# .misc/
+# coverage.html
+# coverage.profile
+# .env
+# .env.*
+# __debug_bin*
+# var
+# etc
+# cover 
+# cover.out
+# .DS_Store
 *.exe

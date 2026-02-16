@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"go-template/internal/domain"
+	"go-template/internal/model"
 	"go-template/utils/log"
 )
 
-// Activities struct holds the dependencies for workflow activities
+// Activities struct holds dependencies for workflow activities
 type Activities struct {
 	domain domain.Domain
 }
@@ -93,9 +94,15 @@ func (a *Activities) SendIsolationNotificationActivity(ctx context.Context, inpu
 		return fmt.Errorf("failed to get customer: %w", err)
 	}
 
-	// TODO: Send notification via notification domain
-	// For now, just log
-	log.WithContext(ctx).Info(fmt.Sprintf("Isolation notification sent to %s (%s)", customer.FullName, customer.Phone))
+	// Send notification via notification domain
+	reason := fmt.Sprintf("Your internet service has been isolated due to unpaid invoice")
+	err = a.domain.Notification().SendIsolationNotification(ctx, input.CustomerID, reason)
+	if err != nil {
+		log.WithContext(ctx).Warn(fmt.Sprintf("Failed to send isolation notification: %v", err))
+		// Don't fail the workflow if notification fails
+	} else {
+		log.WithContext(ctx).Info(fmt.Sprintf("Isolation notification sent to %s (%s)", customer.FullName, customer.Phone))
+	}
 
 	return nil
 }
@@ -119,6 +126,34 @@ func (a *Activities) GetCustomerDetailsActivity(ctx context.Context, input GetCu
 		FullName:     customer.FullName,
 		Email:        email,
 		Phone:        customer.Phone,
+	}, nil
+}
+
+// GetOriginalProfileActivity gets the customer's original bandwidth profile before isolation
+func (a *Activities) GetOriginalProfileActivity(ctx context.Context, input GetOriginalProfileInput) (GetOriginalProfileResult, error) {
+	log.WithContext(ctx).Info(fmt.Sprintf("Getting original profile for customer: %s", input.CustomerID))
+
+	customer, err := a.domain.Customer().GetCustomer(ctx, input.CustomerID)
+	if err != nil {
+		return GetOriginalProfileResult{}, fmt.Errorf("failed to get customer: %w", err)
+	}
+
+	if customer.Profile == nil {
+		return GetOriginalProfileResult{}, fmt.Errorf("customer has no profile set")
+	}
+
+	profile, err := a.domain.BandwidthProfile().GetProfile(ctx, customer.Profile.ID.String())
+	if err != nil {
+		return GetOriginalProfileResult{}, fmt.Errorf("failed to get profile: %w", err)
+	}
+
+	log.WithContext(ctx).Info(fmt.Sprintf("Found original profile for customer %s: %s", customer.CustomerCode, profile.Name))
+
+	return GetOriginalProfileResult{
+		ProfileID:      profile.ID.String(),
+		ProfileName:    profile.Name,
+		PppProfileName: profile.PppProfileName,
+		ProfileCode:    profile.ProfileCode,
 	}, nil
 }
 
@@ -147,8 +182,18 @@ func (a *Activities) UpdateCustomerStatusActivity(ctx context.Context, input Upd
 
 	customer.Status = input.Status
 
-	// TODO: Update customer via domain method
-	// For now, this is handled by ActivateCustomer/IsolateCustomer
+	// Update customer via domain method
+	_, err = a.domain.Customer().UpdateCustomer(ctx, input.CustomerID, model.CustomerInput{
+		CustomerCode: &customer.CustomerCode,
+		FullName:     customer.FullName,
+		Email:        customer.Email,
+		Phone:        customer.Phone,
+		Address:      customer.Address,
+		Status:       &customer.Status,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update customer: %w", err)
+	}
 
 	log.WithContext(ctx).Info(fmt.Sprintf("Customer status updated to: %s", input.Status))
 
@@ -157,22 +202,62 @@ func (a *Activities) UpdateCustomerStatusActivity(ctx context.Context, input Upd
 
 // UpdateExpiryDateActivity updates customer expiry date
 func (a *Activities) UpdateExpiryDateActivity(ctx context.Context, input UpdateExpiryDateInput) error {
-	log.WithContext(ctx).Info(fmt.Sprintf("Updating expiry date for customer: %s", input.CustomerID))
+	log.WithContext(ctx).Info(fmt.Sprintf("Updating expiry date for customer: %s, invoice: %s", input.CustomerID, input.InvoiceID))
 
-	// TODO: Calculate new expiry date based on invoice
-	// For now, set expiry date to 30 days from now
-	newExpiryDate := time.Now().Add(30 * 24 * time.Hour)
-
+	// Get customer details
 	customer, err := a.domain.Customer().GetCustomer(ctx, input.CustomerID)
 	if err != nil {
 		return fmt.Errorf("failed to get customer: %w", err)
 	}
 
-	customer.ExpiryDate = &newExpiryDate
+	// Calculate new expiry date based on billing cycle
+	var newExpiryDate time.Time
 
-	// TODO: Update customer via domain method
+	if customer.BillingCycle == nil || *customer.BillingCycle == "monthly" {
+		// Add one month to current expiry date (or today if nil)
+		currentExpiry := time.Now()
+		if customer.ExpiryDate != nil {
+			currentExpiry = *customer.ExpiryDate
+		}
+		newExpiryDate = currentExpiry.AddDate(0, 1, 0)
+	} else if customer.BillingCycle != nil && *customer.BillingCycle == "quarterly" {
+		// Add three months
+		currentExpiry := time.Now()
+		if customer.ExpiryDate != nil {
+			currentExpiry = *customer.ExpiryDate
+		}
+		newExpiryDate = currentExpiry.AddDate(0, 3, 0)
+	} else if customer.BillingCycle != nil && *customer.BillingCycle == "yearly" {
+		// Add one year
+		currentExpiry := time.Now()
+		if customer.ExpiryDate != nil {
+			currentExpiry = *customer.ExpiryDate
+		}
+		newExpiryDate = currentExpiry.AddDate(1, 0, 0)
+	} else {
+		// Default to one month
+		currentExpiry := time.Now()
+		if customer.ExpiryDate != nil {
+			currentExpiry = *customer.ExpiryDate
+		}
+		newExpiryDate = currentExpiry.AddDate(0, 1, 0)
+	}
 
-	log.WithContext(ctx).Info(fmt.Sprintf("Expiry date updated to: %s", newExpiryDate.Format("2006-01-02")))
+	// Update customer via domain method
+	_, err = a.domain.Customer().UpdateCustomer(ctx, input.CustomerID, model.CustomerInput{
+		CustomerCode: &customer.CustomerCode,
+		FullName:     customer.FullName,
+		Email:        customer.Email,
+		Phone:        customer.Phone,
+		Address:      customer.Address,
+		Status:       &customer.Status,
+		ExpiryDate:   &newExpiryDate,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update customer: %w", err)
+	}
+
+	log.WithContext(ctx).Info(fmt.Sprintf("Expiry date updated to: %s for customer %s", newExpiryDate.Format("2006-01-02"), customer.CustomerCode))
 
 	return nil
 }
@@ -187,9 +272,27 @@ func (a *Activities) SendReactivationNotificationActivity(ctx context.Context, i
 		return fmt.Errorf("failed to get customer: %w", err)
 	}
 
-	// TODO: Send notification via notification domain
-	// For now, just log
-	log.WithContext(ctx).Info(fmt.Sprintf("Reactivation notification sent to %s (%s)", customer.FullName, customer.Phone))
+	// Send notification via notification domain
+	err = a.domain.Notification().SendReactivationNotification(ctx, input.CustomerID, "Your internet service has been reactivated successfully. Thank you for your payment!")
+	if err != nil {
+		log.WithContext(ctx).Warn(fmt.Sprintf("Failed to send reactivation notification: %v", err))
+		// Don't fail the workflow if notification fails
+	} else {
+		log.WithContext(ctx).Info(fmt.Sprintf("Reactivation notification sent to %s (%s)", customer.FullName, customer.Phone))
+	}
 
 	return nil
+}
+
+// GetOriginalProfileInput is input for getting original profile
+type GetOriginalProfileInput struct {
+	CustomerID string
+}
+
+// GetOriginalProfileResult is output for getting original profile
+type GetOriginalProfileResult struct {
+	ProfileID      string
+	ProfileName    string
+	PppProfileName string
+	ProfileCode    string
 }

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Portal - ISP</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loader"></div>
+            <p>Loading...</p>
+        </div>
+
+        <!-- Login Page -->
+        <div id="login-page" class="page hidden">
+            <div class="login-container">
+                <div class="login-box">
+                    <div class="logo-section">
+                        <i class="fas fa-wifi"></i>
+                        <h1>ISP Payment Portal</h1>
+                    </div>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="customer-code">Customer Code or Phone Number</label>
+                            <input type="text" id="customer-code" required placeholder="Enter your customer code or phone number">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <div id="login-error" class="error-message hidden"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page hidden">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <i class="fas fa-wifi"></i>
+                    <span>ISP Portal</span>
+                </div>
+                <div class="navbar-menu">
+                    <span id="customer-name" class="customer-name"></span>
+                    <button id="logout-btn" class="btn btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h2>My Invoices</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-icon pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span id="pending-amount" class="stat-amount">Rp 0</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon paid">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span id="paid-amount" class="stat-amount">Rp 0</span>
+                                <span class="stat-label">Paid</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon overdue">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span id="overdue-amount" class="stat-amount">Rp 0</span>
+                                <span class="stat-label">Overdue</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="invoices-container">
+                    <!-- Invoices will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Page -->
+        <div id="payment-page" class="page hidden">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <button id="back-to-dashboard" class="btn btn-back">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span>Make Payment</span>
+                </div>
+            </nav>
+
+            <div class="payment-container">
+                <div class="invoice-details-card">
+                    <h3>Invoice Details</h3>
+                    <div id="invoice-details-content">
+                        <!-- Invoice details will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="payment-methods-card">
+                    <h3>Select Payment Method</h3>
+                    <div class="payment-methods">
+                        <div class="payment-method" data-method="VA">
+                            <i class="fas fa-university"></i>
+                            <span>Virtual Account</span>
+                        </div>
+                        <div class="payment-method" data-method="GOPAY">
+                            <i class="fas fa-wallet"></i>
+                            <span>GoPay</span>
+                        </div>
+                        <div class="payment-method" data-method="OVO">
+                            <i class="fas fa-wallet"></i>
+                            <span>OVO</span>
+                        </div>
+                        <div class="payment-method" data-method="DANA">
+                            <i class="fas fa-wallet"></i>
+                            <span>DANA</span>
+                        </div>
+                        <div class="payment-method" data-method="QRIS">
+                            <i class="fas fa-qrcode"></i>
+                            <span>QRIS</span>
+                        </div>
+                        <div class="payment-method" data-method="BCA">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Credit Card</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-button-container">
+                    <button id="pay-now-btn" class="btn btn-primary btn-large" disabled>
+                        <i class="fas fa-lock"></i> Pay Now
+                    </button>
+                </div>
+
+                <div id="payment-error" class="error-message hidden"></div>
+            </div>
+        </div>
+
+        <!-- Payment Success Page -->
+        <div id="success-page" class="page hidden">
+            <div class="success-container">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Payment Successful!</h2>
+                <p>Thank you for your payment. Your invoice has been marked as paid.</p>
+                <div id="success-details" class="success-details">
+                    <!-- Success details will be shown here -->
+                </div>
+                <button id="back-to-dashboard-success" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Payment Failed Page -->
+        <div id="failed-page" class="page hidden">
+            <div class="failed-container">
+                <div class="failed-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h2>Payment Failed</h2>
+                <p>Sorry, your payment could not be processed. Please try again or contact support.</p>
+                <div id="failed-details" class="failed-details">
+                    <!-- Error details will be shown here -->
+                </div>
+                <button id="back-to-dashboard-failed" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Invoice Details</h3>
+                    <button id="modal-close" class="btn-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="modal-body" class="modal-body">
+                    <!-- Modal content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button id="modal-close-footer" class="btn btn-secondary">Close</button>
+                    <button id="modal-action" class="btn btn-primary hidden">Pay Now</button>
+                    <button id="modal-download" class="btn btn-secondary hidden">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

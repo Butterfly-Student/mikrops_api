@@ -45,6 +45,23 @@ func (h *CustomerHandler) GetCustomer(c *gin.Context) {
 	c.JSON(http.StatusOK, customer)
 }
 
+func (h *CustomerHandler) GetCustomerByCode(c *gin.Context) {
+	code := c.Param("code")
+
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "customer code is required"})
+		return
+	}
+
+	customer, err := h.domain.Customer().GetByCustomerCode(c.Request.Context(), code)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, customer)
+}
+
 func (h *CustomerHandler) ListCustomers(c *gin.Context) {
 	var filter model.CustomerFilter
 

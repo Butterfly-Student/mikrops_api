@@ -96,3 +96,11 @@ func (s *adapter) Notification() outbound_port.NotificationDatabasePort {
 func (s *adapter) NotificationTemplate() outbound_port.NotificationTemplateDatabasePort {
 	return NewNotificationTemplateAdapter(s.db)
 }
+
+func (s *adapter) ActivityLog() outbound_port.ActivityLogDatabasePort {
+	return NewActivityLogAdapter(s.db)
+}
+
+func (s *adapter) Refund() outbound_port.RefundDatabasePort {
+	return NewRefundAdapter(s.db)
+}

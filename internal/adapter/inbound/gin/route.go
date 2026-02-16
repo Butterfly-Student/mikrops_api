@@ -14,9 +14,12 @@ func InitRoute(
 	port inbound_port.HttpPort,
 ) {
 	// Static files for payment portal (public access, no auth required)
-	app.Static("/payment", "./public/payment")
+	app.Static("/static", "./web/payment-portal/static")
 	app.GET("/payment", func(c *gin.Context) {
-		c.File("./public/payment/index.html")
+		c.File("./web/payment-portal/index.html")
+	})
+	app.GET("/", func(c *gin.Context) {
+		c.File("./web/payment-portal/index.html")
 	})
 
 	// Internal routes with internal auth middleware
@@ -164,16 +167,20 @@ func InitRoute(
 
 	// Customer Management
 	customer := app.Group("/customers")
-	customer.Use(port.Middleware().UserAuth())
 	{
-		customer.POST("", port.Customer().CreateCustomer)
-		customer.GET("", port.Customer().ListCustomers)
-		customer.GET("/:id", port.Customer().GetCustomer)
-		customer.PUT("/:id", port.Customer().UpdateCustomer)
-		customer.DELETE("/:id", port.Customer().DeleteCustomer)
-		customer.GET("/:id/billing-info", port.Customer().GetBillingInfo)
-		customer.POST("/:id/isolate", port.Customer().IsolateCustomer)
-		customer.POST("/:id/activate", port.Customer().ActivateCustomer)
+		// Public route for payment portal
+		customer.GET("/:code", port.Customer().GetCustomerByCode)
+
+		// Authenticated routes
+		customerAuth := customer.Use(port.Middleware().UserAuth())
+		customerAuth.POST("", port.Customer().CreateCustomer)
+		customerAuth.GET("", port.Customer().ListCustomers)
+		customerAuth.GET("/:id", port.Customer().GetCustomer)
+		customerAuth.PUT("/:id", port.Customer().UpdateCustomer)
+		customerAuth.DELETE("/:id", port.Customer().DeleteCustomer)
+		customerAuth.GET("/:id/billing-info", port.Customer().GetBillingInfo)
+		customerAuth.POST("/:id/isolate", port.Customer().IsolateCustomer)
+		customerAuth.POST("/:id/activate", port.Customer().ActivateCustomer)
 	}
 
 	// System Settings
@@ -210,17 +217,24 @@ func InitRoute(
 		// Overdue Management
 		billing.GET("/invoices/overdue", port.Billing().CheckOverdueInvoices)
 		billing.GET("/invoices/:id/late-fee", port.Billing().CalculateLateFee)
+
+		// PDF Download
+		billing.GET("/invoices/:id/pdf", port.Billing().DownloadInvoicePDF)
 	}
 
 	// Payment Management
 	payment := app.Group("/payments")
-	payment.Use(port.Middleware().UserAuth())
 	{
-		payment.POST("", port.Payment().CreatePayment)
-		payment.GET("", port.Payment().ListPayments)
-		payment.GET("/:id", port.Payment().GetPayment)
-		payment.PUT("/:id", port.Payment().UpdatePayment)
-		payment.DELETE("/:id", port.Payment().DeletePayment)
+		// Public route for payment portal
+		payment.POST("/create", port.Payment().CreatePaymentLink)
+
+		// Authenticated routes
+		paymentAuth := payment.Use(port.Middleware().UserAuth())
+		paymentAuth.POST("", port.Payment().CreatePayment)
+		paymentAuth.GET("", port.Payment().ListPayments)
+		paymentAuth.GET("/:id", port.Payment().GetPayment)
+		paymentAuth.PUT("/:id", port.Payment().UpdatePayment)
+		paymentAuth.DELETE("/:id", port.Payment().DeletePayment)
 	}
 
 	// Public Payment Webhook (no auth required)
@@ -277,5 +291,30 @@ func InitRoute(
 		notifications.POST("/invoice-reminder", port.Notification().SendInvoiceReminderNotification)
 		notifications.POST("/payment-failed", port.Notification().SendPaymentFailedNotification)
 		notifications.POST("/invoice-created", port.Notification().SendInvoiceCreatedNotification)
+
+		// Activity Logs
+		activity := app.Group("/activity")
+		activity.Use(port.Middleware().UserAuth())
+		{
+			activity.GET("", port.Activity().ListLogs)
+			activity.GET("/history", port.Activity().GetEntityHistory)
+			activity.GET("/users/:user_id", port.Activity().GetUserLogs)
+		}
+
+		// Refund Management
+		refunds := app.Group("/refunds")
+		refunds.Use(port.Middleware().UserAuth())
+		{
+			refunds.POST("", port.Refund().CreateRefund)
+			refunds.GET("", port.Refund().ListRefunds)
+			refunds.GET("/pending", port.Refund().GetPendingRefunds)
+			refunds.GET("/:id", port.Refund().GetRefund)
+			refunds.PUT("/:id", port.Refund().UpdateRefund)
+			refunds.DELETE("/:id", port.Refund().DeleteRefund)
+			refunds.POST("/:id/approve", port.Refund().ApproveRefund)
+			refunds.POST("/:id/reject", port.Refund().RejectRefund)
+			refunds.POST("/:id/process", port.Refund().ProcessRefund)
+			refunds.POST("/:id/complete", port.Refund().CompleteRefund)
+		}
 	}
 }

@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"go-template/internal/domain/bandwidth_profile"
-	"go-template/internal/domain/notification"
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
 	"go-template/utils/gowa"
@@ -16,6 +14,7 @@ import (
 type CustomerDomain interface {
 	CreateCustomer(ctx context.Context, input model.CustomerInput) (*model.Customer, error)
 	GetCustomer(ctx context.Context, id string) (*model.Customer, error)
+	GetByCustomerCode(ctx context.Context, code string) (*model.Customer, error)
 	ListCustomers(ctx context.Context, filter model.CustomerFilter) ([]model.Customer, error)
 	UpdateCustomer(ctx context.Context, id string, input model.CustomerInput) (*model.Customer, error)
 	DeleteCustomer(ctx context.Context, id string) error
@@ -28,21 +27,21 @@ type CustomerDomain interface {
 }
 
 type domain struct {
-	dbPort       outbound_port.DatabasePort
-	mikrotikPort outbound_port.MikrotikPort
-	gowaUtil     *gowa.Client
+	dbPort               outbound_port.DatabasePort
+	mikrotikPort         outbound_port.MikrotikPort
+	bandwidthProfilePort outbound_port.BandwidthProfileDatabasePort
+	gowaUtil             *gowa.Client
 }
 
-func (d *domain) getBandwidthProfile(ctx context.Context) bandwidth_profile.BandwidthProfileDomain {
-	return bandwidth_profile.NewBandwidthProfileDomain(d.dbPort, d.mikrotikPort)
-}
-
-// getNotificationDomain is a placeholder - notification domain should be accessed via parent domain
-func (d *domain) getNotificationDomain(ctx context.Context) notification.NotificationDomain {
-	// This should be injected from parent domain
-	// For now, return nil to avoid circular dependency
-	// The notification should be handled at the use case/parent domain level
-	return nil
+func (d *domain) getIsolatedProfile(ctx context.Context) (*model.BandwidthProfile, error) {
+	profiles, err := d.bandwidthProfilePort.FindByCategory("isolated")
+	if err != nil {
+		return nil, err
+	}
+	if len(profiles) == 0 {
+		return nil, errors.New("isolated profile not found")
+	}
+	return &profiles[0], nil
 }
 
 func (d *domain) getPaymentPortalURL() string {
@@ -52,11 +51,13 @@ func (d *domain) getPaymentPortalURL() string {
 func NewCustomerDomain(
 	dbPort outbound_port.DatabasePort,
 	mikrotikPort outbound_port.MikrotikPort,
+	bandwidthProfilePort outbound_port.BandwidthProfileDatabasePort,
 ) CustomerDomain {
 	return &domain{
-		dbPort:       dbPort,
-		mikrotikPort: mikrotikPort,
-		gowaUtil:     nil, // Will be set later if needed
+		dbPort:               dbPort,
+		mikrotikPort:         mikrotikPort,
+		bandwidthProfilePort: bandwidthProfilePort,
+		gowaUtil:             nil, // Will be set later if needed
 	}
 }
 
@@ -145,6 +146,10 @@ func (d *domain) CreateCustomer(ctx context.Context, input model.CustomerInput) 
 
 func (d *domain) GetCustomer(ctx context.Context, id string) (*model.Customer, error) {
 	return d.dbPort.Customer().FindByID(id)
+}
+
+func (d *domain) GetByCustomerCode(ctx context.Context, code string) (*model.Customer, error) {
+	return d.dbPort.Customer().FindByCustomerCode(code)
 }
 
 func (d *domain) ListCustomers(ctx context.Context, filter model.CustomerFilter) ([]model.Customer, error) {
@@ -301,7 +306,7 @@ func (d *domain) IsolateCustomer(ctx context.Context, customerID string) error {
 	}
 
 	// Get isolation profile (limited speed)
-	isolatedProfile, err := d.getBandwidthProfile(ctx).GetIsolatedProfile(ctx)
+	isolatedProfile, err := d.getIsolatedProfile(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get isolation profile: %w", err)
 	}
@@ -374,8 +379,8 @@ func (d *domain) ActivateCustomer(ctx context.Context, customerID string) error 
 		return errors.New("customer has no profile assigned")
 	}
 
-	bandwidthProfileDomain := d.getBandwidthProfile(ctx)
-	originalProfile, err := bandwidthProfileDomain.GetProfile(ctx, customer.ProfileID.String())
+	// Get original bandwidth profile
+	originalProfile, err := d.bandwidthProfilePort.FindByID(customer.ProfileID.String())
 	if err != nil {
 		return fmt.Errorf("failed to get original profile: %w", err)
 	}

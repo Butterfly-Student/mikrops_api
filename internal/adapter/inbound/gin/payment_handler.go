@@ -1,6 +1,7 @@
 package gin_inbound_adapter
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,6 +11,8 @@ import (
 	"go-template/internal/domain"
 	"go-template/internal/model"
 	inbound_port "go-template/internal/port/inbound"
+	"go-template/utils/log"
+	"go-template/utils/xendit"
 )
 
 type PaymentHandler struct {
@@ -146,8 +149,10 @@ func (h *PaymentHandler) DeletePayment(c *gin.Context) {
 
 func (h *PaymentHandler) ProcessXenditWebhook(c *gin.Context) {
 	var webhookData struct {
-		ExternalID string `json:"external_id"`
-		Status     string `json:"status"`
+		ExternalID string  `json:"external_id"`
+		Status     string  `json:"status"`
+		PaymentID  string  `json:"payment_id"`
+		PaidAmount float64 `json:"paid_amount"`
 	}
 
 	if err := c.ShouldBindJSON(&webhookData); err != nil {
@@ -155,11 +160,56 @@ func (h *PaymentHandler) ProcessXenditWebhook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "webhook received"})
+	// Process webhook using domain
+	err := h.domain.Payment().ProcessWebhook(c.Request.Context(), &xendit.WebhookData{
+		ExternalID: webhookData.ExternalID,
+		Status:     webhookData.Status,
+		PaymentID:  webhookData.PaymentID,
+		PaidAmount: webhookData.PaidAmount,
+	})
+	if err != nil {
+		log.WithContext(c.Request.Context()).Error(fmt.Sprintf("Failed to process webhook: %v", err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "webhook processed successfully"})
 }
 
 func (h *PaymentHandler) CreatePaymentLink(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "payment link creation not implemented yet"})
+	var input struct {
+		InvoiceID     string `json:"invoice_id" binding:"required"`
+		PaymentMethod string `json:"payment_method"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	invoice, err := h.domain.Billing().GetInvoice(c.Request.Context(), input.InvoiceID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "invoice not found"})
+		return
+	}
+
+	customer, err := h.domain.Customer().GetCustomer(c.Request.Context(), invoice.CustomerID.String())
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "customer not found"})
+		return
+	}
+
+	xenditInvoice, err := h.domain.Payment().CreateXenditInvoice(c.Request.Context(), invoice, customer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"payment_url": xenditInvoice.InvoiceURL,
+		"external_id": xenditInvoice.ExternalID,
+		"amount":      xenditInvoice.Amount,
+	})
 }
 
 // GenerateReceipt generates a PDF receipt for a payment

@@ -21,6 +21,8 @@ import (
 	"go-template/tests/helpers"
 	"go-template/utils/hash"
 	"go-template/utils/token"
+	"go-template/utils/email"
+	"go-template/utils/gowa"
 )
 
 func TestAuthIntegration(t *testing.T) {
@@ -52,7 +54,7 @@ func TestAuthIntegration(t *testing.T) {
 	adapter := postgres_outbound_adapter.NewUserAdapter(pgContainer.DB)
 	dbAdapter := postgres_outbound_adapter.NewAdapter(pgContainer.DB)
 	enforcer, _ := casbin.NewEnforcer(casbinmodel.NewModel())
-	dom := domain.NewDomain(dbAdapter, nil, nil, nil, nil, enforcer)
+	dom := domain.NewDomain(dbAdapter, nil, nil, nil, nil, nil, nil, enforcer)
 
 	Convey("Test Auth Integration with PostgreSQL", t, func() {
 		// Cleanup before test

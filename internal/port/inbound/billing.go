@@ -15,4 +15,5 @@ type BillingHttpPort interface {
 	CreateInvoiceItem(c *gin.Context)
 	GetInvoiceItem(c *gin.Context)
 	ListInvoiceItems(c *gin.Context)
+	DownloadInvoicePDF(c *gin.Context)
 }

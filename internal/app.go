@@ -13,7 +13,6 @@ import (
 	command_inbound_adapter "go-template/internal/adapter/inbound/command"
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
 	rabbitmq_inbound_adapter "go-template/internal/adapter/inbound/rabbitmq"
-	temporal_inbound_adapter "go-template/internal/adapter/inbound/temporal"
 	mikrotik_outbound_adapter "go-template/internal/adapter/outbound/mikrotik"
 	postgres_outbound_adapter "go-template/internal/adapter/outbound/postgres"
 	rabbitmq_outbound_adapter "go-template/internal/adapter/outbound/rabbitmq"
@@ -68,9 +67,14 @@ func NewApp() *App {
 
 	xendit.InitClient()
 
-	dbPort, enforcer := databaseOutbound(ctx)
+	// Create app instance first
+	app := &App{
+		ctx: ctx,
+	}
 
-	// Initialize email utility from database settings (with .env fallback)
+	// Initialize dependencies using app methods
+	dbPort, enforcer := app.databaseOutbound(ctx)
+
 	emailConfig := email.EmailConfig{
 		SMTPHost:     settings.GetStringSettingWithDefault(dbPort, "email.smtp_host", os.Getenv("SMTP_HOST")),
 		SMTPPort:     settings.GetStringSettingWithDefault(dbPort, "email.smtp_port", os.Getenv("SMTP_PORT")),
@@ -82,30 +86,27 @@ func NewApp() *App {
 	}
 	emailUtil := email.NewEmailUtil(emailConfig)
 
-	// Initialize Gowa utility for WhatsApp from database settings (with .env fallback)
 	gowaConfig := gowa.GowaConfig{
 		BaseURL: settings.GetStringSettingWithDefault(dbPort, "gowa.api_url", os.Getenv("GOWA_API_URL")),
 		APIKey:  settings.GetStringSettingWithDefault(dbPort, "gowa.api_key", os.Getenv("GOWA_API_KEY")),
-		Timeout:  settings.GetIntSettingWithDefault(dbPort, "gowa.timeout", 30),
+		Timeout: settings.GetIntSettingWithDefault(dbPort, "gowa.timeout", 30),
 		Enabled: settings.GetBoolSettingWithDefault(dbPort, "gowa.enabled", os.Getenv("GOWA_ENABLED") == "true"),
 	}
 	gowaUtil := gowa.NewClient(gowaConfig)
 
-	domain := domain.NewDomain(
+	// Create domain with all dependencies
+	app.domain = domain.NewDomain(
 		dbPort,
-		messageOutbound(ctx),
-		cacheOutbound(ctx),
-		workflowOutbound(ctx),
-		mikrotikOutbound(),
+		app.messageOutbound(ctx),
+		app.cacheOutbound(ctx),
+		app.workflowOutbound(ctx),
+		app.mikrotikOutbound(),
 		emailUtil,
 		gowaUtil,
 		enforcer,
 	)
 
-	return &App{
-		ctx:    ctx,
-		domain: domain,
-	}
+	return app
 }
 
 func (a *App) Run(option string) {
@@ -114,14 +115,12 @@ func (a *App) Run(option string) {
 		a.httpInbound()
 	case "message":
 		a.messageInbound()
-	case "workflow":
-		a.workflowInbound()
 	default:
 		a.commandInbound()
 	}
 }
 
-func databaseOutbound(ctx context.Context) (outbound_port.DatabasePort, *casbin.Enforcer) {
+func (a *App) databaseOutbound(ctx context.Context) (outbound_port.DatabasePort, *casbin.Enforcer) {
 	if !utils.IsInList(databaseDriverList, outboundDatabaseDriver) {
 		log.WithContext(ctx).Error("database driver is not supported")
 		os.Exit(1)
@@ -135,7 +134,7 @@ func databaseOutbound(ctx context.Context) (outbound_port.DatabasePort, *casbin.
 	return nil, nil
 }
 
-func messageOutbound(ctx context.Context) outbound_port.MessagePort {
+func (a *App) messageOutbound(ctx context.Context) outbound_port.MessagePort {
 	if !utils.IsInList(messageDriverList, outboundMessageDriver) {
 		log.WithContext(ctx).Error("message driver is not supported")
 		os.Exit(1)
@@ -152,11 +151,11 @@ func messageOutbound(ctx context.Context) outbound_port.MessagePort {
 	return nil
 }
 
-func mikrotikOutbound() outbound_port.MikrotikPort {
+func (a *App) mikrotikOutbound() outbound_port.MikrotikPort {
 	return mikrotik_outbound_adapter.NewMikrotikClientAdapter()
 }
 
-func cacheOutbound(ctx context.Context) outbound_port.CachePort {
+func (a *App) cacheOutbound(ctx context.Context) outbound_port.CachePort {
 	if !utils.IsInList([]string{"redis"}, outboundCacheDriver) {
 		log.WithContext(ctx).Error("cache driver is not supported")
 		os.Exit(1)
@@ -170,7 +169,7 @@ func cacheOutbound(ctx context.Context) outbound_port.CachePort {
 	return nil
 }
 
-func workflowOutbound(ctx context.Context) outbound_port.WorkflowPort {
+func (a *App) workflowOutbound(ctx context.Context) outbound_port.WorkflowPort {
 	if outboundWorkflowDriver == "" {
 		return nil
 	}
@@ -182,7 +181,7 @@ func workflowOutbound(ctx context.Context) outbound_port.WorkflowPort {
 
 	switch outboundWorkflowDriver {
 	case "temporal":
-		return temporal_outbound_adapter.NewAdapter()
+		return temporal_outbound_adapter.NewAdapter(a.domain)
 	}
 	return nil
 }
@@ -199,6 +198,21 @@ func (a *App) httpInbound() {
 		app := gin.Default()
 		inboundHttpAdapter := gin_inbound_adapter.NewAdapter(a.domain)
 		gin_inbound_adapter.InitRoute(ctx, app, inboundHttpAdapter)
+
+		// Auto-start temporal schedulers if workflow is configured
+		workflowPort := a.domain.Workflow()
+		if workflowPort != nil {
+			log.WithContext(ctx).Info("Starting temporal schedulers")
+
+			// Start billing scheduler
+			workflowPort.Billing().StartScheduler(ctx)
+
+			// Start isolation scheduler
+			workflowPort.Isolation().StartScheduler(ctx)
+
+			log.WithContext(ctx).Info("Temporal schedulers started successfully")
+		}
+
 		go func() {
 			if err := app.Run(":" + os.Getenv("SERVER_PORT")); err != nil {
 				log.WithContext(ctx).Error("failed to listen and serve", err)
@@ -236,22 +250,5 @@ func (a *App) commandInbound() {
 	command_inbound_adapter.InitRoute(ctx, os.Args, inboundCommandAdapter)
 }
 
-func (a *App) workflowInbound() {
-	ctx := a.ctx
-	if !utils.IsInList(workflowDriverList, inboundWorkflowDriver) {
-		log.WithContext(ctx).Error("workflow driver is not supported")
-		os.Exit(1)
-	}
-
-	switch inboundWorkflowDriver {
-	case "temporal":
-		inboundWorkflowAdapter := temporal_inbound_adapter.NewAdapter(a.domain)
-		temporal_inbound_adapter.InitRoute(ctx, os.Args, inboundWorkflowAdapter)
-	}
-}
-
 func configureLogging() {
-	// Zap logger is initialized in log package init()
-	// No additional configuration needed here; it auto-detects APP_MODE
-	defer log.Sync()
 }

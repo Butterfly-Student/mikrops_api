@@ -11,6 +11,7 @@ import (
 	"go-template/utils/gowa"
 	"go-template/utils/log"
 	"go-template/utils/settings"
+	"go-template/utils/template"
 )
 
 type NotificationDomain interface {
@@ -227,6 +228,55 @@ func (d *domain) DeleteTemplate(ctx context.Context, id string) error {
 	return d.dbPort.NotificationTemplate().Delete(id)
 }
 
+func (d *domain) RenderTemplate(ctx context.Context, templateName string, variables map[string]interface{}) (string, string, error) {
+	tmpl, err := d.dbPort.NotificationTemplate().FindByName(templateName)
+	if err != nil {
+		return "", "", fmt.Errorf("template not found: %w", err)
+	}
+
+	if !tmpl.IsActive {
+		return "", "", fmt.Errorf("template is inactive")
+	}
+
+	renderer := template.NewRenderer(tmpl.Content)
+	renderedContent, err := renderer.RenderWithMap(variables)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to render template content: %w", err)
+	}
+
+	renderedSubject := tmpl.Subject
+	if tmpl.Subject != "" {
+		subjectRenderer := template.NewRenderer(tmpl.Subject)
+		renderedSubject, err = subjectRenderer.RenderWithMap(variables)
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("Failed to render template subject: %v", err))
+		}
+	}
+
+	return renderedSubject, renderedContent, nil
+}
+
+func (d *domain) SendNotificationFromTemplate(ctx context.Context, templateName string, notificationType string, recipient string, variables map[string]interface{}) error {
+	subject, content, err := d.RenderTemplate(ctx, templateName, variables)
+	if err != nil {
+		return err
+	}
+
+	input := model.NotificationInput{
+		Type:      notificationType,
+		Recipient: recipient,
+		Subject:   &subject,
+		Content:   content,
+	}
+
+	_, err = d.CreateNotification(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *domain) SendPaymentConfirmation(ctx context.Context, customerID string, paymentID string, amount float64) error {
 	customer, err := d.dbPort.Customer().FindByID(customerID)
 	if err != nil {
@@ -238,9 +288,25 @@ func (d *domain) SendPaymentConfirmation(ctx context.Context, customerID string,
 		return fmt.Errorf("payment not found: %w", err)
 	}
 
-	// Send email
-	emailSubject := fmt.Sprintf("Payment Confirmation - %s", payment.PaymentNumber)
-	emailContent := fmt.Sprintf(`
+	portalURL := d.getPaymentPortalURL()
+	variables := map[string]interface{}{
+		"CustomerName":  customer.FullName,
+		"CustomerCode":  customer.CustomerCode,
+		"PaymentNumber": payment.PaymentNumber,
+		"PaymentAmount": fmt.Sprintf("%.2f", amount),
+		"PaymentDate":   payment.PaymentDate.Format("2006-01-02"),
+		"PaymentMethod": payment.PaymentMethod,
+		"PortalURL":     portalURL,
+	}
+
+	var emailSubject, emailContent string
+
+	if customer.Email != nil {
+		subject, content, err := d.RenderTemplate(ctx, "payment_confirmation_email", variables)
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("Template not found or failed to render, using fallback: %v", err))
+			emailSubject = fmt.Sprintf("Payment Confirmation - %s", payment.PaymentNumber)
+			emailContent = fmt.Sprintf(`
 Dear %s,
 
 Thank you for your payment!
@@ -257,32 +323,38 @@ If you have any questions, please contact our support team.
 
 Best regards,
 Your Billing Team
-	`, customer.FullName, payment.PaymentNumber, amount, payment.PaymentDate.Format("2006-01-02"), payment.PaymentMethod)
+			`, customer.FullName, payment.PaymentNumber, amount, payment.PaymentDate.Format("2006-01-02"), payment.PaymentMethod)
+		} else {
+			emailSubject = subject
+			emailContent = content
+		}
 
-	emailInput := model.NotificationInput{
-		Type:      "email",
-		Recipient: "",
-		Subject:   &emailSubject,
-		Content:   emailContent,
+		emailInput := model.NotificationInput{
+			Type:      "email",
+			Recipient: *customer.Email,
+			Subject:   &emailSubject,
+			Content:   emailContent,
+		}
+
+		if customer.ID.String() != "" {
+			emailInput.CustomerID = &customer.ID
+			emailInput.PaymentID = &payment.ID
+		}
+
+		_, err = d.CreateNotification(ctx, emailInput)
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("Failed to create email notification: %v", err))
+		}
 	}
 
-	if customer.Email != nil {
-		emailInput.Recipient = *customer.Email
-	}
-
-	if customer.ID.String() != "" {
-		emailInput.CustomerID = &customer.ID
-		emailInput.PaymentID = &payment.ID
-	}
-
-	_, err = d.CreateNotification(ctx, emailInput)
-	if err != nil {
-		return err
-	}
-
-	// Send WhatsApp if phone number is available
 	if customer.Phone != "" {
-		whatsappMessage := fmt.Sprintf("Dear %s,\n\nThank you for your payment of Rp %.2f (Payment No: %s). Your payment has been successfully received.\n\nBest regards", customer.FullName, amount, payment.PaymentNumber)
+		_, content, err := d.RenderTemplate(ctx, "payment_confirmation_whatsapp", variables)
+		whatsappMessage := content
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("WhatsApp template not found or failed to render, using fallback: %v", err))
+			whatsappMessage = fmt.Sprintf("Dear %s,\n\nThank you for your payment of Rp %.2f (Payment No: %s). Your payment has been successfully received.\n\nBest regards", customer.FullName, amount, payment.PaymentNumber)
+		}
+
 		whatsappInput := model.NotificationInput{
 			Type:      "whatsapp",
 			Recipient: customer.Phone,
@@ -314,8 +386,29 @@ func (d *domain) SendInvoiceReminder(ctx context.Context, customerID string, inv
 		return fmt.Errorf("invoice not found: %w", err)
 	}
 
-	emailSubject := fmt.Sprintf("Invoice Reminder - %s", invoice.InvoiceNumber)
-	emailContent := fmt.Sprintf(`
+	portalURL := d.getPaymentPortalURL()
+	outstandingBalance := invoice.TotalAmount - invoice.PaidAmount
+	variables := map[string]interface{}{
+		"CustomerName":       customer.FullName,
+		"CustomerCode":       customer.CustomerCode,
+		"InvoiceNumber":      invoice.InvoiceNumber,
+		"InvoiceDate":        invoice.IssueDate.Format("2006-01-02"),
+		"DueDate":            invoice.DueDate.Format("2006-01-02"),
+		"TotalAmount":        fmt.Sprintf("%.2f", invoice.TotalAmount),
+		"PaidAmount":         fmt.Sprintf("%.2f", invoice.PaidAmount),
+		"OutstandingBalance": fmt.Sprintf("%.2f", outstandingBalance),
+		"DaysOverdue":        days,
+		"PortalURL":          portalURL,
+	}
+
+	var emailSubject, emailContent string
+
+	if customer.Email != nil {
+		subject, content, err := d.RenderTemplate(ctx, "invoice_reminder_email", variables)
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("Template not found or failed to render, using fallback: %v", err))
+			emailSubject = fmt.Sprintf("Invoice Reminder - %s", invoice.InvoiceNumber)
+			emailContent = fmt.Sprintf(`
 Dear %s,
 
 This is a friendly reminder that your invoice is %d days overdue.
@@ -329,33 +422,34 @@ Invoice Details:
 
 Please complete your payment as soon as possible to avoid additional late fees.
 
-You can pay your invoice through our payment portal: https://your-domain.com/payment/
+You can pay your invoice through our payment portal: %s
 
 If you have already made a payment, please disregard this notice.
 
 Best regards,
 Your Billing Team
-	`, customer.FullName, days, invoice.InvoiceNumber, invoice.IssueDate.Format("2006-01-02"), invoice.DueDate.Format("2006-01-02"), invoice.TotalAmount, invoice.TotalAmount-invoice.PaidAmount)
+			`, customer.FullName, days, invoice.InvoiceNumber, invoice.IssueDate.Format("2006-01-02"), invoice.DueDate.Format("2006-01-02"), invoice.TotalAmount, outstandingBalance, portalURL)
+		} else {
+			emailSubject = subject
+			emailContent = content
+		}
 
-	emailInput := model.NotificationInput{
-		Type:      "email",
-		Recipient: "",
-		Subject:   &emailSubject,
-		Content:   emailContent,
-	}
+		emailInput := model.NotificationInput{
+			Type:      "email",
+			Recipient: *customer.Email,
+			Subject:   &emailSubject,
+			Content:   emailContent,
+		}
 
-	if customer.Email != nil {
-		emailInput.Recipient = *customer.Email
-	}
+		if customer.ID.String() != "" {
+			emailInput.CustomerID = &customer.ID
+			emailInput.InvoiceID = &invoice.ID
+		}
 
-	if customer.ID.String() != "" {
-		emailInput.CustomerID = &customer.ID
-		emailInput.InvoiceID = &invoice.ID
-	}
-
-	_, err = d.CreateNotification(ctx, emailInput)
-	if err != nil {
-		return err
+		_, err = d.CreateNotification(ctx, emailInput)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -372,8 +466,24 @@ func (d *domain) SendPaymentFailed(ctx context.Context, customerID string, invoi
 		return fmt.Errorf("invoice not found: %w", err)
 	}
 
-	emailSubject := fmt.Sprintf("Payment Failed - %s", invoice.InvoiceNumber)
-	emailContent := fmt.Sprintf(`
+	portalURL := d.getPaymentPortalURL()
+	variables := map[string]interface{}{
+		"CustomerName":  customer.FullName,
+		"CustomerCode":  customer.CustomerCode,
+		"InvoiceNumber": invoice.InvoiceNumber,
+		"TotalAmount":   fmt.Sprintf("%.2f", invoice.TotalAmount),
+		"FailedReason":  reason,
+		"PortalURL":     portalURL,
+	}
+
+	var emailSubject, emailContent string
+
+	if customer.Email != nil {
+		subject, content, err := d.RenderTemplate(ctx, "payment_failed_email", variables)
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("Template not found or failed to render, using fallback: %v", err))
+			emailSubject = fmt.Sprintf("Payment Failed - %s", invoice.InvoiceNumber)
+			emailContent = fmt.Sprintf(`
 Dear %s,
 
 We regret to inform you that your payment for invoice %s has failed.
@@ -383,33 +493,34 @@ Payment Details:
 - Failed Reason: %s
 - Total Amount: Rp %.2f
 
-Please try again or use a different payment method. If the issue persists, please contact our support team.
+Please try again or use a different payment method. If issue persists, please contact our support team.
 
-You can retry payment through our payment portal: https://your-domain.com/payment/
+You can retry payment through our payment portal: %s
 
 Best regards,
 Your Billing Team
-	`, customer.FullName, invoice.InvoiceNumber, invoice.InvoiceNumber, reason, invoice.TotalAmount)
+			`, customer.FullName, invoice.InvoiceNumber, invoice.InvoiceNumber, reason, invoice.TotalAmount, portalURL)
+		} else {
+			emailSubject = subject
+			emailContent = content
+		}
 
-	emailInput := model.NotificationInput{
-		Type:      "email",
-		Recipient: "",
-		Subject:   &emailSubject,
-		Content:   emailContent,
-	}
+		emailInput := model.NotificationInput{
+			Type:      "email",
+			Recipient: *customer.Email,
+			Subject:   &emailSubject,
+			Content:   emailContent,
+		}
 
-	if customer.Email != nil {
-		emailInput.Recipient = *customer.Email
-	}
+		if customer.ID.String() != "" {
+			emailInput.CustomerID = &customer.ID
+			emailInput.InvoiceID = &invoice.ID
+		}
 
-	if customer.ID.String() != "" {
-		emailInput.CustomerID = &customer.ID
-		emailInput.InvoiceID = &invoice.ID
-	}
-
-	_, err = d.CreateNotification(ctx, emailInput)
-	if err != nil {
-		return err
+		_, err = d.CreateNotification(ctx, emailInput)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -426,8 +537,25 @@ func (d *domain) SendInvoiceCreated(ctx context.Context, customerID string, invo
 		return fmt.Errorf("invoice not found: %w", err)
 	}
 
-	emailSubject := fmt.Sprintf("New Invoice - %s", invoice.InvoiceNumber)
-	emailContent := fmt.Sprintf(`
+	portalURL := d.getPaymentPortalURL()
+	variables := map[string]interface{}{
+		"CustomerName":  customer.FullName,
+		"CustomerCode":  customer.CustomerCode,
+		"InvoiceNumber": invoice.InvoiceNumber,
+		"InvoiceDate":   invoice.IssueDate.Format("2006-01-02"),
+		"DueDate":       invoice.DueDate.Format("2006-01-02"),
+		"TotalAmount":   fmt.Sprintf("%.2f", invoice.TotalAmount),
+		"PortalURL":     portalURL,
+	}
+
+	var emailSubject, emailContent string
+
+	if customer.Email != nil {
+		subject, content, err := d.RenderTemplate(ctx, "invoice_created_email", variables)
+		if err != nil {
+			log.WithContext(ctx).Warn(fmt.Sprintf("Template not found or failed to render, using fallback: %v", err))
+			emailSubject = fmt.Sprintf("New Invoice - %s", invoice.InvoiceNumber)
+			emailContent = fmt.Sprintf(`
 Dear %s,
 
 We are pleased to inform you that a new invoice has been generated for your account.
@@ -440,33 +568,34 @@ Invoice Details:
 
 Please complete your payment before the due date to avoid late fees.
 
-You can view and pay your invoice through our payment portal: https://your-domain.com/payment/
+You can view and pay your invoice through our payment portal: %s
 
 If you have any questions, please contact our support team.
 
 Best regards,
 Your Billing Team
-	`, customer.FullName, invoice.InvoiceNumber, invoice.IssueDate.Format("2006-01-02"), invoice.DueDate.Format("2006-01-02"), invoice.TotalAmount)
+			`, customer.FullName, invoice.InvoiceNumber, invoice.IssueDate.Format("2006-01-02"), invoice.DueDate.Format("2006-01-02"), invoice.TotalAmount, portalURL)
+		} else {
+			emailSubject = subject
+			emailContent = content
+		}
 
-	emailInput := model.NotificationInput{
-		Type:      "email",
-		Recipient: "",
-		Subject:   &emailSubject,
-		Content:   emailContent,
-	}
+		emailInput := model.NotificationInput{
+			Type:      "email",
+			Recipient: *customer.Email,
+			Subject:   &emailSubject,
+			Content:   emailContent,
+		}
 
-	if customer.Email != nil {
-		emailInput.Recipient = *customer.Email
-	}
+		if customer.ID.String() != "" {
+			emailInput.CustomerID = &customer.ID
+			emailInput.InvoiceID = &invoice.ID
+		}
 
-	if customer.ID.String() != "" {
-		emailInput.CustomerID = &customer.ID
-		emailInput.InvoiceID = &invoice.ID
-	}
-
-	_, err = d.CreateNotification(ctx, emailInput)
-	if err != nil {
-		return err
+		_, err = d.CreateNotification(ctx, emailInput)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -487,7 +616,8 @@ func (d *domain) SendActivationNotification(ctx context.Context, customerID stri
 			"Status: Aktif\n"+
 			"Layanan internet telah diaktifkan kembali.\n\n"+
 			"%s\n\n"+
-			"Terima kasih!",
+			"Terima kasih!\n\n"+
+			"Portal: %s",
 		customer.FullName,
 		customer.CustomerCode,
 		message,
@@ -532,7 +662,8 @@ func (d *domain) SendIsolationNotification(ctx context.Context, customerID strin
 			"Status: Terisolasi (terbatas)\n\n"+
 			"Alasan: %s\n\n"+
 			"Silakan lakukan pembayaran melalui portal:\n%s\n\n"+
-			"Terima kasih!",
+			"Terima kasih!\n\n"+
+			"Portal: %s",
 		customer.FullName,
 		customer.CustomerCode,
 		reason,
