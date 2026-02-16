@@ -1,116 +1,337 @@
 ### Variables
-@base_url = http://localhost:8080
-@auth_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzEzNDE4NzMsImlhdCI6MTc3MTI1NTQ3Mywicm9sZSI6ImFkbWluIiwic3ViIjoxfQ.xE_EKmpRfcgByhD1Sc-KR9-THBzPgv82T3hCGcgv3uI
-@secret_id = secret_id_from_mikrotik
-@profile_id = profile_id_from_mikrotik
+@base_url = http://localhost:8000
+@auth_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzEzMjAxNzcsImlhdCI6MTc3MTIzMzc3Nywicm9sZSI6ImFkbWluIiwic3ViIjoxfQ.38_baGS3tzfGaoJ6-a36r9Zqj8ozxgQe-_D4GA5aClI
+@router_id = 4ba264d9-c956-4d28-846a-7db03f43210e
 
 ### 
-### 1. Create PPPoE Secret
-### Model: PppoeSecret
-POST {{base_url}}/pppoe/secrets
+### 1. Login to get auth token
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mikrotik.local",
+  "password": "Admin@123"
+}
+
+> {% 
+    client.global.set("auth_token", response.body.access_token); 
+%}
+
+### 
+### MikroTik Router CRUD Operations
+### 
+
+### 
+### 2. Create MikroTik Router
+POST {{base_url}}/mikrotik
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "name": "user_pppoe_1",
-  "password": "secure_password",
-  "service": "pppoe",
-  "profile": "default_profile",
-  "comment": "Created via API"
+  "name": "Router Local",
+  "address": "192.168.233.1",
+  "username": "admin",
+  "password": "r00t",
+  "api_port": 8728,
+  "rest_port": 80,
+  "use_ssl": false
 }
 
 ### 
-### 2. List PPPoE Secrets
-### Model: PppoeSecret
-GET {{base_url}}/pppoe/secrets
+### 3. List All MikroTik Routers
+GET {{base_url}}/mikrotik
 Authorization: Bearer {{auth_token}}
 
 ### 
-### 3. Get PPPoE Secret
-GET {{base_url}}/pppoe/secrets/{{secret_id}}
+### 4. Get MikroTik Router by ID
+GET {{base_url}}/mikrotik/{{router_id}}
 Authorization: Bearer {{auth_token}}
 
 ### 
-### 4. Update PPPoE Secret
-PUT {{base_url}}/pppoe/secrets/{{secret_id}}
+### 5. Update MikroTik Router
+PUT {{base_url}}/mikrotik/{{router_id}}
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "password": "new_secure_password",
-  "comment": "Updated comment"
+  "name": "Router Local",
+  "address": "192.168.233.1:8728",
+  "username": "admin",
+  "password": "r00t",
+  "api_port": 8728,
+  "rest_port": 80,
+  "use_ssl": false
 }
 
 ### 
-### 5. Delete PPPoE Secret
-DELETE {{base_url}}/pppoe/secrets/{{secret_id}}
-Authorization: Bearer {{auth_token}}
-
-### 
-### 6. Create PPPoE Profile
-### Model: PppoeProfile
-POST {{base_url}}/pppoe/profiles
+### 6. Update Partial Router Fields
+PUT {{base_url}}/mikrotik/{{router_id}}
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "name": "profile_10mbps",
-  "rate_limit": "10M/10M",
-  "bridge": "bridge_local",
-  "comment": "10 Mbps Profile"
+  "name": "Production Router 1 - Updated Name Only"
 }
 
 ### 
-### 7. List PPPoE Profiles
-GET {{base_url}}/pppoe/profiles
+### 7. Update Router with Encrypted Password
+PUT {{base_url}}/mikrotik/{{router_id}}
 Authorization: Bearer {{auth_token}}
-
-### 
-### 8. List Active Sessions
-### Model: PppoeActive
-GET {{base_url}}/pppoe/sessions/active
-Authorization: Bearer {{auth_token}}
-
-### 
-### 9. List Inactive Sessions
-GET {{base_url}}/pppoe/sessions/inactive
-Authorization: Bearer {{auth_token}}
-
-### 
-### 10. Webhook: PPPoE On Up
-### Model: PppoeCallbackData
-POST {{base_url}}/webhooks/pppoe/on-up
 Content-Type: application/json
 
 {
-  "user": "user_pppoe_1",
-  "ip-address": "192.168.10.5",
-  "caller-id": "AA:BB:CC:DD:EE:FF",
-  "session-id": "0x12345",
-  "interface": "pppoe-out1",
-  "uptime": "10s",
-  "bytes-in": 1024,
-  "bytes-out": 2048,
-  "packets-in": 10,
-  "packets-out": 20,
-  "router_id": 1
+  "password": "plain_password_here",
+  "password_encrypted": "encrypted_value_here"
 }
 
 ### 
-### 11. Webhook: PPPoE On Down
-POST {{base_url}}/webhooks/pppoe/on-down
+### 8. Delete MikroTik Router
+DELETE {{base_url}}/mikrotik/{{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### Active Router Management
+### 
+
+### 
+### 9. Set Router as Active
+POST {{base_url}}/mikrotik/{{router_id}}/activate
+Authorization: Bearer {{auth_token}}
+
+### 
+### 10. Get Active Router
+GET {{base_url}}/mikrotik/active
+Authorization: Bearer {{auth_token}}
+
+### 
+### Router Connection Testing
+### 
+
+### 
+### 11. Test Router Connection
+POST {{base_url}}/mikrotik/{{router_id}}/test
+Authorization: Bearer {{auth_token}}
+
+### 
+### Example Scenarios
+### 
+
+### 
+### 12. Create Test Router 1
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "user": "user_pppoe_1",
-  "ip-address": "192.168.10.5",
-  "caller-id": "AA:BB:CC:DD:EE:FF",
-  "session-id": "0x12345",
-  "interface": "pppoe-out1",
-  "uptime": "1h",
-  "bytes-in": 1024000,
-  "bytes-out": 2048000,
-  "packets-in": 1000,
-  "packets-out": 2000,
-  "router_id": 1
+  "name": "Test Router Jakarta",
+  "address": "192.168.100.1:8728",
+  "username": "admin",
+  "password": "jakarta_router_pass"
 }
+
+### 
+### 13. Create Test Router 2 (with SSL)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Test Router Surabaya",
+  "address": "192.168.100.2:8729",
+  "username": "admin",
+  "password": "surabaya_router_pass",
+  "api_port": 8729,
+  "rest_port": 443,
+  "use_ssl": true
+}
+
+### 
+### 14. Create Test Router 3 (Minimal Config)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Test Router Bandung",
+  "address": "192.168.100.3:8728",
+  "username": "admin",
+  "password": "bandung_router_pass"
+}
+
+### 
+### 15. Create Test Router 4 (Inactive)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Backup Router",
+  "address": "192.168.100.4:8728",
+  "username": "admin",
+  "password": "backup_router_pass"
+}
+
+### 
+### Update Scenarios
+### 
+
+### 
+### 16. Update Router Status (deactivate)
+PUT {{base_url}}/mikrotik/{{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Inactive Router",
+  "password": "updated_password"
+}
+
+### 
+### 17. Update Router with all fields
+PUT {{base_url}}/mikrotik/{{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Fully Updated Router",
+  "address": "192.168.1.200:8728",
+  "username": "root",
+  "password": "very_secure_password",
+  "api_port": 8728,
+  "rest_port": 80,
+  "use_ssl": false,
+  "password_encrypted": "encrypted_value_if_needed"
+}
+
+### 
+### Error Handling Tests
+### 
+
+### 
+### 18. Get Non-existent Router (404)
+GET {{base_url}}/mikrotik/00000000-0000-0000-0000-999999999999
+Authorization: Bearer {{auth_token}}
+
+### 
+### 19. Update Non-existent Router (404)
+PUT {{base_url}}/mikrotik/00000000-0000-0000-0000-888888888888
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "This should fail"
+}
+
+### 
+### 20. Delete Non-existent Router (success or 404)
+DELETE {{base_url}}/mikrotik/00000000-0000-0000-0000-777777777777
+Authorization: Bearer {{auth_token}}
+
+### 
+### 21. Test Connection to Non-existent Router (404)
+POST {{base_url}}/mikrotik/00000000-0000-0000-0000-666666666666/test
+Authorization: Bearer {{auth_token}}
+
+### 
+### Validation Tests
+### 
+
+### 
+### 22. Create Router without Name (400)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "address": "192.168.1.100:8728",
+  "username": "admin",
+  "password": "test"
+}
+
+### 
+### 23. Create Router without Address (400)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Invalid Router",
+  "username": "admin",
+  "password": "test"
+}
+
+### 
+### 24. Create Router without Username (400)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Invalid Router",
+  "address": "192.168.1.100:8728",
+  "password": "test"
+}
+
+### 
+### 25. Create Router without Password (400)
+POST {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Invalid Router",
+  "address": "192.168.1.100:8728",
+  "username": "admin"
+}
+
+### 
+### 26. Update Router with Invalid ID (400)
+PUT {{base_url}}/mikrotik/invalid-uuid
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "This should fail validation"
+}
+
+### 
+### Active Router Tests
+### 
+
+### 
+### 27. Activate Multiple Routers (only last one should be active)
+POST {{base_url}}/mikrotik/{{router_id}}/activate
+Authorization: Bearer {{auth_token}}
+
+### 
+### 28. Check if Active Router Changed
+GET {{base_url}}/mikrotik/active
+Authorization: Bearer {{auth_token}}
+
+### 
+### Connection Test Scenarios
+### 
+
+### 
+### 29. Test Connection to Invalid Router (404)
+POST {{base_url}}/mikrotik/00000000-0000-0000-0000-555555555555/test
+Authorization: Bearer {{auth_token}}
+
+### 
+### 30. Test Connection (Success Scenario)
+POST {{base_url}}/mikrotik/{{router_id}}/test
+Authorization: Bearer {{auth_token}}
+
+### 
+### Cleanup Tests
+### 
+
+### 
+### 31. List All Routers Before Cleanup
+GET {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+
+### 
+### 32. Delete Test Routers (Update router_id from list above)
+DELETE {{base_url}}/mikrotik/{{router_id}}
+Authorization: Bearer {{auth_token}}

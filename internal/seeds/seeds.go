@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	_ "go-template/internal/seeds/development"
 	_ "go-template/internal/seeds/production"
 	"go-template/internal/seeds/runner"
 	_ "go-template/internal/seeds/testing"
@@ -28,15 +29,18 @@ func Run(db *gorm.DB) error {
 		// Filter by environment
 		switch config.Env {
 		case runner.Production:
-			if !contains(seederName, "Testing") {
+			if !contains(seederName, "Testing") && !contains(seederName, "Development") {
 				shouldRun = true
 			}
 		case runner.Testing:
-			if !contains(seederName, "Production") {
+			if !contains(seederName, "Production") && !contains(seederName, "Development") {
+				shouldRun = true
+			}
+		case runner.Development, runner.Staging:
+			if !contains(seederName, "Testing") {
 				shouldRun = true
 			}
 		default:
-			// Development or staging - use both or only production seeders
 			shouldRun = true
 		}
 
@@ -56,7 +60,7 @@ func Run(db *gorm.DB) error {
 					entityMatched = true
 					break
 				}
-				if entity == "routers" && (seederName == "Production MikroTik Routers" || seederName == "Testing MikroTik Routers") {
+				if entity == "routers" && (seederName == "Production MikroTik Routers" || seederName == "Testing MikroTik Routers" || seederName == "Development MikroTik Routers") {
 					entityMatched = true
 					break
 				}

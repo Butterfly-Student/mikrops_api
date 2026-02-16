@@ -1,0 +1,85 @@
+### Variables
+@base_url = http://localhost:8000
+@auth_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzEzMjAxNzcsImlhdCI6MTc3MTIzMzc3Nywicm9sZSI6ImFkbWluIiwic3ViIjoxfQ.38_baGS3tzfGaoJ6-a36r9Zqj8ozxgQe-_D4GA5aClI
+@customer_id = 550e8400-e29b-41d4-a716-446655440000
+@router_id = 550e8400-e29b-41d4-a716-446655440001
+@profile_id = 550e8400-e29b-41d4-a716-446655440002
+
+### 
+### 1. Create Customer
+### Model: CustomerInput
+POST {{base_url}}/customers
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "customer_code": "CUST-001",
+  "full_name": "Jane Customer",
+  "email": "jane@example.com",
+  "phone": "081234567890",
+  "address": "Jl. Internet No. 1",
+  "coordinates": {
+    "lat": -6.2088,
+    "lng": 106.8456
+  },
+  "status": "pending",
+  "expiry_date": "2024-12-31T23:59:59Z",
+  "router_id": "{{router_id}}",
+  "ppp_secret_name": "jane_secret",
+  "ppp_secret_password": "jane_pass",
+  "ppp_service": "pppoe",
+  "profile_id": "{{profile_id}}",
+  "billing_cycle": "monthly",
+  "billing_day": 1,
+  "tags": ["vip", "residential"]
+}
+
+### 
+### 2. List Customers
+### Model: CustomerFilter (Query Params)
+GET {{base_url}}/customers?status=active&search=Jane
+Authorization: Bearer {{auth_token}}
+
+### 
+### 3. Get Customer By ID
+### Model: Customer
+GET {{base_url}}/customers/{{customer_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 4. Get Customer By Code (Public)
+### Model: Customer
+GET {{base_url}}/customers/by-code/CUST-001
+
+### 
+### 5. Update Customer
+### Model: CustomerInput
+PUT {{base_url}}/customers/{{customer_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "full_name": "Jane Customer Updated",
+  "phone": "081234567899",
+  "status": "active"
+}
+
+### 
+### 6. Get Billing Info
+GET {{base_url}}/customers/{{customer_id}}/billing-info
+Authorization: Bearer {{auth_token}}
+
+### 
+### 7. Isolate Customer
+POST {{base_url}}/customers/{{customer_id}}/isolate
+Authorization: Bearer {{auth_token}}
+
+### 
+### 8. Activate Customer
+POST {{base_url}}/customers/{{customer_id}}/activate
+Authorization: Bearer {{auth_token}}
+
+### 
+### 9. Delete Customer
+DELETE {{base_url}}/customers/{{customer_id}}
+Authorization: Bearer {{auth_token}}

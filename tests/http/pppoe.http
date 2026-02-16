@@ -1,0 +1,224 @@
+### Variables
+@base_url = http://localhost:8000
+@auth_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzEzMjAxNzcsImlhdCI6MTc3MTIzMzc3Nywicm9sZSI6ImFkbWluIiwic3ViIjoxfQ.38_baGS3tzfGaoJ6-a36r9Zqj8ozxgQe-_D4GA5aClI
+@router_id = 4ba264d9-c956-4d28-846a-7db03f43210e
+@secret_id = *2
+@profile_id = 4ba264d9-c956-4d28-846a-7db03f43210e
+
+### 
+### 1. Login to get auth token
+POST {{base_url}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mikrotik.local",
+  "password": "Admin@123"
+}
+
+> {% 
+    client.global.set("auth_token", response.body.access_token); 
+%}
+
+### 
+### 2. List MikroTik Routers (to get router_id)
+GET {{base_url}}/mikrotik
+Authorization: Bearer {{auth_token}}
+
+### 
+### PPPoE Secrets Management
+### 
+
+### 
+### 3. Create PPPoE Secret
+### Model: PppoeSecret
+POST {{base_url}}/pppoe/secrets?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "user_pppoe_test_1",
+  "password": "secure_password_123",
+  "service": "pppoe",
+  "profile": "default",
+  "comment": "Created via API test"
+}
+
+### 
+### 4. List All PPPoE Secrets
+GET {{base_url}}/pppoe/secrets?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 5. Get PPPoE Secret by ID
+GET {{base_url}}/pppoe/secrets/{{secret_id}}?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 6. Update PPPoE Secret
+PUT {{base_url}}/pppoe/secrets/{{secret_id}}?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "user_pppoe_test_1",
+  "password": "new_secure_password_456",
+  "service": "pppoe",
+  "profile": "default",
+  "comment": "Updated via API test"
+}
+
+### 
+### 7. Delete PPPoE Secret
+DELETE {{base_url}}/pppoe/secrets/{{secret_id}}?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### PPPoE Profiles Management
+### 
+
+### 
+### 8. Create PPPoE Profile
+### Model: PppoeProfile
+POST {{base_url}}/pppoe/profiles?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "profile_test_10mbps",
+  "rate_limit": "10M/10M",
+  "bridge": "bridge_local",
+  "comment": "10 Mbps Profile for testing"
+}
+
+### 
+### 9. List All PPPoE Profiles
+GET {{base_url}}/pppoe/profiles?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 10. Get PPPoE Profile by ID
+GET {{base_url}}/pppoe/profiles/{{profile_id}}?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 11. Update PPPoE Profile
+PUT {{base_url}}/pppoe/profiles/{{profile_id}}?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "profile_test_10mbps",
+  "rate_limit": "20M/20M",
+  "bridge": "bridge_local",
+  "comment": "Updated 20 Mbps Profile for testing"
+}
+
+### 
+### 12. Delete PPPoE Profile
+DELETE {{base_url}}/pppoe/profiles/{{profile_id}}?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### PPPoE Sessions Management
+### 
+
+### 
+### 13. List Active PPPoE Sessions
+### Model: PppoeActive
+GET {{base_url}}/pppoe/sessions/active?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 14. List Inactive PPPoE Sessions
+GET {{base_url}}/pppoe/sessions/inactive?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### 15. List PPPoE Session History
+GET {{base_url}}/pppoe/sessions/history?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+
+### 
+### PPPoE Webhooks (No Auth Required)
+### 
+
+### 
+### 16. Webhook: PPPoE On Up
+### Model: PppoeCallbackData
+POST {{base_url}}/webhooks/pppoe/on-up
+Content-Type: application/json
+
+{
+  "user": "user_pppoe_test_1",
+  "ip-address": "192.168.10.5",
+  "caller-id": "AA:BB:CC:DD:EE:FF",
+  "session-id": "0x12345",
+  "interface": "pppoe-out1",
+  "uptime": "10s",
+  "bytes-in": 1024,
+  "bytes-out": 2048,
+  "packets-in": 10,
+  "packets-out": 20,
+  "router_id": 1
+}
+
+### 
+### 17. Webhook: PPPoE On Down
+POST {{base_url}}/webhooks/pppoe/on-down
+Content-Type: application/json
+
+{
+  "user": "user_pppoe_test_1",
+  "ip-address": "192.168.10.5",
+  "caller-id": "AA:BB:CC:DD:EE:FF",
+  "session-id": "0x12345",
+  "interface": "pppoe-out1",
+  "uptime": "1h",
+  "bytes-in": 1024000,
+  "bytes-out": 2048000,
+  "packets-in": 1000,
+  "packets-out": 2000,
+  "router_id": 1
+}
+
+### 
+### Bulk Operations (Example)
+### 
+
+### 
+### 18. Create Multiple PPPoE Secrets
+POST {{base_url}}/pppoe/secrets?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "bulk_user_001",
+  "password": "bulk_password_001",
+  "service": "pppoe",
+  "profile": "default",
+  "comment": "Bulk created user 001"
+}
+
+POST {{base_url}}/pppoe/secrets?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "bulk_user_002",
+  "password": "bulk_password_002",
+  "service": "pppoe",
+  "profile": "default",
+  "comment": "Bulk created user 002"
+}
+
+POST {{base_url}}/pppoe/secrets?router_id={{router_id}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "bulk_user_003",
+  "password": "bulk_password_003",
+  "service": "pppoe",
+  "profile": "default",
+  "comment": "Bulk created user 003"
+}
