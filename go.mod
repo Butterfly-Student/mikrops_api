@@ -1,6 +1,6 @@
 module go-template
 
-go 1.25.0
+go 1.24.7
 
 require (
 	cloud.google.com/go/pubsub v1.49.0
