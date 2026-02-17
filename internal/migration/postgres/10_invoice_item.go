@@ -15,7 +15,7 @@ func upInvoiceItem(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.Exec(`CREATE TABLE invoice_items (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		invoice_id UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
-		item_type VARCHAR(20) CHECK (item_type IN ('subscription', 'installation', 'equipment', 'other')),
+		item_type VARCHAR(20) NOT NULL CHECK (item_type IN ('subscription', 'installation', 'equipment', 'other')),
 		description VARCHAR(255) NOT NULL,
 		profile_id UUID REFERENCES bandwidth_profiles(id) ON DELETE SET NULL,
 		quantity INTEGER NOT NULL DEFAULT 1,

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"go-template/internal/model"
 	"go-template/utils/log"
 	"gorm.io/gorm"
@@ -37,8 +37,8 @@ func (a *refundPostgresAdapter) Create(input *model.RefundInput) (*model.Refund,
 		CustomerID:        payment.CustomerID,
 		RefundAmount:      *input.RefundAmount,
 		RefundType:        *input.RefundType,
-		RefundReason:      *input.RefundReason,
-		RefundMethod:      *input.RefundMethod,
+		RefundReason:      input.RefundReason,
+		RefundMethod:      input.RefundMethod,
 		BankName:          input.BankName,
 		BankAccountName:   input.BankAccountName,
 		BankAccountNumber: input.BankAccountNumber,
@@ -216,14 +216,15 @@ func (a *refundPostgresAdapter) Approve(id string, approvedBy string) (*model.Re
 	}
 
 	now := time.Now()
-	approvedByUUID, err := uuid.Parse(approvedBy)
+	approvedByID, err := strconv.ParseUint(approvedBy, 10, 64)
 	if err != nil {
-		log.WithContext(ctx).Error(fmt.Sprintf("invalid approved by uuid: %s", approvedBy), err)
+		log.WithContext(ctx).Error(fmt.Sprintf("invalid approved by id: %s", approvedBy), err)
 		return nil, err
 	}
+	approvedByUint := uint(approvedByID)
 
 	refund.Status = "approved"
-	refund.ApprovedBy = &approvedByUUID
+	refund.ApprovedBy = &approvedByUint
 	refund.ApprovedAt = &now
 	refund.UpdatedAt = now
 
@@ -248,14 +249,15 @@ func (a *refundPostgresAdapter) Reject(id string, rejectedBy string, reason stri
 	}
 
 	now := time.Now()
-	processedByUUID, err := uuid.Parse(rejectedBy)
+	rejectedByID, err := strconv.ParseUint(rejectedBy, 10, 64)
 	if err != nil {
-		log.WithContext(ctx).Error(fmt.Sprintf("invalid rejected by uuid: %s", rejectedBy), err)
+		log.WithContext(ctx).Error(fmt.Sprintf("invalid rejected by id: %s", rejectedBy), err)
 		return nil, err
 	}
+	rejectedByUint := uint(rejectedByID)
 
 	refund.Status = "rejected"
-	refund.ProcessedBy = &processedByUUID
+	refund.ProcessedBy = &rejectedByUint
 	refund.ProcessedAt = &now
 	refund.RejectionReason = &reason
 	refund.UpdatedAt = now
@@ -281,14 +283,15 @@ func (a *refundPostgresAdapter) Process(id string, processedBy string) (*model.R
 	}
 
 	now := time.Now()
-	processedByUUID, err := uuid.Parse(processedBy)
+	processedByID, err := strconv.ParseUint(processedBy, 10, 64)
 	if err != nil {
-		log.WithContext(ctx).Error(fmt.Sprintf("invalid processed by uuid: %s", processedBy), err)
+		log.WithContext(ctx).Error(fmt.Sprintf("invalid processed by id: %s", processedBy), err)
 		return nil, err
 	}
+	processedByUint := uint(processedByID)
 
 	refund.Status = "processed"
-	refund.ProcessedBy = &processedByUUID
+	refund.ProcessedBy = &processedByUint
 	refund.ProcessedAt = &now
 	refund.UpdatedAt = now
 
@@ -313,14 +316,15 @@ func (a *refundPostgresAdapter) Complete(id string, processedBy string, xenditRe
 	}
 
 	now := time.Now()
-	processedByUUID, err := uuid.Parse(processedBy)
+	completedByID, err := strconv.ParseUint(processedBy, 10, 64)
 	if err != nil {
-		log.WithContext(ctx).Error(fmt.Sprintf("invalid processed by uuid: %s", processedBy), err)
+		log.WithContext(ctx).Error(fmt.Sprintf("invalid processed by id: %s", processedBy), err)
 		return nil, err
 	}
+	completedByUint := uint(completedByID)
 
 	refund.Status = "completed"
-	refund.ProcessedBy = &processedByUUID
+	refund.ProcessedBy = &completedByUint
 	refund.ProcessedAt = &now
 	refund.XenditRefundID = &xenditRefundID
 	refund.UpdatedAt = now

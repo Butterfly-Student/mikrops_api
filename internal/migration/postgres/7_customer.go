@@ -39,7 +39,7 @@ func upCustomer(ctx context.Context, tx *sql.Tx) error {
 		auto_isolate BOOLEAN DEFAULT true,
 		grace_period_days INTEGER DEFAULT 3,
 		notes TEXT,
-		tags JSONB DEFAULT '{}'::jsonb,
+		tags TEXT[] DEFAULT '{}',
 		created_by INTEGER REFERENCES users(id),
 		updated_by INTEGER REFERENCES users(id),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

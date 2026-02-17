@@ -15,7 +15,7 @@ type SystemSetting struct {
 	Category    *string    `json:"category" gorm:"size:50"`
 	Description *string    `json:"description" gorm:"type:text"`
 	IsPublic    *bool      `json:"is_public" gorm:"default:false"`
-	UpdatedBy   *uuid.UUID `json:"updated_by" gorm:"type:uuid"`
+	UpdatedBy   *uint      `json:"updated_by" gorm:"type:integer"`
 	UpdatedAt   time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 }
 

@@ -2,8 +2,8 @@ package postgres_outbound_adapter
 
 import (
 	"errors"
+	"strconv"
 
-	"github.com/google/uuid"
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
 	"gorm.io/gorm"
@@ -78,8 +78,8 @@ func (a *SystemSettingAdapter) UpdateByKey(key string, value string, userID stri
 
 	setting.Value = &value
 	if userID != "" {
-		uid, _ := uuid.Parse(userID)
-		updatedBy := uid
+		uid, _ := strconv.ParseUint(userID, 10, 64)
+		updatedBy := uint(uid)
 		setting.UpdatedBy = &updatedBy
 	}
 

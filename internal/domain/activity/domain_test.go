@@ -26,11 +26,13 @@ func TestLogActivity(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("success - log activity", func(t *testing.T) {
-		userID := uuid.New()
+		userID := uint(1)
 		action := "customer.created"
 		entityType := "customer"
 		entityID := uuid.New()
 		description := "Customer created successfully"
+		ipAddress := "192.168.1.1"
+		userAgent := "Mozilla/5.0"
 
 		input := model.ActivityLogInput{
 			UserID:      &userID,
@@ -38,8 +40,8 @@ func TestLogActivity(t *testing.T) {
 			EntityType:  entityType,
 			EntityID:    &entityID,
 			Description: description,
-			IPAddress:   "192.168.1.1",
-			UserAgent:   "Mozilla/5.0",
+			IPAddress:   &ipAddress,
+			UserAgent:   &userAgent,
 		}
 
 		mockActivityDB.EXPECT().
@@ -53,7 +55,7 @@ func TestLogActivity(t *testing.T) {
 	})
 
 	t.Run("error - database error", func(t *testing.T) {
-		userID := uuid.New()
+		userID := uint(1)
 
 		input := model.ActivityLogInput{
 			UserID:      &userID,
@@ -113,12 +115,12 @@ func TestListLogs(t *testing.T) {
 	})
 
 	t.Run("success - list logs with filter", func(t *testing.T) {
-		userID := uuid.New()
 		filter := model.ActivityLogFilter{
-			UserIDs: []uuid.UUID{userID},
+			UserIDs: []uint{1},
 			Limit:   10,
 		}
 
+		userID := uint(1)
 		expectedLogs := []model.ActivityLog{
 			{
 				ID:     uuid.New(),

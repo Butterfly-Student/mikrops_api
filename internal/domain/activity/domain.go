@@ -56,20 +56,22 @@ func (d *domain) GetEntityHistory(ctx context.Context, entityType string, entity
 	return d.dbPort.ActivityLog().FindByEntity(entityType, entityID)
 }
 
-func (d *domain) LogAction(ctx context.Context, userID *uuid.UUID, action string, entityType string, entityID *uuid.UUID, description string, oldValue interface{}, newValue interface{}) error {
-	oldValuesJSON := ""
+func (d *domain) LogAction(ctx context.Context, userID *uint, action string, entityType string, entityID *uuid.UUID, description string, oldValue interface{}, newValue interface{}) error {
+	var oldValuesJSON *string
 	if oldValue != nil {
 		data, err := json.Marshal(oldValue)
 		if err == nil {
-			oldValuesJSON = string(data)
+			s := string(data)
+			oldValuesJSON = &s
 		}
 	}
 
-	newValuesJSON := ""
+	var newValuesJSON *string
 	if newValue != nil {
 		data, err := json.Marshal(newValue)
 		if err == nil {
-			newValuesJSON = string(data)
+			s := string(data)
+			newValuesJSON = &s
 		}
 	}
 

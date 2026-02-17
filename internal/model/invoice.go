@@ -24,9 +24,9 @@ type Invoice struct {
 	LateFee            float64    `json:"late_fee" gorm:"type:decimal(12,2);default:0" validate:"min=0"`
 	TotalAmount        float64    `json:"total_amount" gorm:"not null;type:decimal(12,2)" validate:"required,min=0"`
 	PaidAmount         float64    `json:"paid_amount" gorm:"type:decimal(12,2);default:0" validate:"min=0"`
-	Balance            float64    `json:"balance" gorm:"type:decimal(12,2)"`
+	Balance            float64    `json:"balance" gorm:"type:decimal(12,2);->"`
 	Status             string     `json:"status" gorm:"default:'draft';not null" validate:"required,oneof=draft sent partial paid overdue cancelled refunded"`
-	PaymentStatus      string     `json:"payment_status" gorm:"type:varchar(20)" validate:"oneof=unpaid partial paid overpaid"`
+	PaymentStatus      *string    `json:"payment_status" gorm:"type:varchar(20)" validate:"omitempty,oneof=unpaid partial paid overpaid"`
 	PaymentDate        *time.Time `json:"payment_date" gorm:"type:timestamp"`
 	PaymentMethod      *string    `json:"payment_method" validate:"omitempty,oneof=cash bank_transfer e-wallet credit_card debit_card check"`
 	InvoiceType        string     `json:"invoice_type" gorm:"default:'recurring';not null" validate:"required,oneof=recurring installation additional refund"`
@@ -35,8 +35,8 @@ type Invoice struct {
 	LastReminderSent   *time.Time `json:"last_reminder_sent" gorm:"type:timestamp"`
 	Notes              *string    `json:"notes" gorm:"type:text"`
 	InternalNotes      *string    `json:"internal_notes" gorm:"type:text"`
-	CreatedBy          *uuid.UUID `json:"created_by" gorm:"type:uuid"`
-	UpdatedBy          *uuid.UUID `json:"updated_by" gorm:"type:uuid"`
+	CreatedBy          *uint      `json:"created_by" gorm:"type:integer"`
+	UpdatedBy          *uint      `json:"updated_by" gorm:"type:integer"`
 	CreatedAt          time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt          time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt          *time.Time `json:"-" gorm:"index"`
@@ -101,7 +101,7 @@ type InvoiceItem struct {
 	Quantity            int               `json:"quantity" gorm:"not null;default:1" validate:"min=1"`
 	UnitPrice           float64           `json:"unit_price" gorm:"not null" validate:"required,min=0"`
 	Subtotal            float64           `json:"subtotal" gorm:"not null" validate:"required,min=0"`
-	TaxRate             float64           `json:"tax_rate" gorm:"default:0.11;type:decimal(5,4)" validate:"min=0,max=1"`
+	TaxRate             float64           `json:"tax_rate" gorm:"default:0;type:decimal(5,4)" validate:"min=0,max=1"`
 	TaxAmount           float64           `json:"tax_amount" gorm:"default:0;type:decimal(12,2)" validate:"min=0"`
 	Total               float64           `json:"total" gorm:"not null" validate:"required,min=0"`
 	IsProrated          *bool             `json:"is_prorated" gorm:"default:false"`

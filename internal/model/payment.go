@@ -27,16 +27,16 @@ type Payment struct {
 	ProofImage           *string    `json:"proof_image" gorm:"type:text"`
 	ReceiptNumber        *string    `json:"receipt_number" gorm:"size:50"`
 	Status               string     `json:"status" gorm:"not null;default:'pending';type:varchar(20)" validate:"required,oneof=pending confirmed rejected refunded"`
-	ProcessedBy          *uuid.UUID `json:"processed_by" gorm:"type:uuid"`
+	ProcessedBy          *uint      `json:"processed_by" gorm:"type:integer"`
 	ProcessedByUser      *User      `json:"processed_by_user,omitempty" gorm:"foreignKey:ProcessedBy"`
 	ProcessedAt          *time.Time `json:"processed_at" gorm:"type:timestamp"`
 	RejectionReason      *string    `json:"rejection_reason" gorm:"type:text"`
 	RefundAmount         float64    `json:"refund_amount" gorm:"type:decimal(12,2);default:0" validate:"min=0"`
 	RefundDate           *time.Time `json:"refund_date" gorm:"type:timestamp"`
 	RefundReason         *string    `json:"refund_reason" gorm:"type:text"`
-	RefundedBy           *uuid.UUID `json:"refunded_by" gorm:"type:uuid"`
+	RefundedBy           *uint      `json:"refunded_by" gorm:"type:integer"`
 	Notes                *string    `json:"notes" gorm:"type:text"`
-	CreatedBy            *uuid.UUID `json:"created_by" gorm:"type:uuid"`
+	CreatedBy            *uint      `json:"created_by" gorm:"type:integer"`
 	CreatedByUser        *User      `json:"created_by_user,omitempty" gorm:"foreignKey:CreatedBy"`
 	CreatedAt            time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt            time.Time  `json:"updated_at" gorm:"autoUpdateTime"`

@@ -42,8 +42,8 @@ func TestCreateRefund(t *testing.T) {
 			PaymentID:   paymentID,
 			RefundAmount: refundAmount,
 			RefundType:   refundType,
-			RefundReason: refundReason,
-			RefundMethod: refundMethod,
+			RefundReason: &refundReason,
+			RefundMethod: &refundMethod,
 			Status:      "pending",
 		}
 

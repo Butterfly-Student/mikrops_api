@@ -17,22 +17,22 @@ type Refund struct {
 	Customer         *Customer  `json:"customer,omitempty" gorm:"foreignKey:CustomerID"`
 	RefundAmount     float64    `json:"refund_amount" gorm:"not null"`
 	RefundType       string     `json:"refund_type" gorm:"not null"` // 'full', 'partial'
-	RefundReason     string     `json:"refund_reason" gorm:"type:text"`
-	RefundMethod     string     `json:"refund_method"`               // 'original', 'bank_transfer', 'cash'
+	RefundReason     *string    `json:"refund_reason" gorm:"type:text"`
+	RefundMethod     *string    `json:"refund_method"`               // 'original', 'bank_transfer', 'cash'
 	BankName         *string    `json:"bank_name"`
 	BankAccountName  *string    `json:"bank_account_name"`
 	BankAccountNumber *string   `json:"bank_account_number"`
-	Status           string     `json:"status" gorm:"not null"` // 'pending', 'approved', 'rejected', 'processed', 'completed', 'failed'
-	ApprovedBy       *uuid.UUID `json:"approved_by" gorm:"type:uuid"`
+	Status           string     `json:"status" gorm:"not null;default:'pending'"` // 'pending', 'approved', 'rejected', 'processed', 'completed', 'failed'
+	ApprovedBy       *uint      `json:"approved_by" gorm:"type:integer"`
 	ApprovedByUser   *User      `json:"approved_by_user,omitempty" gorm:"foreignKey:ApprovedBy"`
 	ApprovedAt       *time.Time `json:"approved_at"`
-	ProcessedBy      *uuid.UUID `json:"processed_by" gorm:"type:uuid"`
+	ProcessedBy      *uint      `json:"processed_by" gorm:"type:integer"`
 	ProcessedByUser  *User      `json:"processed_by_user,omitempty" gorm:"foreignKey:ProcessedBy"`
 	ProcessedAt      *time.Time `json:"processed_at"`
 	RejectionReason  *string    `json:"rejection_reason" gorm:"type:text"`
 	Notes            *string    `json:"notes" gorm:"type:text"`
 	XenditRefundID   *string    `json:"xendit_refund_id"` // Xendit refund ID if using Xendit
-	CreatedBy        *uuid.UUID `json:"created_by" gorm:"type:uuid"`
+	CreatedBy        *uint      `json:"created_by" gorm:"type:integer"`
 	CreatedByUser    *User      `json:"created_by_user,omitempty" gorm:"foreignKey:CreatedBy"`
 	CreatedAt        time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt        time.Time  `json:"updated_at" gorm:"autoUpdateTime"`

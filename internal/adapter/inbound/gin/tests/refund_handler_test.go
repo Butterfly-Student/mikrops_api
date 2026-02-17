@@ -199,7 +199,7 @@ func TestRefundHandler(t *testing.T) {
 					ID:          refundID,
 					PaymentID:   uuid.New(),
 					RefundAmount: 100000.0,
-					RefundReason: refundReason,
+					RefundReason: &refundReason,
 					Status:      "pending",
 				}
 

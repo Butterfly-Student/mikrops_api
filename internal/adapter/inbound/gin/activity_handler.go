@@ -2,9 +2,9 @@ package gin_inbound_adapter
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"go-template/internal/domain"
 	"go-template/internal/model"
 	inbound_port "go-template/internal/port/inbound"
@@ -66,14 +66,14 @@ func (h *ActivityHandler) GetEntityHistory(c *gin.Context) {
 func (h *ActivityHandler) GetUserLogs(c *gin.Context) {
 	userIDStr := c.Param("user_id")
 
-	userID, err := uuid.Parse(userIDStr)
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
 
 	filter := model.ActivityLogFilter{
-		UserIDs: []uuid.UUID{userID},
+		UserIDs: []uint{uint(userID)},
 		Limit:   100,
 	}
 

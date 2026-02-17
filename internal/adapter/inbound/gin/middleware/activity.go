@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"go-template/internal/domain"
 	"go-template/internal/model"
 )
@@ -18,12 +17,16 @@ func ActivityLoggingMiddleware(domain domain.Domain) gin.HandlerFunc {
 
 		duration := time.Since(start)
 
+		ipAddress := c.ClientIP()
+		userAgent := c.Request.UserAgent()
+		description := fmt.Sprintf("API call completed in %v", duration)
+
 		activityLog := &model.ActivityLog{
 			Action:      c.Request.Method + " " + c.Request.URL.Path,
 			EntityType:  "api_request",
-			Description: fmt.Sprintf("API call completed in %v", duration),
-			IPAddress:   c.ClientIP(),
-			UserAgent:   c.Request.UserAgent(),
+			Description: description,
+			IPAddress:   &ipAddress,
+			UserAgent:   &userAgent,
 		}
 
 		userID := getUserIDFromContext(c)
@@ -43,17 +46,14 @@ func ActivityLoggingMiddleware(domain domain.Domain) gin.HandlerFunc {
 	}
 }
 
-func getUserIDFromContext(c *gin.Context) *uuid.UUID {
-	userID, exists := c.Get("user_id")
+func getUserIDFromContext(c *gin.Context) *uint {
+	userID, exists := c.Get("userID")
 	if !exists {
 		return nil
 	}
 
-	if userIDStr, ok := userID.(string); ok {
-		parsedID, err := uuid.Parse(userIDStr)
-		if err == nil {
-			return &parsedID
-		}
+	if uid, ok := userID.(uint); ok {
+		return &uid
 	}
 
 	return nil

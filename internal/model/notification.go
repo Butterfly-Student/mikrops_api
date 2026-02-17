@@ -41,7 +41,7 @@ type NotificationTemplate struct {
 	Subject   string     `json:"subject" gorm:"not null;type:varchar(500)"`
 	Content   string     `json:"content" gorm:"not null;type:text"`
 	IsActive  bool       `json:"is_active" gorm:"default:true"`
-	Variables string     `json:"variables" gorm:"type:jsonb"` // JSON array of required variables
+	Variables *string    `json:"variables" gorm:"type:jsonb"` // JSON array of required variables
 	CreatedAt time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt *time.Time `json:"-" gorm:"index"`
@@ -53,7 +53,7 @@ type NotificationTemplateInput struct {
 	Subject   string `json:"subject" validate:"required"`
 	Content   string `json:"content" validate:"required"`
 	IsActive  *bool  `json:"is_active"`
-	Variables string `json:"variables"`
+	Variables *string `json:"variables"`
 }
 
 type NotificationInput struct {

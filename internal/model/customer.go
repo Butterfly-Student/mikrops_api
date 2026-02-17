@@ -33,13 +33,13 @@ type Customer struct {
 	Profile           *BandwidthProfile `json:"profile,omitempty" gorm:"foreignKey:ProfileID"`
 	BillingCycle      *string           `json:"billing_cycle" gorm:"default:'monthly'" validate:"omitempty,oneof=monthly quarterly yearly"`
 	BillingDay        *int              `json:"billing_day" gorm:"default:1" validate:"omitempty,min=1,max=31"`
-	PaymentMethodPref *string           `json:"payment_method_preference" validate:"omitempty,oneof=cash transfer e-wallet auto-debit"`
+	PaymentMethodPref *string           `json:"payment_method_preference" gorm:"column:payment_method_preference" validate:"omitempty,oneof=cash transfer e-wallet auto-debit"`
 	AutoIsolate       *bool             `json:"auto_isolate" gorm:"default:true"`
 	GracePeriodDays   *int              `json:"grace_period_days" gorm:"default:3" validate:"omitempty,min=0"`
 	Notes             *string           `json:"notes" gorm:"type:text"`
 	Tags              pq.StringArray    `json:"tags" gorm:"type:text[] default:'{}'"`
-	CreatedBy         *uuid.UUID        `json:"created_by" gorm:"type:uuid"`
-	UpdatedBy         *uuid.UUID        `json:"updated_by" gorm:"type:uuid"`
+	CreatedBy         *uint             `json:"created_by" gorm:"type:integer"`
+	UpdatedBy         *uint             `json:"updated_by" gorm:"type:integer"`
 	CreatedAt         time.Time         `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt         time.Time         `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt         *time.Time        `json:"-" gorm:"index"`

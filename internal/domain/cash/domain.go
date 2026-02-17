@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
-
-	"github.com/google/uuid"
 
 	"go-template/internal/model"
 	outbound_port "go-template/internal/port/outbound"
@@ -297,8 +296,9 @@ func (d *domain) ApproveTransaction(ctx context.Context, id string, userID strin
 	}
 
 	transaction.ApprovalStatus = "approved"
-	userUUID, _ := uuid.Parse(userID)
-	transaction.ApprovedBy = &userUUID
+	uid, _ := strconv.ParseUint(userID, 10, 64)
+	approvedBy := uint(uid)
+	transaction.ApprovedBy = &approvedBy
 	now := time.Now()
 	transaction.ApprovedAt = &now
 
@@ -316,8 +316,9 @@ func (d *domain) RejectTransaction(ctx context.Context, id string, userID string
 	}
 
 	transaction.ApprovalStatus = "rejected"
-	userUUID, _ := uuid.Parse(userID)
-	transaction.ApprovedBy = &userUUID
+	uid2, _ := strconv.ParseUint(userID, 10, 64)
+	rejectedBy := uint(uid2)
+	transaction.ApprovedBy = &rejectedBy
 	if reason != "" {
 		transaction.Notes = &reason
 	}

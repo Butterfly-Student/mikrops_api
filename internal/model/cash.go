@@ -67,11 +67,11 @@ type CashTransaction struct {
 	ReceiptNumber     *string       `json:"receipt_number" gorm:"size:50"`
 	RequiresApproval  bool          `json:"requires_approval" gorm:"default:false" validate:"required"`
 	ApprovalStatus    string        `json:"approval_status" gorm:"default:'pending';type:varchar(20)" validate:"required,oneof=pending approved rejected"`
-	ApprovedBy        *uuid.UUID    `json:"approved_by" gorm:"type:uuid"`
+	ApprovedBy        *uint         `json:"approved_by" gorm:"type:integer"`
 	ApprovedByUser    *User         `json:"approved_by_user,omitempty" gorm:"foreignKey:ApprovedBy"`
 	ApprovedAt        *time.Time    `json:"approved_at" gorm:"type:timestamp"`
 	Notes             *string       `json:"notes" gorm:"type:text"`
-	ProcessedBy       *uuid.UUID    `json:"processed_by" gorm:"type:uuid"`
+	ProcessedBy       *uint         `json:"processed_by" gorm:"type:integer"`
 	CreatedAt         time.Time     `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt         time.Time     `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt         *time.Time    `json:"-" gorm:"index"`

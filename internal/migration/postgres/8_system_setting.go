@@ -16,7 +16,7 @@ func upSystemSetting(ctx context.Context, tx *sql.Tx) error {
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		key VARCHAR(100) UNIQUE NOT NULL,
 		value TEXT,
-		value_type VARCHAR(20) DEFAULT 'string' CHECK (value_type IN ('string', 'number', 'boolean', 'json')),
+		value_type VARCHAR(20) NOT NULL DEFAULT 'string' CHECK (value_type IN ('string', 'number', 'boolean', 'json')),
 		category VARCHAR(50),
 		description TEXT,
 		is_public BOOLEAN DEFAULT false,

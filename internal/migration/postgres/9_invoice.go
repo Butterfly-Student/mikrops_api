@@ -34,7 +34,7 @@ func upInvoice(ctx context.Context, tx *sql.Tx) error {
 		payment_status VARCHAR(20) CHECK (payment_status IN ('unpaid', 'partial', 'paid', 'overpaid')),
 		payment_date TIMESTAMP,
 		payment_method VARCHAR(20),
-		invoice_type VARCHAR(20) DEFAULT 'recurring' CHECK (invoice_type IN ('recurring', 'installation', 'additional', 'refund')),
+		invoice_type VARCHAR(20) NOT NULL DEFAULT 'recurring' CHECK (invoice_type IN ('recurring', 'installation', 'additional', 'refund')),
 		is_auto_generated BOOLEAN DEFAULT true,
 		reminder_sent_count INTEGER DEFAULT 0,
 		last_reminder_sent TIMESTAMP,

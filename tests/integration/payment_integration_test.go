@@ -286,7 +286,7 @@ func TestPaymentIntegration(t *testing.T) {
 				TaxAmount:          11000.0,
 				TotalAmount:        111000.0,
 				Status:             "sent",
-				PaymentStatus:      "unpaid",
+				PaymentStatus:      func() *string { s := "unpaid"; return &s }(),
 			}
 			model.InvoicePrepare(invoice)
 			err = dbAdapter.Invoice().Create(invoice)
