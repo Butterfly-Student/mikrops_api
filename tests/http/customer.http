@@ -18,10 +18,8 @@ Content-Type: application/json
   "email": "jane@example.com",
   "phone": "081234567890",
   "address": "Jl. Internet No. 1",
-  "coordinates": {
-    "lat": -6.2088,
-    "lng": 106.8456
-  },
+  "latitude": -6.2088,
+  "longitude": 106.8456,
   "status": "pending",
   "expiry_date": "2024-12-31T23:59:59Z",
   "router_id": "{{router_id}}",

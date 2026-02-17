@@ -1,65 +1,12 @@
 package model
 
 import (
-	"database/sql/driver"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
-
-type Coordinate struct {
-	Lat float64 `json:"lat"`
-	Lng float64 `json:"lng"`
-}
-
-func (c *Coordinate) Scan(value interface{}) error {
-	if value == nil {
-		return nil
-	}
-
-	str, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("cannot scan %T into Coordinate", value)
-	}
-
-	var lat, lng float64
-	_, err := fmt.Sscanf(str, "POINT(%f %f)", &lng, &lat)
-	if err != nil {
-		return err
-	}
-
-	c.Lat = lat
-	c.Lng = lng
-	return nil
-}
-
-func (c Coordinate) Value() (driver.Value, error) {
-	if c.Lat == 0 && c.Lng == 0 {
-		return nil, nil
-	}
-	return fmt.Sprintf("POINT(%f %f)", c.Lng, c.Lat), nil
-}
-
-func (c Coordinate) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]float64{
-		"lat": c.Lat,
-		"lng": c.Lng,
-	})
-}
-
-func (c *Coordinate) UnmarshalJSON(data []byte) error {
-	var obj map[string]float64
-	if err := json.Unmarshal(data, &obj); err != nil {
-		return err
-	}
-	c.Lat = obj["lat"]
-	c.Lng = obj["lng"]
-	return nil
-}
 
 type Customer struct {
 	ID                uuid.UUID         `json:"id" gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
@@ -68,7 +15,8 @@ type Customer struct {
 	Email             *string           `json:"email" gorm:"unique" validate:"omitempty,email"`
 	Phone             string            `json:"phone" gorm:"not null" validate:"required"`
 	Address           *string           `json:"address" gorm:"type:text"`
-	Coordinates       *Coordinate       `json:"coordinates" gorm:"type:geography"`
+	Latitude          *float64          `json:"latitude" gorm:"type:decimal(10,8)"`
+	Longitude         *float64          `json:"longitude" gorm:"type:decimal(11,8)"`
 	Status            string            `json:"status" gorm:"default:'pending';not null" validate:"required,oneof=pending active suspended isolated terminated"`
 	ActivationDate    *time.Time        `json:"activation_date"`
 	InstallationDate  *time.Time        `json:"installation_date"`
@@ -103,7 +51,8 @@ type CustomerInput struct {
 	Email             *string        `json:"email" validate:"omitempty,email"`
 	Phone             string         `json:"phone" validate:"required"`
 	Address           *string        `json:"address"`
-	Coordinates       *Coordinate    `json:"coordinates"`
+	Latitude          *float64       `json:"latitude"`
+	Longitude         *float64       `json:"longitude"`
 	Status            *string        `json:"status" validate:"omitempty,oneof=pending active suspended isolated terminated"`
 	ActivationDate    *time.Time     `json:"activation_date"`
 	InstallationDate  *time.Time     `json:"installation_date"`

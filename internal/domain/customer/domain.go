@@ -81,7 +81,8 @@ func (d *domain) CreateCustomer(ctx context.Context, input model.CustomerInput) 
 			Email:             input.Email,
 			Phone:             input.Phone,
 			Address:           input.Address,
-			Coordinates:       input.Coordinates,
+			Latitude:          input.Latitude,
+			Longitude:         input.Longitude,
 			Status:            status,
 			ActivationDate:    input.ActivationDate,
 			InstallationDate:  input.InstallationDate,
@@ -180,8 +181,11 @@ func (d *domain) UpdateCustomer(ctx context.Context, id string, input model.Cust
 		if input.Address != nil {
 			customer.Address = input.Address
 		}
-		if input.Coordinates != nil {
-			customer.Coordinates = input.Coordinates
+		if input.Latitude != nil {
+			customer.Latitude = input.Latitude
+		}
+		if input.Longitude != nil {
+			customer.Longitude = input.Longitude
 		}
 		if input.ExpiryDate != nil {
 			customer.ExpiryDate = input.ExpiryDate
