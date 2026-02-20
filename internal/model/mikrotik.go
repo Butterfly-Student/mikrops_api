@@ -26,6 +26,25 @@ type MikrotikRouter struct {
 	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+// MikrotikRouterInput for creating/updating a MikroTik router
+type MikrotikRouterInput struct {
+	Name     string `json:"name" validate:"required"`
+	Address  string `json:"address" validate:"required"` // IP address of the router
+	ApiPort  *int   `json:"api_port"`                    // RouterOS API port, default 8728
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	UseSSL   *bool  `json:"use_ssl"`
+	IsActive *bool  `json:"is_active"`
+}
+
+// MikrotikTestResult holds the result of a connection test
+type MikrotikTestResult struct {
+	Success         bool   `json:"success"`
+	Message         string `json:"message"`
+	RouterOSVersion string `json:"router_os_version,omitempty"`
+	Identity        string `json:"identity,omitempty"`
+}
+
 // PPPoE Models for JSON communication (from RouterOS)
 
 type PppoeSecret struct {

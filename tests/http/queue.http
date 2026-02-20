@@ -1,0 +1,109 @@
+### Queue Management API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@queueId = YOUR_QUEUE_UUID_HERE
+@queueName = MY-QUEUE-NAME
+
+# ============================================================
+# Create Queue
+# ============================================================
+POST {{baseUrl}}/queues
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "user001-queue",
+  "target": "10.0.0.2/32",
+  "max_limit": "10M/10M",
+  "burst_limit": "15M/15M",
+  "burst_threshold": "8M/8M",
+  "burst_time": "10s/10s",
+  "comment": "Queue untuk pelanggan user001"
+}
+
+###
+
+# ============================================================
+# List Queues
+# ============================================================
+GET {{baseUrl}}/queues
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Queue by ID
+# ============================================================
+GET {{baseUrl}}/queues/{{queueId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Update Queue
+# ============================================================
+PUT {{baseUrl}}/queues/{{queueId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "user001-queue",
+  "target": "10.0.0.2/32",
+  "max_limit": "20M/10M",
+  "burst_limit": "25M/15M",
+  "burst_threshold": "15M/8M",
+  "burst_time": "10s/10s",
+  "comment": "Queue user001 - Upgrade ke Asymmetric"
+}
+
+###
+
+# ============================================================
+# Delete Queue
+# ============================================================
+DELETE {{baseUrl}}/queues/{{queueId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Start Monitoring All Queues (WebSocket streaming)
+# ============================================================
+POST {{baseUrl}}/queues/monitor
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Start Monitoring Specific Queue by Name
+# ============================================================
+POST {{baseUrl}}/queues/monitor/{{queueName}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Stop Monitoring All Queues
+# ============================================================
+DELETE {{baseUrl}}/queues/monitor
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Stop Monitoring Specific Queue by Name
+# ============================================================
+DELETE {{baseUrl}}/queues/monitor/{{queueName}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###

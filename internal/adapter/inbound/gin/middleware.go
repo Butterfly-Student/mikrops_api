@@ -175,3 +175,27 @@ func (h *middlewareAdapter) ClientAuth() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func (h *middlewareAdapter) RouterAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		routerID := c.Param("router_id")
+		if routerID == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "router_id path parameter is required"})
+			return
+		}
+
+		router, err := h.domain.MikrotikRouter().GetByID(c.Request.Context(), routerID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "MikroTik router not found: " + routerID})
+			return
+		}
+
+		if router.IsActive != nil && !*router.IsActive {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "MikroTik router is inactive"})
+			return
+		}
+
+		c.Set("router", router)
+		c.Next()
+	}
+}

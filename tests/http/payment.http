@@ -1,0 +1,126 @@
+### Payment API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@paymentId = YOUR_PAYMENT_UUID_HERE
+@invoiceId = YOUR_INVOICE_UUID_HERE
+@customerId = YOUR_CUSTOMER_UUID_HERE
+
+# ============================================================
+# Create Payment
+# ============================================================
+POST {{baseUrl}}/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "customer_id": "{{customerId}}",
+  "amount": 150000,
+  "method": "transfer",
+  "reference": "TRF-20260220-001",
+  "notes": "Transfer via BCA",
+  "payment_date": "2026-02-20"
+}
+
+###
+
+# ============================================================
+# List Payments
+# ============================================================
+GET {{baseUrl}}/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# List Payments with Filter
+# ============================================================
+GET {{baseUrl}}/payments?customer_id={{customerId}}&status=pending
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Payment by ID
+# ============================================================
+GET {{baseUrl}}/payments/{{paymentId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Payment by Number
+# ============================================================
+GET {{baseUrl}}/payments/number/PAY-2026-0001
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Update Payment
+# ============================================================
+PUT {{baseUrl}}/payments/{{paymentId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "customer_id": "{{customerId}}",
+  "amount": 150000,
+  "method": "transfer",
+  "reference": "TRF-20260220-001-REV",
+  "notes": "Transfer via BCA (Revisi nomor referensi)",
+  "payment_date": "2026-02-20"
+}
+
+###
+
+# ============================================================
+# Confirm Payment
+# ============================================================
+POST {{baseUrl}}/payments/{{paymentId}}/confirm
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Reject Payment
+# ============================================================
+POST {{baseUrl}}/payments/{{paymentId}}/reject
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "reason": "Bukti transfer tidak valid, nominal tidak sesuai"
+}
+
+###
+
+# ============================================================
+# Allocate Payment to Invoice
+# ============================================================
+POST {{baseUrl}}/payments/{{paymentId}}/allocate
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "invoice_id": "{{invoiceId}}",
+  "amount": 150000
+}
+
+###
+
+# ============================================================
+# Delete Payment
+# ============================================================
+DELETE {{baseUrl}}/payments/{{paymentId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###

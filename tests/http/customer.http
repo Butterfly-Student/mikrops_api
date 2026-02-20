@@ -1,0 +1,146 @@
+### Customer API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@customerId = YOUR_CUSTOMER_UUID_HERE
+@routerId = YOUR_ROUTER_UUID_HERE
+@profileId = YOUR_PROFILE_UUID_HERE
+
+# ============================================================
+# Create Customer
+# ============================================================
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "customer_code": "CUST-001",
+  "full_name": "Budi Santoso",
+  "email": "budi@example.com",
+  "phone": "081234567890",
+  "address": "Jl. Merdeka No. 1, Jakarta",
+  "latitude": -6.2088,
+  "longitude": 106.8456,
+  "status": "pending",
+  "router_id": "{{routerId}}",
+  "ppp_secret_name": "budi-santoso",
+  "ppp_secret_password": "rahasia123",
+  "ppp_service": "pppoe",
+  "profile_id": "{{profileId}}",
+  "billing_cycle": "monthly",
+  "billing_day": 1,
+  "payment_method_preference": "transfer",
+  "auto_isolate": true,
+  "grace_period_days": 3,
+  "notes": "Pelanggan baru area Jakarta Pusat"
+}
+
+###
+
+# ============================================================
+# List Customers
+# ============================================================
+GET {{baseUrl}}/customers
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# List Customers with Filter
+# ============================================================
+GET {{baseUrl}}/customers?status=active&billing_cycle=monthly&search=budi
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Customer by ID
+# ============================================================
+GET {{baseUrl}}/customers/{{customerId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Customer by Code
+# ============================================================
+GET {{baseUrl}}/customers/code/CUST-001
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Update Customer
+# ============================================================
+PUT {{baseUrl}}/customers/{{customerId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "customer_code": "CUST-001",
+  "full_name": "Budi Santoso Updated",
+  "email": "budi.new@example.com",
+  "phone": "081234567890",
+  "address": "Jl. Merdeka No. 2, Jakarta Pusat",
+  "billing_cycle": "monthly",
+  "billing_day": 5,
+  "auto_isolate": true,
+  "grace_period_days": 5
+}
+
+###
+
+# ============================================================
+# Change Customer Status
+# ============================================================
+POST {{baseUrl}}/customers/{{customerId}}/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "status": "active"
+}
+
+###
+
+# ============================================================
+# Isolate Customer (restrict network access)
+# ============================================================
+POST {{baseUrl}}/customers/{{customerId}}/isolate
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Un-Isolate Customer (restore network access)
+# ============================================================
+POST {{baseUrl}}/customers/{{customerId}}/unisolate
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Sync Customer to MikroTik
+# ============================================================
+POST {{baseUrl}}/customers/{{customerId}}/sync
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Delete Customer
+# ============================================================
+DELETE {{baseUrl}}/customers/{{customerId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###

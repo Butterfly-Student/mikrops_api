@@ -1,0 +1,18 @@
+package outbound_port
+
+import (
+	"context"
+
+	"go-template/internal/model"
+)
+
+type CustomerDatabasePort interface {
+	Create(ctx context.Context, customer *model.Customer) error
+	FindByID(ctx context.Context, id string) (*model.Customer, error)
+	FindByCode(ctx context.Context, code string) (*model.Customer, error)
+	FindByPppSecretName(ctx context.Context, name string) (*model.Customer, error)
+	FindAll(ctx context.Context, filter *model.CustomerFilter) ([]model.Customer, error)
+	Update(ctx context.Context, customer *model.Customer) error
+	Delete(ctx context.Context, id string) error
+	UpdateStatus(ctx context.Context, id string, status model.CustomerStatus) error
+}

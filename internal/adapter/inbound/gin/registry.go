@@ -50,3 +50,27 @@ func (s *adapter) Interface() inbound_port.InterfaceHttpPort {
 func (s *adapter) IpPool() inbound_port.IpPoolHttpPort {
 	return NewIpPoolAdapter(s.domain)
 }
+
+func (s *adapter) BandwidthProfile() inbound_port.BandwidthProfileHttpPort {
+	return NewBandwidthProfileAdapter(s.domain)
+}
+
+func (s *adapter) Customer() inbound_port.CustomerHttpPort {
+	return NewCustomerAdapter(s.domain)
+}
+
+func (s *adapter) Invoice() inbound_port.InvoiceHttpPort {
+	return NewInvoiceAdapter(s.domain)
+}
+
+func (s *adapter) Payment() inbound_port.PaymentHttpPort {
+	return NewPaymentAdapter(s.domain)
+}
+
+func (s *adapter) MikrotikRouter() inbound_port.MikrotikRouterHttpPort {
+	return NewMikrotikRouterAdapter(s.domain)
+}
+
+func (s *adapter) Hotspot() inbound_port.HotspotHttpPort {
+	return NewHotspotAdapter(s.domain)
+}

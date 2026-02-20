@@ -2,9 +2,15 @@ package domain
 
 import (
 	"go-template/internal/domain/auth"
+	"go-template/internal/domain/bandwidth_profile"
 	"go-template/internal/domain/client"
+	"go-template/internal/domain/customer"
+	hotspot_domain "go-template/internal/domain/hotspot"
 	"go-template/internal/domain/iface"
+	"go-template/internal/domain/invoice"
 	"go-template/internal/domain/ippool"
+	"go-template/internal/domain/mikrotik_router"
+	"go-template/internal/domain/payment"
 	"go-template/internal/domain/ping"
 	"go-template/internal/domain/pppoe"
 	"go-template/internal/domain/queue"
@@ -15,6 +21,10 @@ import (
 )
 
 type Domain interface {
+	Payment() payment.PaymentDomain
+	Invoice() invoice.InvoiceDomain
+	Customer() customer.CustomerDomain
+	BandwidthProfile() bandwidth_profile.BandwidthProfileDomain
 	Client() client.ClientDomain
 	Auth() auth.AuthDomain
 	User() user.UserDomain
@@ -23,6 +33,8 @@ type Domain interface {
 	Interface() iface.InterfaceDomain
 	IpPool() ippool.IpPoolDomain
 	Ping() ping.PingDomain
+	MikrotikRouter() mikrotik_router.MikrotikRouterDomain
+	Hotspot() hotspot_domain.HotspotDomain
 }
 
 type domain struct {
@@ -31,6 +43,7 @@ type domain struct {
 	cachePort    outbound_port.CachePort
 	workflowPort outbound_port.WorkflowPort
 	mikrotikPort outbound_port.MikrotikPort
+	hotspotPort  outbound_port.HotspotPort
 	enforcer     *casbin.Enforcer
 }
 
@@ -40,6 +53,7 @@ func NewDomain(
 	cachePort outbound_port.CachePort,
 	workflowPort outbound_port.WorkflowPort,
 	mikrotikPort outbound_port.MikrotikPort,
+	hotspotPort outbound_port.HotspotPort,
 	enforcer *casbin.Enforcer,
 ) Domain {
 	return &domain{
@@ -48,6 +62,7 @@ func NewDomain(
 		cachePort:    cachePort,
 		workflowPort: workflowPort,
 		mikrotikPort: mikrotikPort,
+		hotspotPort:  hotspotPort,
 		enforcer:     enforcer,
 	}
 }
@@ -82,4 +97,28 @@ func (d *domain) IpPool() ippool.IpPoolDomain {
 
 func (d *domain) Ping() ping.PingDomain {
 	return ping.NewPingDomain(d.databasePort, d.cachePort, d.mikrotikPort)
+}
+
+func (d *domain) BandwidthProfile() bandwidth_profile.BandwidthProfileDomain {
+	return bandwidth_profile.NewBandwidthProfileDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) Customer() customer.CustomerDomain {
+	return customer.NewCustomerDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) Invoice() invoice.InvoiceDomain {
+	return invoice.NewInvoiceDomain(d.databasePort)
+}
+
+func (d *domain) Payment() payment.PaymentDomain {
+	return payment.NewPaymentDomain(d.databasePort, d.Invoice(), d.Customer())
+}
+
+func (d *domain) MikrotikRouter() mikrotik_router.MikrotikRouterDomain {
+	return mikrotik_router.NewMikrotikRouterDomain(d.databasePort, d.mikrotikPort)
+}
+
+func (d *domain) Hotspot() hotspot_domain.HotspotDomain {
+	return hotspot_domain.NewHotspotDomain(d.databasePort, d.hotspotPort)
 }

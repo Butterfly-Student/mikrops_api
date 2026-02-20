@@ -21,11 +21,11 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ~/apps/go-template:/var/lib/postgresql/data
+      - ~/apps/mikrops_api:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - POSTGRES_USER=${POSTGRES_USER:-go-template}
-      - POSTGRES_DB=${POSTGRES_DB:-go-template}
+      - POSTGRES_USER=${POSTGRES_USER:-root}
+      - POSTGRES_DB=${POSTGRES_DB:-mikrops_db}
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -33,7 +33,7 @@ services:
       - 5672:5672
       - 15672:15672
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-go-template}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-root}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-changeme}
 
 volumes:

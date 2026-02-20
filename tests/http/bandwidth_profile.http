@@ -1,0 +1,93 @@
+### Bandwidth Profile API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@profileId = YOUR_PROFILE_UUID_HERE
+@routerId = YOUR_ROUTER_UUID_HERE
+
+# ============================================================
+# Create Bandwidth Profile
+# ============================================================
+POST {{baseUrl}}/bandwidth-profiles
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "code": "BP-10M",
+  "name": "Paket 10 Mbps",
+  "download_rate": "10M",
+  "upload_rate": "10M",
+  "burst_download": "15M",
+  "burst_upload": "15M",
+  "price": 150000,
+  "description": "Paket internet 10 Mbps untuk rumahan"
+}
+
+###
+
+# ============================================================
+# List Bandwidth Profiles
+# ============================================================
+GET {{baseUrl}}/bandwidth-profiles
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Bandwidth Profile by ID
+# ============================================================
+GET {{baseUrl}}/bandwidth-profiles/{{profileId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Bandwidth Profile by Code
+# ============================================================
+GET {{baseUrl}}/bandwidth-profiles/code/BP-10M
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Update Bandwidth Profile
+# ============================================================
+PUT {{baseUrl}}/bandwidth-profiles/{{profileId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "code": "BP-10M",
+  "name": "Paket 10 Mbps Updated",
+  "download_rate": "10M",
+  "upload_rate": "5M",
+  "burst_download": "20M",
+  "burst_upload": "10M",
+  "price": 175000,
+  "description": "Paket internet 10 Mbps asymmetric"
+}
+
+###
+
+# ============================================================
+# Sync Bandwidth Profile to MikroTik
+# ============================================================
+POST {{baseUrl}}/bandwidth-profiles/{{profileId}}/sync?router_id={{routerId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Delete Bandwidth Profile
+# ============================================================
+DELETE {{baseUrl}}/bandwidth-profiles/{{profileId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###

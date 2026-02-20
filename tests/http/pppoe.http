@@ -1,0 +1,175 @@
+### PPPoE Management API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@secretId = YOUR_SECRET_UUID_HERE
+@profileId = YOUR_PROFILE_UUID_HERE
+
+# ============================================================
+# SECRETS
+# ============================================================
+
+# Create PPPoE Secret
+POST {{baseUrl}}/pppoe/secrets
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "user001",
+  "password": "pass001",
+  "profile": "10mbps",
+  "service": "pppoe",
+  "local_address": "10.0.0.1",
+  "remote_address": "10.0.0.2",
+  "comment": "Pelanggan Budi"
+}
+
+###
+
+# List PPPoE Secrets
+GET {{baseUrl}}/pppoe/secrets
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Get PPPoE Secret by ID
+GET {{baseUrl}}/pppoe/secrets/{{secretId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Update PPPoE Secret
+PUT {{baseUrl}}/pppoe/secrets/{{secretId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "user001",
+  "password": "newpass001",
+  "profile": "20mbps",
+  "service": "pppoe",
+  "comment": "Pelanggan Budi - Upgrade Paket"
+}
+
+###
+
+# Delete PPPoE Secret
+DELETE {{baseUrl}}/pppoe/secrets/{{secretId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# PROFILES
+# ============================================================
+
+# Create PPPoE Profile
+POST {{baseUrl}}/pppoe/profiles
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "10mbps",
+  "local_address": "10.0.0.1",
+  "remote_address": "10.0.0.0/24",
+  "rate_limit": "10M/10M",
+  "comment": "Paket 10 Mbps"
+}
+
+###
+
+# List PPPoE Profiles
+GET {{baseUrl}}/pppoe/profiles
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Get PPPoE Profile by ID
+GET {{baseUrl}}/pppoe/profiles/{{profileId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Update PPPoE Profile
+PUT {{baseUrl}}/pppoe/profiles/{{profileId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "10mbps",
+  "local_address": "10.0.0.1",
+  "remote_address": "10.0.0.0/24",
+  "rate_limit": "10M/5M",
+  "comment": "Paket 10 Mbps Asymmetric"
+}
+
+###
+
+# Delete PPPoE Profile
+DELETE {{baseUrl}}/pppoe/profiles/{{profileId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# SESSIONS
+# ============================================================
+
+# List Active PPPoE Sessions
+GET {{baseUrl}}/pppoe/sessions/active
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# List Inactive PPPoE Sessions
+GET {{baseUrl}}/pppoe/sessions/inactive
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# List PPPoE Session History
+GET {{baseUrl}}/pppoe/sessions/history
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# WEBHOOKS (MikroTik Callbacks - no auth required)
+# ============================================================
+
+# PPPoE On-Up Callback
+POST {{baseUrl}}/webhooks/pppoe/on-up
+Content-Type: {{contentType}}
+
+{
+  "username": "user001",
+  "ip": "10.0.0.2",
+  "mac": "AA:BB:CC:DD:EE:FF",
+  "interface": "ether1",
+  "session_id": "sess-12345"
+}
+
+###
+
+# PPPoE On-Down Callback
+POST {{baseUrl}}/webhooks/pppoe/on-down
+Content-Type: {{contentType}}
+
+{
+  "username": "user001",
+  "session_id": "sess-12345",
+  "reason": "user-request"
+}
+
+###

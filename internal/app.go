@@ -68,6 +68,7 @@ func NewApp() *App {
 		cacheOutbound(ctx),
 		workflowOutbound(ctx),
 		mikrotikOutbound(),
+		hotspotOutbound(),
 		enforcer,
 	)
 
@@ -123,6 +124,10 @@ func messageOutbound(ctx context.Context) outbound_port.MessagePort {
 
 func mikrotikOutbound() outbound_port.MikrotikPort {
 	return mikrotik_outbound_adapter.NewMikrotikClientAdapter()
+}
+
+func hotspotOutbound() outbound_port.HotspotPort {
+	return mikrotik_outbound_adapter.NewHotspotAdapter()
 }
 
 func cacheOutbound(ctx context.Context) outbound_port.CachePort {

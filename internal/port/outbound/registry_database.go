@@ -5,6 +5,10 @@ import "gorm.io/gorm"
 type InTransaction func(repoRegistry DatabasePort) (interface{}, error)
 
 type DatabasePort interface {
+	Payment() PaymentDatabasePort
+	Invoice() InvoiceDatabasePort
+	Customer() CustomerDatabasePort
+	BandwidthProfile() BandwidthProfileDatabasePort
 	Client() ClientDatabasePort
 	User() UserDatabasePort
 	Mikrotik() MikrotikDatabasePort

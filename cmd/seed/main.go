@@ -7,12 +7,19 @@ import (
 	"log"
 
 	"go-template/internal/seeds"
+	"go-template/utils"
 	"go-template/utils/database"
 
 	"gorm.io/gorm"
 )
 
 func main() {
+	// Load .env file so DATABASE_* variables are available even when
+	// running via `make seed` without manually exporting environment variables.
+	if err := utils.LoadEnvFile(".env"); err != nil {
+		log.Printf("[WARN] Could not load .env file: %v", err)
+	}
+
 	clean := flag.Bool("clean", false, "Clean seed data instead of seeding")
 	flag.Parse()
 

@@ -1,0 +1,245 @@
+### https://client.env.json
+{
+  "$schema": "https://raw.githubusercontent.com/Huachao/vscode-restclient/master/schema/http-client.env-schema.json",
+  "local": {
+    "baseUrl": "http://localhost:8080",
+    "token": "",
+    "routerId": ""
+  }
+}
+
+@baseUrl = {{$dotenv baseUrl}}
+@token = {{$dotenv token}}
+@routerId = {{$dotenv routerId}}
+
+# ─────────────────────────────────────────────────────────
+# MIKROTIK ROUTER MANAGEMENT
+# Manage multiple MikroTik routers via CRUD operations
+# ─────────────────────────────────────────────────────────
+
+###
+# @name createRouter
+# Create a new MikroTik router
+POST {{baseUrl}}/mikrotik
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Router Utama",
+  "address": "192.168.88.1",
+  "api_port": 8728,
+  "username": "admin",
+  "password": "secret123",
+  "use_ssl": false,
+  "is_active": true
+}
+
+###
+# @name listRouters
+# List all registered MikroTik routers
+GET {{baseUrl}}/mikrotik
+Authorization: Bearer {{token}}
+
+###
+# @name getRouter
+# Get a specific router by ID
+GET {{baseUrl}}/mikrotik/{{routerId}}
+Authorization: Bearer {{token}}
+
+###
+# @name updateRouter
+# Update router configuration
+PUT {{baseUrl}}/mikrotik/{{routerId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Router Utama (Updated)",
+  "address": "192.168.88.1",
+  "api_port": 8728,
+  "username": "admin",
+  "password": "newpassword123",
+  "use_ssl": false,
+  "is_active": true
+}
+
+###
+# @name testConnection
+# Test live connection to the MikroTik router
+POST {{baseUrl}}/mikrotik/{{routerId}}/test
+Authorization: Bearer {{token}}
+
+###
+# @name deleteRouter
+# Delete a MikroTik router
+DELETE {{baseUrl}}/mikrotik/{{routerId}}
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────────────
+# PPPOE MANAGEMENT VIA ROUTER PATH
+# All operations target the specified router
+# URL pattern: /mikrotik/:router_id/pppoe/...
+# ─────────────────────────────────────────────────────────
+
+###
+# List PPPoE Secrets via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/pppoe/secrets
+Authorization: Bearer {{token}}
+
+###
+# Get PPPoE Secret by ID via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/pppoe/secrets/<*routeros-id*>
+Authorization: Bearer {{token}}
+
+###
+# Create PPPoE Secret via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/pppoe/secrets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "user001",
+  "password": "pass001",
+  "service": "pppoe",
+  "profile": "10Mbps",
+  "comment": "Test user"
+}
+
+###
+# Update PPPoE Secret via Router Path
+PUT {{baseUrl}}/mikrotik/{{routerId}}/pppoe/secrets/<*routeros-id*>
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "user001",
+  "password": "newpass001",
+  "profile": "20Mbps",
+  "disabled": false
+}
+
+###
+# Delete PPPoE Secret via Router Path
+DELETE {{baseUrl}}/mikrotik/{{routerId}}/pppoe/secrets/<*routeros-id*>
+Authorization: Bearer {{token}}
+
+###
+# List PPPoE Profiles via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/pppoe/profiles
+Authorization: Bearer {{token}}
+
+###
+# List Active Sessions via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/pppoe/sessions/active
+Authorization: Bearer {{token}}
+
+###
+# List Inactive Sessions via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/pppoe/sessions/inactive
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────────────
+# QUEUE MANAGEMENT VIA ROUTER PATH
+# ─────────────────────────────────────────────────────────
+
+###
+# List Queues via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/queues
+Authorization: Bearer {{token}}
+
+###
+# Create Queue via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/queues
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "queue-user001",
+  "target": "192.168.1.100/32",
+  "max_limit": "10M/10M",
+  "burst_limit": "20M/20M",
+  "comment": "Queue for user001"
+}
+
+###
+# Start Monitoring All Queues via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/queues/monitor
+Authorization: Bearer {{token}}
+
+###
+# Stop Monitoring All Queues via Router Path
+DELETE {{baseUrl}}/mikrotik/{{routerId}}/queues/monitor
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────────────
+# INTERFACE MONITORING VIA ROUTER PATH
+# ─────────────────────────────────────────────────────────
+
+###
+# Start Monitoring All Interfaces via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/interfaces/monitor
+Authorization: Bearer {{token}}
+
+###
+# Start Monitoring Specific Interface via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/interfaces/monitor/ether1
+Authorization: Bearer {{token}}
+
+###
+# Stop Monitoring All Interfaces via Router Path
+DELETE {{baseUrl}}/mikrotik/{{routerId}}/interfaces/monitor
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────────────
+# IP POOL MANAGEMENT VIA ROUTER PATH
+# ─────────────────────────────────────────────────────────
+
+###
+# List IP Pools via Router Path
+GET {{baseUrl}}/mikrotik/{{routerId}}/ip-pools
+Authorization: Bearer {{token}}
+
+###
+# Create IP Pool via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/ip-pools
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "pool-pppoe",
+  "ranges": "192.168.10.1-192.168.10.254"
+}
+
+###
+# Delete IP Pool via Router Path
+DELETE {{baseUrl}}/mikrotik/{{routerId}}/ip-pools/<*routeros-id*>
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────────────
+# PING VIA ROUTER PATH
+# ─────────────────────────────────────────────────────────
+
+###
+# Ping Target via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/ping
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "address": "8.8.8.8",
+  "count": 4
+}
+
+###
+# Stop Ping via Router Path
+DELETE {{baseUrl}}/mikrotik/{{routerId}}/ping/8.8.8.8
+Authorization: Bearer {{token}}
+
+# ─────────────────────────────────────────────────────────
+# BANDWIDTH PROFILE SYNC VIA ROUTER PATH
+# ─────────────────────────────────────────────────────────
+
+###
+# Sync Bandwidth Profile to Router via Router Path
+POST {{baseUrl}}/mikrotik/{{routerId}}/bandwidth-profiles/<bandwidth-profile-id>/sync
+Authorization: Bearer {{token}}

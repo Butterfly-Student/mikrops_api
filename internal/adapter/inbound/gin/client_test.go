@@ -39,7 +39,7 @@ func TestClientAdapter(t *testing.T) {
 		mockCachePort.EXPECT().Client().Return(mockClientCachePort).AnyTimes()
 		mockWorkflowPort.EXPECT().Client().Return(mockClientWorkflowPort).AnyTimes()
 
-		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, nil)
+		dom := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, nil, nil)
 		adapter := gin_inbound_adapter.NewAdapter(dom)
 
 		// Set Gin to test mode

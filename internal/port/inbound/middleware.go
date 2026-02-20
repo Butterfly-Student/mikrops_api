@@ -8,4 +8,5 @@ type MiddlewareHttpPort interface {
 	ClientAuth() gin.HandlerFunc
 	UserAuth() gin.HandlerFunc
 	RBAC() gin.HandlerFunc
+	RouterAuth() gin.HandlerFunc // validates :router_id path param and sets "router" in context
 }

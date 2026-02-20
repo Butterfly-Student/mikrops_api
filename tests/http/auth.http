@@ -1,0 +1,129 @@
+### Auth API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+
+# ============================================================
+# SEEDED ACCOUNTS (from `make seed`)
+# ============================================================
+# [ADMIN - full control]
+#   email   : admin@mikrotik.local
+#   password: Admin@123
+#   role    : admin
+#
+# [TEST ADMIN - full control]
+#   email   : test-admin@example.com
+#   password: Test@123
+#   role    : admin
+#
+# [TEST USER - limited]
+#   email   : test-user@example.com
+#   password: Test@123
+#   role    : user
+#
+# [REGULAR USER - limited]
+#   email   : regular@example.com
+#   password: Test@123
+#   role    : user
+#
+# [INACTIVE USER - cannot login]
+#   email   : inactive-user@example.com
+#   password: Test@123
+#   role    : user / status: inactive
+# ============================================================
+
+# VARIABLES - Paste token from login response below
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzE2ODg2NDYsImlhdCI6MTc3MTYwMjI0Niwicm9sZSI6ImFkbWluIiwic3ViIjoxfQ.YrFFNLZtrZYZxkqSYR5erfjpmF01wMm0z_mhkxaHkE4
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzIyMDcwNDYsImlhdCI6MTc3MTYwMjI0Niwic3ViIjoxfQ.glnL-YlElq4gGi3Gpgczvc8h4w0mjM9y-KsixJCfQAA
+
+# ============================================================
+# Login as Admin (full control) - PRODUCTION SEED
+# ============================================================
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@mikrotik.local",
+  "password": "Admin@123"
+}
+
+###
+
+# ============================================================
+# Login as Test Admin (full control) - TESTING SEED
+# ============================================================
+# @name loginTestAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "test-admin@example.com",
+  "password": "Test@123"
+}
+
+###
+
+# ============================================================
+# Login as Regular User (limited) - TESTING SEED
+# ============================================================
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "regular@example.com",
+  "password": "Test@123"
+}
+
+###
+
+# ============================================================
+# Register
+# ============================================================
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "New User",
+  "email": "newuser@example.com",
+  "password": "password123",
+  "role": "staff"
+}
+
+###
+
+# ============================================================
+# Refresh Token
+# ============================================================
+POST {{baseUrl}}/auth/refresh
+Content-Type: {{contentType}}
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+###
+
+# ============================================================
+# Change Password (requires auth)
+# ============================================================
+POST {{baseUrl}}/user/change-password
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "current_password": "password123",
+  "new_password": "newpassword456"
+}
+
+###
+
+# ============================================================
+# Logout (requires auth)
+# ============================================================
+POST {{baseUrl}}/user/logout
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###

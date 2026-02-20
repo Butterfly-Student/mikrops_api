@@ -9,7 +9,14 @@
       "Bash(grep:*)",
       "Bash(docker:*)",
       "Bash(go vet:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(make:*)",
+      "Bash(go doc:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(mockgen:*)"
     ]
   }
 }

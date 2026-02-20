@@ -1,0 +1,59 @@
+### Internal Client API Tests
+### REST Client - VS Code Extension
+### NOTE: Requires X-Internal-Key header (InternalAuth middleware)
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@internalKey = REPLACE_WITH_SECURE_KEY
+
+# ============================================================
+# Upsert Clients (create or update batch)
+# ============================================================
+POST {{baseUrl}}/internal/client-upsert
+Content-Type: {{contentType}}
+X-Internal-Key: {{internalKey}}
+
+[
+  {
+    "external_id": "EXT-001",
+    "name": "Client Alpha",
+    "email": "alpha@example.com",
+    "phone": "081234567890",
+    "status": "active"
+  },
+  {
+    "external_id": "EXT-002",
+    "name": "Client Beta",
+    "email": "beta@example.com",
+    "phone": "089876543210",
+    "status": "active"
+  }
+]
+
+###
+
+# ============================================================
+# Find Clients by Filter
+# ============================================================
+POST {{baseUrl}}/internal/client-find
+Content-Type: {{contentType}}
+X-Internal-Key: {{internalKey}}
+
+{
+  "external_id": "EXT-001"
+}
+
+###
+
+# ============================================================
+# Delete Clients by Filter
+# ============================================================
+DELETE {{baseUrl}}/internal/client-delete
+Content-Type: {{contentType}}
+X-Internal-Key: {{internalKey}}
+
+{
+  "external_id": "EXT-001"
+}
+
+###

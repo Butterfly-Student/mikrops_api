@@ -1,0 +1,29 @@
+### User Profile API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+
+# ============================================================
+# Get Profile (requires auth + RBAC)
+# ============================================================
+GET {{baseUrl}}/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Update Profile (requires auth + RBAC)
+# ============================================================
+PUT {{baseUrl}}/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Updated Name",
+  "email": "updated@example.com"
+}
+
+###

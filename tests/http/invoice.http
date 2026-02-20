@@ -1,0 +1,119 @@
+### Invoice API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@invoiceId = YOUR_INVOICE_UUID_HERE
+@customerId = YOUR_CUSTOMER_UUID_HERE
+
+# ============================================================
+# Create Invoice
+# ============================================================
+POST {{baseUrl}}/invoices
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "customer_id": "{{customerId}}",
+  "amount": 150000,
+  "due_date": "2026-03-01",
+  "description": "Tagihan Internet Bulan Februari 2026",
+  "items": [
+    {
+      "description": "Paket 10 Mbps",
+      "quantity": 1,
+      "unit_price": 150000,
+      "amount": 150000
+    }
+  ]
+}
+
+###
+
+# ============================================================
+# List Invoices
+# ============================================================
+GET {{baseUrl}}/invoices
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# List Invoices with Filter
+# ============================================================
+GET {{baseUrl}}/invoices?customer_id={{customerId}}&status=unpaid
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Invoice by ID
+# ============================================================
+GET {{baseUrl}}/invoices/{{invoiceId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Get Invoice by Number
+# ============================================================
+GET {{baseUrl}}/invoices/number/INV-2026-0001
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Update Invoice
+# ============================================================
+PUT {{baseUrl}}/invoices/{{invoiceId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "customer_id": "{{customerId}}",
+  "amount": 175000,
+  "due_date": "2026-03-05",
+  "description": "Tagihan Internet Bulan Februari 2026 (Revisi)",
+  "items": [
+    {
+      "description": "Paket 10 Mbps Asymmetric",
+      "quantity": 1,
+      "unit_price": 175000,
+      "amount": 175000
+    }
+  ]
+}
+
+###
+
+# ============================================================
+# Generate Monthly Invoice for Customer
+# ============================================================
+POST {{baseUrl}}/invoices/generate/{{customerId}}?month=2&year=2026
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Calculate Late Fee for Invoice
+# ============================================================
+POST {{baseUrl}}/invoices/{{invoiceId}}/late-fee
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# Delete Invoice
+# ============================================================
+DELETE {{baseUrl}}/invoices/{{invoiceId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###

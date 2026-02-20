@@ -1,0 +1,122 @@
+### IP Pool & Interface Monitoring API Tests
+### REST Client - VS Code Extension
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+@token = YOUR_JWT_TOKEN_HERE
+@ipPoolId = YOUR_IPPOOL_UUID_HERE
+@interfaceName = ether1
+
+# ============================================================
+# IP POOL MANAGEMENT
+# ============================================================
+
+# Create IP Pool
+POST {{baseUrl}}/ip-pools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "pool-pelanggan",
+  "ranges": "10.10.0.2-10.10.0.254",
+  "comment": "Pool IP untuk pelanggan PPPoE"
+}
+
+###
+
+# List IP Pools
+GET {{baseUrl}}/ip-pools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Get IP Pool by ID
+GET {{baseUrl}}/ip-pools/{{ipPoolId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Update IP Pool
+PUT {{baseUrl}}/ip-pools/{{ipPoolId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "pool-pelanggan-updated",
+  "ranges": "10.10.0.2-10.10.1.254",
+  "comment": "Pool IP expanded untuk pelanggan PPPoE"
+}
+
+###
+
+# Delete IP Pool
+DELETE {{baseUrl}}/ip-pools/{{ipPoolId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# INTERFACE MONITORING
+# ============================================================
+
+# Start Monitoring All Interfaces
+POST {{baseUrl}}/interfaces/monitor
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Start Monitoring Specific Interface by Name
+POST {{baseUrl}}/interfaces/monitor/{{interfaceName}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Stop Monitoring All Interfaces
+DELETE {{baseUrl}}/interfaces/monitor
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Stop Monitoring Specific Interface by Name
+DELETE {{baseUrl}}/interfaces/monitor/{{interfaceName}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# PING MANAGEMENT
+# ============================================================
+
+# Start Ping to Address
+POST {{baseUrl}}/ping
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "address": "8.8.8.8",
+  "count": 5,
+  "interval": "1s"
+}
+
+###
+
+# Stop Ping to Address
+DELETE {{baseUrl}}/ping/8.8.8.8
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+# Get Ping Resource via Client Auth (v1 route)
+GET {{baseUrl}}/v1/ping
+Content-Type: {{contentType}}
+Authorization: Bearer CLIENT_AUTH_TOKEN_HERE
+
+###

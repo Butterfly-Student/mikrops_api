@@ -10,15 +10,27 @@ import (
 	"go-template/internal/model"
 )
 
-// Helper to get routerID
+// Helper to get routerID from context or query param.
+// Priority: gin context "router_id" (set by RouterAuth middleware) → ?router_id= query param
 func getRouterID(c *gin.Context) (string, error) {
-	idStr := c.Query("router_id")
+	// First try context set by RouterAuth middleware (from /mikrotik/:router_id/* routes)
+	if router, exists := c.Get("router"); exists {
+		if r, ok := router.(*model.MikrotikRouter); ok {
+			return r.ID.String(), nil
+		}
+	}
+
+	// Fallback to query param (legacy /pppoe, /queues, etc.)
+	idStr := c.Param("router_id")
 	if idStr == "" {
-		return "", errors.New("router_id query parameter required")
+		idStr = c.Query("router_id")
+	}
+	if idStr == "" {
+		return "", errors.New("router_id is required (path param or query param)")
 	}
 	_, err := uuid.Parse(idStr)
 	if err != nil {
-		return "", errors.New("Invalid router_id format")
+		return "", errors.New("invalid router_id format")
 	}
 	return idStr, nil
 }

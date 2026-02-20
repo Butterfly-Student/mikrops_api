@@ -52,3 +52,19 @@ func (s *adapter) User() outbound_port.UserDatabasePort {
 func (s *adapter) Mikrotik() outbound_port.MikrotikDatabasePort {
 	return NewMikrotikAdapter(s.db)
 }
+
+func (s *adapter) BandwidthProfile() outbound_port.BandwidthProfileDatabasePort {
+	return NewBandwidthProfileAdapter(s.db)
+}
+
+func (s *adapter) Customer() outbound_port.CustomerDatabasePort {
+	return NewCustomerAdapter(s.db)
+}
+
+func (s *adapter) Invoice() outbound_port.InvoiceDatabasePort {
+	return NewInvoiceAdapter(s.db)
+}
+
+func (s *adapter) Payment() outbound_port.PaymentDatabasePort {
+	return NewPaymentAdapter(s.db)
+}
