@@ -83,6 +83,10 @@ type Customer struct {
 	Notes *string                `gorm:"type:text" json:"notes"`
 	Tags  map[string]interface{} `gorm:"type:jsonb" json:"tags"`
 
+	// Customer Portal
+	PortalPassword  *string    `gorm:"size:255" json:"-"`                         // bcrypt hashed, never exposed
+	PortalLastLogin *time.Time `json:"portal_last_login,omitempty"`
+
 	CreatedBy *uuid.UUID `gorm:"type:uuid" json:"created_by"`
 	UpdatedBy *uuid.UUID `gorm:"type:uuid" json:"updated_by"`
 	CreatedAt time.Time  `json:"created_at"`

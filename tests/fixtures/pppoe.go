@@ -34,20 +34,14 @@ func (p *PppoeTestData) ValidPppoeSecret() model.PppoeSecret {
 // ValidPppoeProfile returns a valid PPPoE profile for testing
 func (p *PppoeTestData) ValidPppoeProfile() model.PppoeProfile {
 	return model.PppoeProfile{
-		ID:             "1",
-		Name:           "default",
-		LocalAddress:   "192.168.1.1",
-		RemoteAddress:  "192.168.1.0/24",
-		Bridge:         "bridge1",
-		ChangeTCPMSS:   "default",
-		RateLimit:      "",
-		OnlyOne:        "default",
-		UseMPLS:        "no",
-		UseCompression: "default",
-		UseEncryption:  "default",
-		UseIPv6:        "yes",
-		DNSServer:      "8.8.8.8",
-		Comment:        "Default PPPoE Profile",
+		ID:            "1",
+		Name:          "default",
+		LocalAddress:  "192.168.1.1",
+		RemoteAddress: "192.168.1.0/24",
+		RateLimit:     "10M/20M",
+		OnlyOne:       "default",
+		DNSServer:     "8.8.8.8",
+		Comment:       "Default PPPoE Profile",
 	}
 }
 
@@ -114,20 +108,14 @@ func (p *PppoeTestData) MultiplePppoeProfiles(count int) []model.PppoeProfile {
 
 	for i := 0; i < count; i++ {
 		profiles[i] = model.PppoeProfile{
-			ID:             fmt.Sprintf("%d", i+1),
-			Name:           fmt.Sprintf("profile-%d", i+1),
-			LocalAddress:   "192.168.1.1",
-			RemoteAddress:  fmt.Sprintf("192.168.%d.0/24", i+1),
-			Bridge:         fmt.Sprintf("bridge%d", i+1),
-			ChangeTCPMSS:   "default",
-			RateLimit:      "",
-			OnlyOne:        "default",
-			UseMPLS:        "no",
-			UseCompression: "default",
-			UseEncryption:  "default",
-			UseIPv6:        "yes",
-			DNSServer:      "8.8.8.8",
-			Comment:        fmt.Sprintf("PPPoE Profile %d", i+1),
+			ID:            fmt.Sprintf("%d", i+1),
+			Name:          fmt.Sprintf("profile-%d", i+1),
+			LocalAddress:  "192.168.1.1",
+			RemoteAddress: fmt.Sprintf("192.168.%d.0/24", i+1),
+			RateLimit:     fmt.Sprintf("%dM/%dM", (i+1)*5, (i+1)*10),
+			OnlyOne:       "default",
+			DNSServer:     "8.8.8.8",
+			Comment:       fmt.Sprintf("PPPoE Profile %d", i+1),
 		}
 	}
 

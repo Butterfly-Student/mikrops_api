@@ -88,6 +88,23 @@ func (a *customerAdapter) FindByPppSecretName(ctx context.Context, name string) 
 	return &customer, nil
 }
 
+func (a *customerAdapter) FindByPortalIdentifier(ctx context.Context, identifier string) (*model.Customer, error) {
+	var customer model.Customer
+
+	if err := a.db.WithContext(ctx).
+		Preload("Profile").
+		Preload("Router").
+		Where("customer_code = ? OR phone = ?", identifier, identifier).
+		First(&customer).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, stacktrace.NewError("customer not found")
+		}
+		return nil, stacktrace.Propagate(err, "failed to find customer by portal identifier")
+	}
+
+	return &customer, nil
+}
+
 func (a *customerAdapter) FindAll(ctx context.Context, filter *model.CustomerFilter) ([]model.Customer, error) {
 	var customers []model.Customer
 

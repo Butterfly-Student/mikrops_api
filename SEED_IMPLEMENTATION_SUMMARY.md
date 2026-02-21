@@ -216,4 +216,4 @@ The seed data system is fully functional with:
 - ✅ Makefile integration
 - ✅ Production and test data ready
 
- Harusnya customer dan bandwidht profiles itu membutuhkan koneksi ke mikrotik untuk customer itu ke ppp secret dan bandwidht-profile ke ppp profile jadi anda memastikan lagi dan mengubah routenya agar ada /mikrotik/router_id coba refer ke context7 lagi apa saja yang biasanya dibutuhkan pada ppp profile itu name,  local-address, remote-address, rate limit (rx/tx), dan juga parent-queue 
+ Harusnya customer dan bandwidht profiles itu membutuhkan koneksi ke mikrotik untuk customer itu ke ppp secret dan bandwidht-profile ke ppp profile jadi anda memastikan lagi dan mengubah routenya agar ada /mikrotik/router_id coba refer ke context7 lagi apa saja yang biasanya dibutuhkan pada ppp profile itu name,  local-address, remote-address, rate limit (rx/tx), dan juga parent-queue dan untuk ppp secret itu username, password, service, profile, local-address, remote-address, limit-bytes-in, limit-bytes-out. dan pastikan untuk customer dan bandwidth profile itu untuk get atau pun list harusnya di filter berdasarkan router_id karena project ini multi router

@@ -176,8 +176,9 @@ func (a *paymentAdapter) GetLastPaymentNumber(ctx context.Context, year, month i
 	pattern := fmt.Sprintf("PAY/%d/%02d/%%", year, month)
 
 	if err := a.db.WithContext(ctx).
+		Unscoped().
 		Where("payment_number LIKE ?", pattern).
-		Order("payment_number DESC").
+		Order("created_at DESC").
 		First(&payment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return "", nil // No payment found for this month

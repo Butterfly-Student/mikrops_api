@@ -13,6 +13,31 @@ func InitRoute(
 	app *gin.Engine,
 	port inbound_port.HttpPort,
 ) {
+	// ─── Public Registration (no auth) ────────────────────────────────────────
+	public := app.Group("/public")
+	{
+		public.POST("/register", port.Registration().Submit)
+	}
+
+	// ─── Customer Portal Auth (no auth) ───────────────────────────────────────
+	portalAuth := app.Group("/portal/auth")
+	{
+		portalAuth.POST("/login", port.CustomerPortal().Login)
+		portalAuth.POST("/refresh", port.CustomerPortal().RefreshToken)
+	}
+
+	// ─── Customer Portal (CustomerPortalAuth) ─────────────────────────────────
+	portalMe := app.Group("/portal")
+	portalMe.Use(port.Middleware().CustomerPortalAuth())
+	{
+		portalMe.GET("/me", port.CustomerPortal().GetProfile)
+		portalMe.PUT("/me", port.CustomerPortal().UpdateProfile)
+		portalMe.POST("/change-password", port.CustomerPortal().ChangePassword)
+		portalMe.PUT("/ppp-credentials", port.CustomerPortal().ChangePppCredentials)
+		portalMe.GET("/invoices", port.CustomerPortal().ListInvoices)
+		portalMe.GET("/invoices/:id", port.CustomerPortal().GetInvoice)
+	}
+
 	// Internal routes with internal auth middleware
 	internal := app.Group("/internal")
 	internal.Use(port.Middleware().InternalAuth())
@@ -32,6 +57,7 @@ func InitRoute(
 	// Ping Management
 	pingMgmt := app.Group("/ping")
 	pingMgmt.Use(port.Middleware().UserAuth())
+	pingMgmt.Use(port.Middleware().RBAC())
 	{
 		pingMgmt.POST("", port.Ping().StartPing)
 		pingMgmt.DELETE("/:address", port.Ping().StopPing)
@@ -48,26 +74,32 @@ func InitRoute(
 		auth.POST("/refresh", port.Auth().RefreshToken)
 	}
 
-	// User routes
+	// User routes (all protected by RBAC)
 	user := app.Group("/user")
 	user.Use(port.Middleware().UserAuth())
+	user.Use(port.Middleware().RBAC())
 	{
 		user.POST("/change-password", port.Auth().ChangePassword)
 		user.POST("/logout", port.Auth().Logout)
+		user.GET("/profile", port.User().GetProfile)
+		user.PUT("/profile", port.User().UpdateProfile)
 	}
 
-	// Protected user profile routes with RBAC
-	userProfile := user.Group("/")
-	userProfile.Use(port.Middleware().RBAC())
+	// Registration Management (admin/user review pending registrations)
+	registrations := app.Group("/registrations")
+	registrations.Use(port.Middleware().UserAuth())
+	registrations.Use(port.Middleware().RBAC())
 	{
-		userProfile.GET("/profile", port.User().GetProfile)
-		userProfile.PUT("/profile", port.User().UpdateProfile)
+		registrations.GET("", port.Registration().List)
+		registrations.GET("/:id", port.Registration().GetByID)
+		registrations.POST("/:id/approve", port.Registration().Approve)
+		registrations.POST("/:id/reject", port.Registration().Reject)
 	}
 
 	// PPPoE Management
 	pppoe := app.Group("/pppoe")
 	pppoe.Use(port.Middleware().UserAuth())
-	// pppoe.Use(port.Middleware().RBAC()) // Enabled RBAC later
+	pppoe.Use(port.Middleware().RBAC())
 	{
 		// Secrets
 		pppoe.POST("/secrets", port.Pppoe().CreateSecret)
@@ -102,6 +134,7 @@ func InitRoute(
 	// Queue Management
 	queue := app.Group("/queues")
 	queue.Use(port.Middleware().UserAuth())
+	queue.Use(port.Middleware().RBAC())
 	{
 		queue.POST("", port.Queue().CreateQueue)
 		queue.GET("", port.Queue().ListQueues)
@@ -122,6 +155,7 @@ func InitRoute(
 	// Interface Monitoring
 	iface := app.Group("/interfaces")
 	iface.Use(port.Middleware().UserAuth())
+	iface.Use(port.Middleware().RBAC())
 	{
 		iface.POST("/monitor", port.Interface().StartMonitoring)              // Start all
 		iface.POST("/monitor/:name", port.Interface().StartMonitoringByName)  // Start by name
@@ -135,6 +169,7 @@ func InitRoute(
 	// IP Pool Management
 	ippool := app.Group("/ip-pools")
 	ippool.Use(port.Middleware().UserAuth())
+	ippool.Use(port.Middleware().RBAC())
 	{
 		ippool.POST("", port.IpPool().CreateIpPool)
 		ippool.GET("", port.IpPool().ListIpPools)
@@ -146,6 +181,7 @@ func InitRoute(
 	// Bandwidth Profile Management
 	bandwidthProfile := app.Group("/bandwidth-profiles")
 	bandwidthProfile.Use(port.Middleware().UserAuth())
+	bandwidthProfile.Use(port.Middleware().RBAC())
 	{
 		bandwidthProfile.POST("", port.BandwidthProfile().Create)
 		bandwidthProfile.GET("", port.BandwidthProfile().List)
@@ -159,6 +195,7 @@ func InitRoute(
 	// Customer Management (read-only, no MikroTik required)
 	customer := app.Group("/customers")
 	customer.Use(port.Middleware().UserAuth())
+	customer.Use(port.Middleware().RBAC())
 	{
 		customer.GET("", port.Customer().List)
 		customer.GET("/code/:code", port.Customer().GetByCode)
@@ -168,6 +205,7 @@ func InitRoute(
 	// Invoice Management
 	invoice := app.Group("/invoices")
 	invoice.Use(port.Middleware().UserAuth())
+	invoice.Use(port.Middleware().RBAC())
 	{
 		invoice.POST("", port.Invoice().Create)
 		invoice.GET("", port.Invoice().List)
@@ -182,6 +220,7 @@ func InitRoute(
 	// Payment Management
 	payment := app.Group("/payments")
 	payment.Use(port.Middleware().UserAuth())
+	payment.Use(port.Middleware().RBAC())
 	{
 		payment.POST("", port.Payment().Create)
 		payment.GET("", port.Payment().List)
@@ -201,6 +240,7 @@ func InitRoute(
 	// CRUD routers (no live connection required)
 	mikrotik := app.Group("/mikrotik")
 	mikrotik.Use(port.Middleware().UserAuth())
+	mikrotik.Use(port.Middleware().RBAC())
 	{
 		mikrotik.POST("", port.MikrotikRouter().Create)
 		mikrotik.GET("", port.MikrotikRouter().List)
@@ -213,6 +253,7 @@ func InitRoute(
 	// Routes requiring a live MikroTik connection — router_id resolved via RouterAuth middleware
 	mikrotikOp := app.Group("/mikrotik/:router_id")
 	mikrotikOp.Use(port.Middleware().UserAuth())
+	mikrotikOp.Use(port.Middleware().RBAC())
 	mikrotikOp.Use(port.Middleware().RouterAuth())
 	{
 		// PPPoE Secrets via router path
@@ -264,6 +305,10 @@ func InitRoute(
 		mikrotikOp.DELETE("/ping/:address", port.Ping().StopPing)
 
 		// Customer Management (MikroTik-first: creates PPP secret on router)
+		// GET routes auto-filter by router_id from path
+		mikrotikOp.GET("/customers", port.Customer().List)
+		mikrotikOp.GET("/customers/code/:code", port.Customer().GetByCode)
+		mikrotikOp.GET("/customers/:id", port.Customer().GetByID)
 		mikrotikOp.POST("/customers", port.Customer().Create)
 		mikrotikOp.PUT("/customers/:id", port.Customer().Update)
 		mikrotikOp.DELETE("/customers/:id", port.Customer().Delete)
@@ -273,6 +318,10 @@ func InitRoute(
 		mikrotikOp.POST("/customers/:id/sync", port.Customer().SyncToMikrotik)
 
 		// Bandwidth Profile via router path (MikroTik-first: creates PPP profile on router)
+		// GET routes list all profiles (profiles are global, not per-router)
+		mikrotikOp.GET("/bandwidth-profiles", port.BandwidthProfile().List)
+		mikrotikOp.GET("/bandwidth-profiles/code/:code", port.BandwidthProfile().GetByCode)
+		mikrotikOp.GET("/bandwidth-profiles/:id", port.BandwidthProfile().GetByID)
 		mikrotikOp.POST("/bandwidth-profiles", port.BandwidthProfile().CreateWithRouter)
 		mikrotikOp.PUT("/bandwidth-profiles/:id", port.BandwidthProfile().UpdateWithRouter)
 		mikrotikOp.DELETE("/bandwidth-profiles/:id", port.BandwidthProfile().DeleteWithRouter)

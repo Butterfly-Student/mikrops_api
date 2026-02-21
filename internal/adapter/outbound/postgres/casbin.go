@@ -16,7 +16,9 @@ func InitCasbin(db *gorm.DB) *casbin.Enforcer {
 		log.Fatalf("failed to initialize casbin adapter: %v", err)
 	}
 
-	// Define RBAC model
+	// Define RBAC model with wildcard path matching.
+	// keyMatch(obj, pattern): pattern can use * as wildcard (e.g. /pppoe/secrets/* matches /pppoe/secrets/123)
+	// p.act == "*" allows a single policy rule to cover any HTTP method.
 	text := `
 [request_definition]
 r = sub, obj, act
@@ -31,7 +33,7 @@ g = _, _
 e = some(where (p.eft == allow))
 
 [matchers]
-m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
+m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && (r.act == p.act || p.act == "*")
 `
 
 	m, err := model.NewModelFromString(text)

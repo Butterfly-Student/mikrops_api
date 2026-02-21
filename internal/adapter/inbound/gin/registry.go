@@ -74,3 +74,11 @@ func (s *adapter) MikrotikRouter() inbound_port.MikrotikRouterHttpPort {
 func (s *adapter) Hotspot() inbound_port.HotspotHttpPort {
 	return NewHotspotAdapter(s.domain)
 }
+
+func (s *adapter) Registration() inbound_port.RegistrationHttpPort {
+	return NewRegistrationAdapter(s.domain)
+}
+
+func (s *adapter) CustomerPortal() inbound_port.CustomerPortalHttpPort {
+	return NewCustomerPortalAdapter(s.domain)
+}

@@ -54,15 +54,36 @@ func (s *UserSeeder) Seed(db *gorm.DB) error {
 		var existingUser model.User
 		result := db.Where("email = ?", user.Email).First(&existingUser)
 
+		var targetID uint
+		var targetRole string
+
 		if result.Error == gorm.ErrRecordNotFound {
 			if err := db.Create(user).Error; err != nil {
 				return fmt.Errorf("failed to create test user %s: %w", user.Email, err)
 			}
-			fmt.Printf("[USER TEST SEED] Created: %s\n", user.Email)
+			fmt.Printf("[USER TEST SEED] Created: %s (id=%d)\n", user.Email, user.ID)
+			targetID = user.ID
+			targetRole = user.Role
 		} else if result.Error != nil {
 			return fmt.Errorf("failed to check existing user %s: %w", user.Email, result.Error)
 		} else {
 			fmt.Printf("[USER TEST SEED] Already exists: %s\n", user.Email)
+			targetID = existingUser.ID
+			targetRole = existingUser.Role
+		}
+
+		// Add Casbin grouping immediately so RBAC works without running the
+		// Casbin seeder separately. The RBAC middleware uses the numeric user ID
+		// as the Casbin subject.
+		if targetRole != "" {
+			gRule := model.CasbinRule{
+				Ptype: "g",
+				V0:    fmt.Sprintf("%d", targetID),
+				V1:    targetRole,
+			}
+			if err := upsertTestGroupRule(db, gRule); err != nil {
+				return fmt.Errorf("failed to assign casbin role for %s: %w", user.Email, err)
+			}
 		}
 	}
 

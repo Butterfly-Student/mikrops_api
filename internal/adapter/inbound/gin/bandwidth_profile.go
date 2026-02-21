@@ -9,6 +9,7 @@ import (
 	"go-template/internal/domain"
 	"go-template/internal/model"
 	inbound_port "go-template/internal/port/inbound"
+	"go-template/utils"
 	"go-template/utils/activity"
 )
 
@@ -29,6 +30,11 @@ func (h *bandwidthProfileAdapter) Create(c *gin.Context) {
 
 	var input model.BandwidthProfileInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return
+	}
+
+	if err := utils.ValidateStruct(&input); err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
 		return
 	}
@@ -66,6 +72,11 @@ func (h *bandwidthProfileAdapter) CreateWithRouter(c *gin.Context) {
 
 	var input model.BandwidthProfileInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return
+	}
+
+	if err := utils.ValidateStruct(&input); err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
 		return
 	}
@@ -195,6 +206,11 @@ func (h *bandwidthProfileAdapter) Update(c *gin.Context) {
 		return
 	}
 
+	if err := utils.ValidateStruct(&input); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return
+	}
+
 	ctx = activity.WithPayload(ctx, map[string]interface{}{
 		"id":    id,
 		"input": input,
@@ -306,6 +322,11 @@ func (h *bandwidthProfileAdapter) UpdateWithRouter(c *gin.Context) {
 
 	var input model.BandwidthProfileInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
+		return
+	}
+
+	if err := utils.ValidateStruct(&input); err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: err.Error()})
 		return
 	}

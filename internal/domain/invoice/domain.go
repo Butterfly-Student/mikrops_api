@@ -105,8 +105,10 @@ func (d *domain) Update(ctx context.Context, id string, input model.InvoiceInput
 		return nil, stacktrace.Propagate(err, "failed to find invoice")
 	}
 
-	// Update fields
-	invoice.InvoiceNumber = input.InvoiceNumber
+	// Update fields — preserve existing InvoiceNumber if not provided in input
+	if input.InvoiceNumber != "" {
+		invoice.InvoiceNumber = input.InvoiceNumber
+	}
 	invoice.CustomerID = input.CustomerID
 	invoice.BillingPeriodStart = input.BillingPeriodStart
 	invoice.BillingPeriodEnd = input.BillingPeriodEnd

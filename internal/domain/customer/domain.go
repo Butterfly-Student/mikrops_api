@@ -235,21 +235,26 @@ func (d *domain) ChangeStatus(ctx context.Context, id string, status model.Custo
 	}
 }
 
-// changeStatusWithSync updates status in DB and syncs disable state to MikroTik.
+// changeStatusWithSync syncs disable state to MikroTik FIRST, then updates DB status.
 func (d *domain) changeStatusWithSync(ctx context.Context, id string, customer *model.Customer, status model.CustomerStatus) error {
-	// Update status in DB
-	if err := d.dbPort.Customer().UpdateStatus(ctx, id, status); err != nil {
-		return stacktrace.Propagate(err, "failed to update customer status")
-	}
-
-	// Update customer object for sync
+	oldStatus := customer.Status
 	customer.Status = status
 
-	// Sync to MikroTik (disable/enable based on new status)
+	// MikroTik-first: sync disabled/enabled state based on new status
 	if customer.RouterID != nil && customer.PppSecretName != nil {
 		if err := d.syncToMikrotik(ctx, customer); err != nil {
-			return stacktrace.Propagate(err, "status updated but failed to sync to mikrotik")
+			return stacktrace.Propagate(err, "failed to sync status to mikrotik, status not changed")
 		}
+	}
+
+	// MikroTik OK — update status in DB
+	if err := d.dbPort.Customer().UpdateStatus(ctx, id, status); err != nil {
+		// Best-effort rollback: restore old status on MikroTik
+		if customer.RouterID != nil && customer.PppSecretName != nil {
+			customer.Status = oldStatus
+			_ = d.syncToMikrotik(ctx, customer)
+		}
+		return stacktrace.Propagate(err, "mikrotik synced but failed to update status in database")
 	}
 
 	return nil

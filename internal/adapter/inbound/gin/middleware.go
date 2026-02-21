@@ -176,6 +176,39 @@ func (h *middlewareAdapter) ClientAuth() gin.HandlerFunc {
 	}
 }
 
+func (h *middlewareAdapter) CustomerPortalAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader(authorizationHeader)
+		var bearerToken string
+
+		if len(authHeader) > bearerPrefixLen && authHeader[:bearerPrefixLen] == bearerPrefix {
+			bearerToken = authHeader[bearerPrefixLen:]
+		} else {
+			bearerToken = authHeader
+		}
+
+		if bearerToken == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			return
+		}
+
+		claims, err := token.ValidateCustomerToken(bearerToken, false)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token: " + err.Error()})
+			return
+		}
+
+		customerID, ok := claims["sub"].(string)
+		if !ok || customerID == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			return
+		}
+
+		c.Set("customerID", customerID)
+		c.Next()
+	}
+}
+
 func (h *middlewareAdapter) RouterAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		routerID := c.Param("router_id")

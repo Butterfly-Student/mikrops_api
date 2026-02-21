@@ -32,7 +32,12 @@
       "Bash(bash test_all_routes.sh)",
       "Bash(python3:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "Bash(cd /c/Users/masji/web/Mikrotik/mikrops_api && docker-compose ps 2>&1)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(ls /tmp/server*.log 2>/dev/null && wc -l /tmp/server*.log 2>/dev/null)",
+      "Bash(go env:*)"
     ]
   }
 }

@@ -5,6 +5,7 @@ import (
 	"go-template/internal/domain/bandwidth_profile"
 	"go-template/internal/domain/client"
 	"go-template/internal/domain/customer"
+	customer_portal "go-template/internal/domain/customer_portal"
 	hotspot_domain "go-template/internal/domain/hotspot"
 	"go-template/internal/domain/iface"
 	"go-template/internal/domain/invoice"
@@ -14,6 +15,7 @@ import (
 	"go-template/internal/domain/ping"
 	"go-template/internal/domain/pppoe"
 	"go-template/internal/domain/queue"
+	"go-template/internal/domain/registration"
 	"go-template/internal/domain/user"
 	outbound_port "go-template/internal/port/outbound"
 
@@ -35,6 +37,8 @@ type Domain interface {
 	Ping() ping.PingDomain
 	MikrotikRouter() mikrotik_router.MikrotikRouterDomain
 	Hotspot() hotspot_domain.HotspotDomain
+	Registration() registration.RegistrationDomain
+	CustomerPortal() customer_portal.CustomerPortalDomain
 }
 
 type domain struct {
@@ -121,4 +125,12 @@ func (d *domain) MikrotikRouter() mikrotik_router.MikrotikRouterDomain {
 
 func (d *domain) Hotspot() hotspot_domain.HotspotDomain {
 	return hotspot_domain.NewHotspotDomain(d.databasePort, d.hotspotPort)
+}
+
+func (d *domain) Registration() registration.RegistrationDomain {
+	return registration.NewRegistrationDomain(d.databasePort, d.Customer())
+}
+
+func (d *domain) CustomerPortal() customer_portal.CustomerPortalDomain {
+	return customer_portal.NewCustomerPortalDomain(d.databasePort, d.Customer())
 }

@@ -48,11 +48,34 @@ func (s *UserSeeder) Seed(db *gorm.DB) error {
 		if err := db.Create(adminUser).Error; err != nil {
 			return fmt.Errorf("failed to create admin user: %w", err)
 		}
-		fmt.Printf("[USER SEED] Created admin user: %s\n", email)
+		fmt.Printf("[USER SEED] Created admin user: %s (id=%d)\n", email, adminUser.ID)
+
+		// Add Casbin grouping immediately so RBAC works without running the
+		// Casbin seeder separately. The RBAC middleware uses the numeric user ID
+		// as the Casbin subject, so we must use that — not the email.
+		gRule := model.CasbinRule{
+			Ptype: "g",
+			V0:    fmt.Sprintf("%d", adminUser.ID),
+			V1:    adminUser.Role,
+		}
+		if err := upsertGroupRule(db, gRule); err != nil {
+			return fmt.Errorf("failed to assign casbin role for admin user: %w", err)
+		}
+		fmt.Printf("[USER SEED] Assigned Casbin role %q to user id=%d\n", adminUser.Role, adminUser.ID)
 	} else if result.Error != nil {
 		return fmt.Errorf("failed to check existing user: %w", result.Error)
 	} else {
 		fmt.Printf("[USER SEED] Admin user already exists: %s\n", email)
+
+		// Ensure grouping exists even for pre-existing users
+		gRule := model.CasbinRule{
+			Ptype: "g",
+			V0:    fmt.Sprintf("%d", existingUser.ID),
+			V1:    existingUser.Role,
+		}
+		if err := upsertGroupRule(db, gRule); err != nil {
+			return fmt.Errorf("failed to ensure casbin role for admin user: %w", err)
+		}
 	}
 
 	return nil

@@ -51,32 +51,30 @@ type PppoeSecret struct {
 	ID            string `json:"id,omitempty"` // .id from mikrotik
 	Name          string `json:"name" validate:"required"`
 	Password      string `json:"password" validate:"required"`
-	Service       string `json:"service"` // pppoe
+	Service       string `json:"service"` // pppoe, pptp, l2tp, etc.
 	CallerID      string `json:"caller_id"`
 	Profile       string `json:"profile"`
 	LocalAddress  string `json:"local_address"`
 	RemoteAddress string `json:"remote_address"`
+	LimitBytesIn  int64  `json:"limit_bytes_in"`  // 0 = no limit
+	LimitBytesOut int64  `json:"limit_bytes_out"` // 0 = no limit
 	Routes        string `json:"routes"`
 	Comment       string `json:"comment"`
 	Disabled      bool   `json:"disabled"`
 }
 
+// PppoeProfile maps RouterOS /ppp/profile fields.
+// RateLimit format: "upload/download" e.g. "10M/20M" (kbps: 1024k, Mbps: 1M, Gbps: 1G)
 type PppoeProfile struct {
 	ID                string `json:"id,omitempty"`
 	Name              string `json:"name" validate:"required"`
-	LocalAddress      string `json:"local_address"`
-	RemoteAddress     string `json:"remote_address"`
-	Bridge            string `json:"bridge"`
-	ChangeTCPMSS      string `json:"change_tcp_mss"` // default, yes, no
-	RateLimit         string `json:"rate_limit"`
+	LocalAddress      string `json:"local_address"`   // IP or pool name for server side
+	RemoteAddress     string `json:"remote_address"`  // IP or pool name for client side
+	RateLimit         string `json:"rate_limit"`      // "upload/download" e.g. "5M/10M"
 	ParentQueue       string `json:"parent_queue"`
 	QueueType         string `json:"queue_type"`
 	InsertQueueBefore string `json:"insert_queue_before"` // bottom, first, or queue name
 	OnlyOne           string `json:"only_one"`            // default, yes, no
-	UseMPLS           string `json:"use_mpls"`
-	UseCompression    string `json:"use_compression"`
-	UseEncryption     string `json:"use_encryption"`
-	UseIPv6           string `json:"use_ipv6"`
 	DNSServer         string `json:"dns_server"`
 	AddressList       string `json:"address_list"`
 	InterfaceList     string `json:"interface_list"`

@@ -1,6 +1,7 @@
 package gin_inbound_adapter
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -221,8 +222,8 @@ func (h *paymentAdapter) Confirm(c *gin.Context) {
 		return
 	}
 
-	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("user_id")
+	// Get user ID from context (set by auth middleware as "userID" uint)
+	userIDRaw, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, model.Response{
 			Success: false,
@@ -231,7 +232,7 @@ func (h *paymentAdapter) Confirm(c *gin.Context) {
 		return
 	}
 
-	userIDStr, ok := userID.(string)
+	userIDUint, ok := userIDRaw.(uint)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, model.Response{
 			Success: false,
@@ -239,6 +240,7 @@ func (h *paymentAdapter) Confirm(c *gin.Context) {
 		})
 		return
 	}
+	userIDStr := fmt.Sprintf("%d", userIDUint)
 
 	ctx = activity.WithPayload(ctx, map[string]string{
 		"id":      id,
@@ -272,8 +274,8 @@ func (h *paymentAdapter) Reject(c *gin.Context) {
 		return
 	}
 
-	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	// Get user ID from context (set by auth middleware as "userID" uint)
+	userIDRaw, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, model.Response{
 			Success: false,
@@ -282,7 +284,7 @@ func (h *paymentAdapter) Reject(c *gin.Context) {
 		return
 	}
 
-	userIDStr, ok := userID.(string)
+	userIDUint, ok := userIDRaw.(uint)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, model.Response{
 			Success: false,
@@ -290,6 +292,7 @@ func (h *paymentAdapter) Reject(c *gin.Context) {
 		})
 		return
 	}
+	userIDStr := fmt.Sprintf("%d", userIDUint)
 
 	// Get rejection reason from request body
 	var requestBody struct {

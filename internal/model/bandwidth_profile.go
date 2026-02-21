@@ -92,12 +92,12 @@ type BandwidthProfileInput struct {
 
 // BandwidthProfileFilter for filtering bandwidth profiles
 type BandwidthProfileFilter struct {
-	Category  *string `json:"category"`
-	IsActive  *bool   `json:"is_active"`
-	IsVisible *bool   `json:"is_visible"`
+	Category  *string  `json:"category"`
+	IsActive  *bool    `json:"is_active"`
+	IsVisible *bool    `json:"is_visible"`
 	MinPrice  *float64 `json:"min_price"`
 	MaxPrice  *float64 `json:"max_price"`
-	Search    *string `json:"search"` // search by name, code, or description
+	Search    *string  `json:"search"` // search by name, code, or description
 }
 
 // ToModel converts input to model

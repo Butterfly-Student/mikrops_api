@@ -143,6 +143,13 @@ func (h *customerAdapter) List(c *gin.Context) {
 		return
 	}
 
+	// If called under /mikrotik/:router_id/customers, auto-filter by that router
+	if routerRaw, exists := c.Get("router"); exists {
+		if router, ok := routerRaw.(*model.MikrotikRouter); ok {
+			filter.RouterID = &router.ID
+		}
+	}
+
 	ctx = activity.WithPayload(ctx, filter)
 
 	customers, err := h.domain.Customer().List(ctx, &filter)

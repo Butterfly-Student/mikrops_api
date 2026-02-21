@@ -73,7 +73,7 @@ type Payment struct {
 	Status PaymentStatusType `gorm:"size:20;not null;default:pending" json:"status"`
 
 	// Processing
-	ProcessedBy     *uuid.UUID `gorm:"type:uuid" json:"processed_by"`
+	ProcessedBy     *uint      `gorm:"type:bigint" json:"processed_by"`
 	ProcessedAt     *time.Time `json:"processed_at"`
 	RejectionReason *string    `gorm:"type:text" json:"rejection_reason"`
 
@@ -81,7 +81,7 @@ type Payment struct {
 	RefundAmount *float64   `gorm:"type:decimal(12,2);default:0" json:"refund_amount"`
 	RefundDate   *time.Time `json:"refund_date"`
 	RefundReason *string    `gorm:"type:text" json:"refund_reason"`
-	RefundedBy   *uuid.UUID `gorm:"type:uuid" json:"refunded_by"`
+	RefundedBy   *uint      `gorm:"type:bigint" json:"refunded_by"`
 
 	Notes *string `gorm:"type:text" json:"notes"`
 

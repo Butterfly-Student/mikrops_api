@@ -16,4 +16,6 @@ type HttpPort interface {
 	IpPool() IpPoolHttpPort
 	MikrotikRouter() MikrotikRouterHttpPort
 	Hotspot() HotspotHttpPort
+	Registration() RegistrationHttpPort
+	CustomerPortal() CustomerPortalHttpPort
 }

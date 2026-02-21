@@ -2,6 +2,7 @@ package mikrotik_outbound_adapter
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"go-template/internal/model"
@@ -24,6 +25,9 @@ func (a *mikrotikClientAdapter) CreateSecret(router *model.MikrotikRouter, secre
 		"=service=pppoe",
 	}
 
+	if secret.CallerID != "" {
+		cmd = append(cmd, "=caller-id="+secret.CallerID)
+	}
 	if secret.Profile != "" {
 		cmd = append(cmd, "=profile="+secret.Profile)
 	}
@@ -32,6 +36,12 @@ func (a *mikrotikClientAdapter) CreateSecret(router *model.MikrotikRouter, secre
 	}
 	if secret.RemoteAddress != "" {
 		cmd = append(cmd, "=remote-address="+secret.RemoteAddress)
+	}
+	if secret.LimitBytesIn > 0 {
+		cmd = append(cmd, "=limit-bytes-in="+strconv.FormatInt(secret.LimitBytesIn, 10))
+	}
+	if secret.LimitBytesOut > 0 {
+		cmd = append(cmd, "=limit-bytes-out="+strconv.FormatInt(secret.LimitBytesOut, 10))
 	}
 	if secret.Comment != "" {
 		cmd = append(cmd, "=comment="+secret.Comment)
@@ -72,6 +82,9 @@ func (a *mikrotikClientAdapter) UpdateSecret(router *model.MikrotikRouter, secre
 	if secret.Password != "" {
 		cmd = append(cmd, "=password="+secret.Password)
 	}
+	if secret.CallerID != "" {
+		cmd = append(cmd, "=caller-id="+secret.CallerID)
+	}
 	if secret.Profile != "" {
 		cmd = append(cmd, "=profile="+secret.Profile)
 	}
@@ -80,6 +93,12 @@ func (a *mikrotikClientAdapter) UpdateSecret(router *model.MikrotikRouter, secre
 	}
 	if secret.RemoteAddress != "" {
 		cmd = append(cmd, "=remote-address="+secret.RemoteAddress)
+	}
+	if secret.LimitBytesIn > 0 {
+		cmd = append(cmd, "=limit-bytes-in="+strconv.FormatInt(secret.LimitBytesIn, 10))
+	}
+	if secret.LimitBytesOut > 0 {
+		cmd = append(cmd, "=limit-bytes-out="+strconv.FormatInt(secret.LimitBytesOut, 10))
 	}
 	if secret.Comment != "" {
 		cmd = append(cmd, "=comment="+secret.Comment)
@@ -157,15 +176,20 @@ func (a *mikrotikClientAdapter) ListSecrets(router *model.MikrotikRouter) ([]mod
 }
 
 func parseSecret(re *proto.Sentence) *model.PppoeSecret {
+	limitIn, _ := strconv.ParseInt(re.Map["limit-bytes-in"], 10, 64)
+	limitOut, _ := strconv.ParseInt(re.Map["limit-bytes-out"], 10, 64)
 	return &model.PppoeSecret{
 		ID:            re.Map[".id"],
 		Name:          re.Map["name"],
 		Password:      re.Map["password"],
 		Service:       re.Map["service"],
+		CallerID:      re.Map["caller-id"],
 		Profile:       re.Map["profile"],
 		LocalAddress:  re.Map["local-address"],
 		RemoteAddress: re.Map["remote-address"],
+		LimitBytesIn:  limitIn,
+		LimitBytesOut: limitOut,
 		Comment:       re.Map["comment"],
-		Disabled:      re.Map["disabled"] == "true",
+		Disabled:      re.Map["disabled"] == "yes",
 	}
 }

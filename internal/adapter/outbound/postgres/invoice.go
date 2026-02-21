@@ -183,8 +183,9 @@ func (a *invoiceAdapter) GetLastInvoiceNumber(ctx context.Context, year, month i
 	pattern := fmt.Sprintf("INV/%d/%02d/%%", year, month)
 
 	if err := a.db.WithContext(ctx).
+		Unscoped().
 		Where("invoice_number LIKE ?", pattern).
-		Order("invoice_number DESC").
+		Order("created_at DESC").
 		First(&invoice).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return "", nil // No invoice found for this month

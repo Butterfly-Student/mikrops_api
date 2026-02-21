@@ -3,6 +3,7 @@ package payment
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -136,8 +137,10 @@ func (d *domain) Update(ctx context.Context, id string, input model.PaymentInput
 		return nil, stacktrace.Propagate(err, "failed to find payment")
 	}
 
-	// Update fields
-	payment.PaymentNumber = input.PaymentNumber
+	// Update fields — preserve existing PaymentNumber if not provided in input
+	if input.PaymentNumber != "" {
+		payment.PaymentNumber = input.PaymentNumber
+	}
 	payment.CustomerID = input.CustomerID
 	payment.InvoiceID = input.InvoiceID
 	payment.Amount = input.Amount
@@ -194,15 +197,16 @@ func (d *domain) Confirm(ctx context.Context, id string, userID string) (*model.
 		return nil, stacktrace.NewError("payment is not in pending status")
 	}
 
-	// Parse user ID
-	userUUID, err := uuid.Parse(userID)
+	// Parse user ID (numeric)
+	userIDUint64, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "invalid user id")
 	}
+	userIDUint := uint(userIDUint64)
 
 	// Update payment status
 	payment.Status = model.PaymentStatusTypeConfirmed
-	payment.ProcessedBy = &userUUID
+	payment.ProcessedBy = &userIDUint
 	now := time.Now()
 	payment.ProcessedAt = &now
 
@@ -267,15 +271,16 @@ func (d *domain) Reject(ctx context.Context, id string, userID string, reason st
 		return nil, stacktrace.NewError("payment is not in pending status")
 	}
 
-	// Parse user ID
-	userUUID, err := uuid.Parse(userID)
+	// Parse user ID (numeric)
+	userIDUint64, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "invalid user id")
 	}
+	userIDUint := uint(userIDUint64)
 
 	// Update payment status
 	payment.Status = model.PaymentStatusTypeRejected
-	payment.ProcessedBy = &userUUID
+	payment.ProcessedBy = &userIDUint
 	now := time.Now()
 	payment.ProcessedAt = &now
 	payment.RejectionReason = &reason

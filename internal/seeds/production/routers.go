@@ -2,7 +2,6 @@ package production
 
 import (
 	"fmt"
-	"os"
 
 	"go-template/internal/model"
 	"go-template/internal/seeds/runner"
@@ -18,56 +17,39 @@ func (s *MikrotikSeeder) Name() string {
 }
 
 func (s *MikrotikSeeder) Seed(db *gorm.DB) error {
-	seedRouters := os.Getenv("SEED_ROUTERS")
-	if seedRouters == "" || seedRouters == "false" {
-		fmt.Println("[MIKROTIK SEED] Skipping router seeding (not configured)")
-		return nil
+	apiPort := 8728
+	restPort := 80
+	useSSL := false
+	isActive := true
+
+	testRouters := []*model.MikrotikRouter{
+		{
+			ID:       uuid.MustParse("550e8400-e29b-41d4-a716-446655440002"),
+			Name:     "Production-Lokal",
+			Address:  "192.168.233.1:8728",
+			ApiPort:  &apiPort,
+			RestPort: &restPort,
+			Username: "admin",
+			Password: "r00t",
+			UseSSL:   &useSSL,
+			IsActive: &isActive,
+		},
 	}
 
-	routerName := os.Getenv("SEED_ROUTER_NAME")
-	if routerName == "" {
-		routerName = "Default Router"
-	}
+	for _, router := range testRouters {
+		var existingRouter model.MikrotikRouter
+		result := db.Where("id = ?", router.ID).First(&existingRouter)
 
-	routerAddress := os.Getenv("SEED_ROUTER_ADDRESS")
-	if routerAddress == "" {
-		fmt.Println("[MIKROTIK SEED] No router address provided, skipping")
-		return nil
-	}
-
-	routerUsername := os.Getenv("SEED_ROUTER_USERNAME")
-	if routerUsername == "" {
-		fmt.Println("[MIKROTIK SEED] No router username provided, skipping")
-		return nil
-	}
-
-	routerPassword := os.Getenv("SEED_ROUTER_PASSWORD")
-	if routerPassword == "" {
-		fmt.Println("[MIKROTIK SEED] No router password provided, skipping")
-		return nil
-	}
-
-	router := &model.MikrotikRouter{
-		ID:       uuid.New(),
-		Name:     routerName,
-		Address:  routerAddress,
-		Username: routerUsername,
-		Password: routerPassword,
-		IsActive: func(b bool) *bool { return &b }(true),
-	}
-
-	var existingRouter model.MikrotikRouter
-	result := db.Where("name = ?", router.Name).First(&existingRouter)
-
-	if result.Error == gorm.ErrRecordNotFound {
-		if err := db.Create(router).Error; err != nil {
-			return fmt.Errorf("failed to create mikrotik router: %w", err)
+		if result.Error == gorm.ErrRecordNotFound {
+			if err := db.Create(router).Error; err != nil {
+				return fmt.Errorf("failed to create test router %s: %w", router.Name, err)
+			}
+			fmt.Printf("[MIKROTIK PRODUCTION SEED] Created: %s\n", router.Name)
+		} else if result.Error != nil {
+			return fmt.Errorf("failed to check existing router %s: %w", router.Name, result.Error)
+		} else {
+			fmt.Printf("[MIKROTIK PRODUCTION SEED] Already exists: %s\n", router.Name)
 		}
-		fmt.Printf("[MIKROTIK SEED] Created router: %s\n", router.Name)
-	} else if result.Error != nil {
-		return fmt.Errorf("failed to check existing router: %w", result.Error)
-	} else {
-		fmt.Printf("[MIKROTIK SEED] Router already exists: %s\n", router.Name)
 	}
 
 	return nil
