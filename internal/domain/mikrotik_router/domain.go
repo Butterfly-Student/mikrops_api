@@ -19,6 +19,8 @@ type MikrotikRouterDomain interface {
 	Update(ctx context.Context, id string, input model.MikrotikRouterInput) (*model.MikrotikRouter, error)
 	Delete(ctx context.Context, id string) error
 	TestConnection(ctx context.Context, id string) (*model.MikrotikTestResult, error)
+	SetupIsolation(ctx context.Context, id string, config model.IsolationConfig) error
+	CheckIsolationSetup(ctx context.Context, id string) (bool, error)
 }
 
 type domain struct {
@@ -137,4 +139,26 @@ func (d *domain) TestConnection(ctx context.Context, id string) (*model.Mikrotik
 	}
 
 	return result, nil
+}
+
+func (d *domain) SetupIsolation(ctx context.Context, id string, config model.IsolationConfig) error {
+	router, err := d.dbPort.Mikrotik().FindByID(id)
+	if err != nil {
+		return stacktrace.Propagate(err, "mikrotik router not found")
+	}
+
+	if err := d.mikrotikPort.SetupIsolation(router, config); err != nil {
+		return stacktrace.Propagate(err, "failed to setup isolation on router")
+	}
+
+	return nil
+}
+
+func (d *domain) CheckIsolationSetup(ctx context.Context, id string) (bool, error) {
+	router, err := d.dbPort.Mikrotik().FindByID(id)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "mikrotik router not found")
+	}
+
+	return d.mikrotikPort.CheckIsolationSetup(router)
 }

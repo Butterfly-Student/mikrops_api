@@ -61,6 +61,10 @@ type MikrotikPort interface {
 
 	// Ping
 	Ping(ctx context.Context, router *model.MikrotikRouter, req model.PingRequest) (<-chan model.PingResult, error)
+
+	// Isolation
+	SetupIsolation(router *model.MikrotikRouter, config model.IsolationConfig) error
+	CheckIsolationSetup(router *model.MikrotikRouter) (bool, error)
 }
 
 // MikrotikDatabasePort defines methods for managing MikroTik router configurations

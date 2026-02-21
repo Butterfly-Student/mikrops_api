@@ -69,8 +69,9 @@ type Customer struct {
 	MacAddress        *string    `gorm:"size:17" json:"mac_address"`
 
 	// Package Information
-	ProfileID *uuid.UUID        `gorm:"type:uuid" json:"profile_id"`
-	Profile   *BandwidthProfile `gorm:"foreignKey:ProfileID;constraint:OnDelete:RESTRICT" json:"profile,omitempty"`
+	ProfileID         *uuid.UUID        `gorm:"type:uuid" json:"profile_id"`
+	Profile           *BandwidthProfile `gorm:"foreignKey:ProfileID;constraint:OnDelete:RESTRICT" json:"profile,omitempty"`
+	PreviousProfileID *uuid.UUID        `gorm:"type:uuid" json:"previous_profile_id"`
 
 	// Billing Information
 	BillingCycle            BillingCycle `gorm:"size:20;default:monthly" json:"billing_cycle"`

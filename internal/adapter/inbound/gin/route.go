@@ -156,20 +156,13 @@ func InitRoute(
 		bandwidthProfile.POST("/:id/sync", port.BandwidthProfile().SyncToMikrotik)
 	}
 
-	// Customer Management
+	// Customer Management (read-only, no MikroTik required)
 	customer := app.Group("/customers")
 	customer.Use(port.Middleware().UserAuth())
 	{
-		customer.POST("", port.Customer().Create)
 		customer.GET("", port.Customer().List)
 		customer.GET("/code/:code", port.Customer().GetByCode)
 		customer.GET("/:id", port.Customer().GetByID)
-		customer.PUT("/:id", port.Customer().Update)
-		customer.DELETE("/:id", port.Customer().Delete)
-		customer.POST("/:id/status", port.Customer().ChangeStatus)
-		customer.POST("/:id/isolate", port.Customer().Isolate)
-		customer.POST("/:id/unisolate", port.Customer().UnIsolate)
-		customer.POST("/:id/sync", port.Customer().SyncToMikrotik)
 	}
 
 	// Invoice Management
@@ -211,10 +204,10 @@ func InitRoute(
 	{
 		mikrotik.POST("", port.MikrotikRouter().Create)
 		mikrotik.GET("", port.MikrotikRouter().List)
-		mikrotik.GET("/:id", port.MikrotikRouter().GetByID)
-		mikrotik.PUT("/:id", port.MikrotikRouter().Update)
-		mikrotik.DELETE("/:id", port.MikrotikRouter().Delete)
-		mikrotik.POST("/:id/test", port.MikrotikRouter().TestConnection)
+		mikrotik.GET("/:router_id", port.MikrotikRouter().GetByID)
+		mikrotik.PUT("/:router_id", port.MikrotikRouter().Update)
+		mikrotik.DELETE("/:router_id", port.MikrotikRouter().Delete)
+		mikrotik.POST("/:router_id/test", port.MikrotikRouter().TestConnection)
 	}
 
 	// Routes requiring a live MikroTik connection — router_id resolved via RouterAuth middleware
@@ -270,11 +263,24 @@ func InitRoute(
 		mikrotikOp.POST("/ping", port.Ping().StartPing)
 		mikrotikOp.DELETE("/ping/:address", port.Ping().StopPing)
 
-		// Bandwidth Profile via router path (MikroTik-first)
+		// Customer Management (MikroTik-first: creates PPP secret on router)
+		mikrotikOp.POST("/customers", port.Customer().Create)
+		mikrotikOp.PUT("/customers/:id", port.Customer().Update)
+		mikrotikOp.DELETE("/customers/:id", port.Customer().Delete)
+		mikrotikOp.POST("/customers/:id/status", port.Customer().ChangeStatus)
+		mikrotikOp.POST("/customers/:id/isolate", port.Customer().Isolate)
+		mikrotikOp.POST("/customers/:id/unisolate", port.Customer().UnIsolate)
+		mikrotikOp.POST("/customers/:id/sync", port.Customer().SyncToMikrotik)
+
+		// Bandwidth Profile via router path (MikroTik-first: creates PPP profile on router)
 		mikrotikOp.POST("/bandwidth-profiles", port.BandwidthProfile().CreateWithRouter)
 		mikrotikOp.PUT("/bandwidth-profiles/:id", port.BandwidthProfile().UpdateWithRouter)
 		mikrotikOp.DELETE("/bandwidth-profiles/:id", port.BandwidthProfile().DeleteWithRouter)
 		mikrotikOp.POST("/bandwidth-profiles/:id/sync", port.BandwidthProfile().SyncToMikrotik)
+
+		// Isolation Management
+		mikrotikOp.POST("/isolation/setup", port.MikrotikRouter().SetupIsolation)
+		mikrotikOp.GET("/isolation/status", port.MikrotikRouter().CheckIsolationSetup)
 
 		// Hotspot Management
 		// Profiles

@@ -210,13 +210,34 @@ func (d *domain) Delete(ctx context.Context, id string) error {
 }
 
 func (d *domain) ChangeStatus(ctx context.Context, id string, status model.CustomerStatus) error {
-	// Get customer
-	customer, err := d.dbPort.Customer().FindByID(ctx, id)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to find customer")
+	// Delegate isolation/un-isolation to specialized methods with profile-switching
+	switch status {
+	case model.CustomerStatusIsolated:
+		return d.Isolate(ctx, id)
+	case model.CustomerStatusActive:
+		// Check if currently isolated — if so, use UnIsolate to restore profile
+		customer, err := d.dbPort.Customer().FindByID(ctx, id)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to find customer")
+		}
+		if customer.Status == model.CustomerStatusIsolated {
+			return d.UnIsolate(ctx, id)
+		}
+		// Otherwise, normal status change (e.g., pending → active)
+		return d.changeStatusWithSync(ctx, id, customer, status)
+	default:
+		// For suspended, terminated, pending — use standard disable-based sync
+		customer, err := d.dbPort.Customer().FindByID(ctx, id)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to find customer")
+		}
+		return d.changeStatusWithSync(ctx, id, customer, status)
 	}
+}
 
-	// Update status
+// changeStatusWithSync updates status in DB and syncs disable state to MikroTik.
+func (d *domain) changeStatusWithSync(ctx context.Context, id string, customer *model.Customer, status model.CustomerStatus) error {
+	// Update status in DB
 	if err := d.dbPort.Customer().UpdateStatus(ctx, id, status); err != nil {
 		return stacktrace.Propagate(err, "failed to update customer status")
 	}
@@ -224,24 +245,10 @@ func (d *domain) ChangeStatus(ctx context.Context, id string, status model.Custo
 	// Update customer object for sync
 	customer.Status = status
 
-	// Sync to MikroTik based on status
+	// Sync to MikroTik (disable/enable based on new status)
 	if customer.RouterID != nil && customer.PppSecretName != nil {
-		switch status {
-		case model.CustomerStatusIsolated, model.CustomerStatusSuspended:
-			// Disable PPPoE secret
-			if err := d.syncToMikrotik(ctx, customer); err != nil {
-				return stacktrace.Propagate(err, "status updated but failed to disable in mikrotik")
-			}
-		case model.CustomerStatusActive:
-			// Enable PPPoE secret
-			if err := d.syncToMikrotik(ctx, customer); err != nil {
-				return stacktrace.Propagate(err, "status updated but failed to enable in mikrotik")
-			}
-		case model.CustomerStatusTerminated:
-			// Disable and optionally delete
-			if err := d.syncToMikrotik(ctx, customer); err != nil {
-				return stacktrace.Propagate(err, "status updated but failed to disable in mikrotik")
-			}
+		if err := d.syncToMikrotik(ctx, customer); err != nil {
+			return stacktrace.Propagate(err, "status updated but failed to sync to mikrotik")
 		}
 	}
 
@@ -249,11 +256,144 @@ func (d *domain) ChangeStatus(ctx context.Context, id string, status model.Custo
 }
 
 func (d *domain) Isolate(ctx context.Context, id string) error {
-	return d.ChangeStatus(ctx, id, model.CustomerStatusIsolated)
+	// Get customer with profile preloaded
+	customer, err := d.dbPort.Customer().FindByID(ctx, id)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to find customer")
+	}
+
+	// Validate: must be active and have MikroTik config
+	if customer.Status != model.CustomerStatusActive {
+		return stacktrace.NewError("only active customers can be isolated, current status: %s", customer.Status)
+	}
+	if customer.RouterID == nil {
+		return stacktrace.NewError("customer has no router assigned")
+	}
+	if customer.PppSecretName == nil || *customer.PppSecretName == "" {
+		return stacktrace.NewError("customer has no ppp secret name")
+	}
+
+	// Get router
+	router, err := d.dbPort.Mikrotik().FindByID(customer.RouterID.String())
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get mikrotik router")
+	}
+
+	// Ensure isolation infrastructure exists on router (idempotent)
+	isolationSetup, _ := d.mikrotikPort.CheckIsolationSetup(router)
+	if !isolationSetup {
+		config := model.DefaultIsolationConfig()
+		if err := d.mikrotikPort.SetupIsolation(router, config); err != nil {
+			return stacktrace.Propagate(err, "failed to setup isolation on router")
+		}
+	}
+
+	// MikroTik-first: switch PPP secret profile to "isolir"
+	isolationProfileName := model.DefaultIsolationConfig().ProfileName
+	secret := &model.PppoeSecret{
+		Name:    *customer.PppSecretName,
+		Profile: isolationProfileName,
+	}
+	existingSecret, _ := d.findSecretByName(router, *customer.PppSecretName)
+	if existingSecret != nil {
+		secret.ID = existingSecret.ID
+	}
+	if err := d.mikrotikPort.UpdateSecret(router, secret); err != nil {
+		return stacktrace.Propagate(err, "failed to switch ppp secret to isolation profile")
+	}
+
+	// Kick active session so user reconnects with isolation profile
+	_ = d.mikrotikPort.RemoveActiveSession(router, *customer.PppSecretName)
+
+	// MikroTik OK — update DB: save previous profile and change status
+	customer.PreviousProfileID = customer.ProfileID
+	customer.Status = model.CustomerStatusIsolated
+	if err := d.dbPort.Customer().Update(ctx, customer); err != nil {
+		// Best-effort rollback: restore original profile on MikroTik
+		if customer.Profile != nil {
+			rollbackSecret := &model.PppoeSecret{
+				Name:    *customer.PppSecretName,
+				Profile: customer.Profile.PppProfileName,
+			}
+			if existingSecret != nil {
+				rollbackSecret.ID = existingSecret.ID
+			}
+			_ = d.mikrotikPort.UpdateSecret(router, rollbackSecret)
+		}
+		return stacktrace.Propagate(err, "mikrotik isolated but failed to update database")
+	}
+
+	return nil
 }
 
 func (d *domain) UnIsolate(ctx context.Context, id string) error {
-	return d.ChangeStatus(ctx, id, model.CustomerStatusActive)
+	// Get customer
+	customer, err := d.dbPort.Customer().FindByID(ctx, id)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to find customer")
+	}
+
+	// Validate: must be isolated
+	if customer.Status != model.CustomerStatusIsolated {
+		return stacktrace.NewError("only isolated customers can be un-isolated, current status: %s", customer.Status)
+	}
+	if customer.RouterID == nil {
+		return stacktrace.NewError("customer has no router assigned")
+	}
+	if customer.PppSecretName == nil || *customer.PppSecretName == "" {
+		return stacktrace.NewError("customer has no ppp secret name")
+	}
+	if customer.PreviousProfileID == nil {
+		return stacktrace.NewError("customer has no previous profile to restore")
+	}
+
+	// Get the previous bandwidth profile to restore
+	previousProfile, err := d.dbPort.BandwidthProfile().FindByID(ctx, customer.PreviousProfileID.String())
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get previous bandwidth profile")
+	}
+
+	// Get router
+	router, err := d.dbPort.Mikrotik().FindByID(customer.RouterID.String())
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get mikrotik router")
+	}
+
+	// MikroTik-first: restore PPP secret profile to original
+	secret := &model.PppoeSecret{
+		Name:    *customer.PppSecretName,
+		Profile: previousProfile.PppProfileName,
+	}
+	existingSecret, _ := d.findSecretByName(router, *customer.PppSecretName)
+	if existingSecret != nil {
+		secret.ID = existingSecret.ID
+	}
+	if err := d.mikrotikPort.UpdateSecret(router, secret); err != nil {
+		return stacktrace.Propagate(err, "failed to restore ppp secret profile")
+	}
+
+	// Kick active session so user reconnects with restored profile
+	_ = d.mikrotikPort.RemoveActiveSession(router, *customer.PppSecretName)
+
+	// MikroTik OK — update DB: restore profile and clear previous
+	customer.ProfileID = customer.PreviousProfileID
+	customer.PreviousProfileID = nil
+	customer.Status = model.CustomerStatusActive
+	if err := d.dbPort.Customer().Update(ctx, customer); err != nil {
+		// Best-effort rollback: switch back to isolation profile
+		isolationProfileName := model.DefaultIsolationConfig().ProfileName
+		rollbackSecret := &model.PppoeSecret{
+			Name:    *customer.PppSecretName,
+			Profile: isolationProfileName,
+		}
+		if existingSecret != nil {
+			rollbackSecret.ID = existingSecret.ID
+		}
+		_ = d.mikrotikPort.UpdateSecret(router, rollbackSecret)
+		return stacktrace.Propagate(err, "mikrotik restored but failed to update database")
+	}
+
+	return nil
 }
 
 func (d *domain) SyncToMikrotik(ctx context.Context, id string) error {
@@ -376,11 +516,16 @@ func (d *domain) findSecretByName(router *model.MikrotikRouter, name string) (*m
 }
 
 func (d *domain) convertToPppoeSecret(customer *model.Customer) *model.PppoeSecret {
+	// Isolated and active users stay connected (not disabled)
+	// Suspended and terminated users are disabled
+	disabled := customer.Status == model.CustomerStatusSuspended ||
+		customer.Status == model.CustomerStatusTerminated
+
 	secret := &model.PppoeSecret{
 		Name:     *customer.PppSecretName,
 		Password: *customer.PppSecretPassword,
 		Service:  string(customer.PppService),
-		Disabled: customer.Status != model.CustomerStatusActive,
+		Disabled: disabled,
 	}
 
 	// Set caller ID (MAC address)
@@ -388,8 +533,10 @@ func (d *domain) convertToPppoeSecret(customer *model.Customer) *model.PppoeSecr
 		secret.CallerID = *customer.MacAddress
 	}
 
-	// Set profile from BandwidthProfile
-	if customer.Profile != nil {
+	// For isolated customers, use the isolation profile instead of the bandwidth profile
+	if customer.Status == model.CustomerStatusIsolated {
+		secret.Profile = model.DefaultIsolationConfig().ProfileName
+	} else if customer.Profile != nil {
 		secret.Profile = customer.Profile.PppProfileName
 	}
 

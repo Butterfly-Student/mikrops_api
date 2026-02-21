@@ -62,20 +62,29 @@ type PppoeSecret struct {
 }
 
 type PppoeProfile struct {
-	ID             string `json:"id,omitempty"`
-	Name           string `json:"name" validate:"required"`
-	LocalAddress   string `json:"local_address"`
-	RemoteAddress  string `json:"remote_address"`
-	Bridge         string `json:"bridge"`
-	ChangeTCPMSS   string `json:"change_tcp_mss"` // default, yes, no
-	RateLimit      string `json:"rate_limit"`
-	OnlyOne        string `json:"only_one"` // default, yes, no
-	UseMPLS        string `json:"use_mpls"`
-	UseCompression string `json:"use_compression"`
-	UseEncryption  string `json:"use_encryption"`
-	UseIPv6        string `json:"use_ipv6"`
-	DNSServer      string `json:"dns_server"`
-	Comment        string `json:"comment"`
+	ID                string `json:"id,omitempty"`
+	Name              string `json:"name" validate:"required"`
+	LocalAddress      string `json:"local_address"`
+	RemoteAddress     string `json:"remote_address"`
+	Bridge            string `json:"bridge"`
+	ChangeTCPMSS      string `json:"change_tcp_mss"` // default, yes, no
+	RateLimit         string `json:"rate_limit"`
+	ParentQueue       string `json:"parent_queue"`
+	QueueType         string `json:"queue_type"`
+	InsertQueueBefore string `json:"insert_queue_before"` // bottom, first, or queue name
+	OnlyOne           string `json:"only_one"`            // default, yes, no
+	UseMPLS           string `json:"use_mpls"`
+	UseCompression    string `json:"use_compression"`
+	UseEncryption     string `json:"use_encryption"`
+	UseIPv6           string `json:"use_ipv6"`
+	DNSServer         string `json:"dns_server"`
+	AddressList       string `json:"address_list"`
+	InterfaceList     string `json:"interface_list"`
+	IncomingFilter    string `json:"incoming_filter"`
+	OutgoingFilter    string `json:"outgoing_filter"`
+	OnUp              string `json:"on_up"`
+	OnDown            string `json:"on_down"`
+	Comment           string `json:"comment"`
 }
 
 type PppoeActive struct {
@@ -90,6 +99,26 @@ type PppoeActive struct {
 	LimitBytesIn  int64  `json:"limit_bytes_in"`
 	LimitBytesOut int64  `json:"limit_bytes_out"`
 	Radius        bool   `json:"radius"`
+}
+
+// IsolationConfig holds settings for customer isolation on a MikroTik router
+type IsolationConfig struct {
+	ProfileName string `json:"profile_name"` // PPP profile name, e.g., "isolir"
+	AddressList string `json:"address_list"` // Firewall address list, e.g., "isolated-users"
+	PortalIP    string `json:"portal_ip"`    // Captive portal IP address
+	PortalPort  string `json:"portal_port"`  // Captive portal port (default "80")
+	DNSServer   string `json:"dns_server"`   // DNS server for isolated users
+	RateLimit   string `json:"rate_limit"`   // Minimal rate limit, e.g., "256k/256k"
+}
+
+// DefaultIsolationConfig returns a config with sensible defaults (portal IP must be set)
+func DefaultIsolationConfig() IsolationConfig {
+	return IsolationConfig{
+		ProfileName: "isolir",
+		AddressList: "isolated-users",
+		PortalPort:  "80",
+		RateLimit:   "256k/256k",
+	}
 }
 
 // Reuse callback and webhook structs from before

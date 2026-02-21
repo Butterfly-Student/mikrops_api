@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	_ "go-template/internal/migration/postgres"
 	"go-template/internal/seeds"
 	"go-template/utils"
 	"go-template/utils/database"

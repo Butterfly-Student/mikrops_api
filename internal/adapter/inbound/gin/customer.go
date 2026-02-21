@@ -27,6 +27,18 @@ func NewCustomerAdapter(
 func (h *customerAdapter) Create(c *gin.Context) {
 	ctx := activity.NewContext("http_customer_create")
 
+	// Get router from context (set by RouterAuth middleware)
+	routerRaw, exists := c.Get("router")
+	if !exists {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: "router context not found; use /mikrotik/:router_id/customers"})
+		return
+	}
+	router, ok := routerRaw.(*model.MikrotikRouter)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: "invalid router context"})
+		return
+	}
+
 	var input model.CustomerInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{
@@ -36,13 +48,21 @@ func (h *customerAdapter) Create(c *gin.Context) {
 		return
 	}
 
+	// Inject router_id from URL path
+	input.RouterID = &router.ID
+
 	ctx = activity.WithPayload(ctx, input)
 
 	customer, err := h.domain.Customer().Create(ctx, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.Response{
+		statusCode := http.StatusInternalServerError
+		errMsg := stacktrace.RootCause(err).Error()
+		if errMsg != "" {
+			statusCode = http.StatusBadGateway
+		}
+		c.JSON(statusCode, model.Response{
 			Success: false,
-			Error:   stacktrace.RootCause(err).Error(),
+			Error:   errMsg,
 		})
 		return
 	}
@@ -152,6 +172,18 @@ func (h *customerAdapter) Update(c *gin.Context) {
 		return
 	}
 
+	// Get router from context (set by RouterAuth middleware)
+	routerRaw, exists := c.Get("router")
+	if !exists {
+		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: "router context not found; use /mikrotik/:router_id/customers"})
+		return
+	}
+	router, ok := routerRaw.(*model.MikrotikRouter)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: "invalid router context"})
+		return
+	}
+
 	var input model.CustomerInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{
@@ -161,6 +193,9 @@ func (h *customerAdapter) Update(c *gin.Context) {
 		return
 	}
 
+	// Inject router_id from URL path
+	input.RouterID = &router.ID
+
 	ctx = activity.WithPayload(ctx, map[string]interface{}{
 		"id":    id,
 		"input": input,
@@ -168,7 +203,7 @@ func (h *customerAdapter) Update(c *gin.Context) {
 
 	customer, err := h.domain.Customer().Update(ctx, id, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.Response{
+		c.JSON(http.StatusBadGateway, model.Response{
 			Success: false,
 			Error:   stacktrace.RootCause(err).Error(),
 		})

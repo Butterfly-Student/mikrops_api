@@ -16,7 +16,23 @@
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(mockgen:*)"
+      "Bash(mockgen:*)",
+      "Bash(timeout 5 go run:*)",
+      "mcp__postman__getAuthenticatedUser",
+      "mcp__postman__getWorkspaces",
+      "Bash(lsof:*)",
+      "Bash(curl:*)",
+      "mcp__postman__createEnvironment",
+      "mcp__postman__createCollection",
+      "mcp__postman__createCollectionFolder",
+      "mcp__postman__createCollectionRequest",
+      "mcp__postman__runCollection",
+      "Bash(/home/butterfly_student/code/Mikrotik/mikrops_no-tenant/test_all_routes.sh:*)",
+      "Bash(chmod:*)",
+      "Bash(bash test_all_routes.sh)",
+      "Bash(python3:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
     ]
   }
 }

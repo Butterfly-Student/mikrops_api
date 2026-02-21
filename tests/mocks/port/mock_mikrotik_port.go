@@ -401,6 +401,35 @@ func (mr *MockMikrotikPortMockRecorder) Ping(ctx, router, req interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockMikrotikPort)(nil).Ping), ctx, router, req)
 }
 
+// SetupIsolation mocks base method.
+func (m *MockMikrotikPort) SetupIsolation(router *model.MikrotikRouter, config model.IsolationConfig) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetupIsolation", router, config)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetupIsolation indicates an expected call of SetupIsolation.
+func (mr *MockMikrotikPortMockRecorder) SetupIsolation(router, config interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetupIsolation", reflect.TypeOf((*MockMikrotikPort)(nil).SetupIsolation), router, config)
+}
+
+// CheckIsolationSetup mocks base method.
+func (m *MockMikrotikPort) CheckIsolationSetup(router *model.MikrotikRouter) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckIsolationSetup", router)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckIsolationSetup indicates an expected call of CheckIsolationSetup.
+func (mr *MockMikrotikPortMockRecorder) CheckIsolationSetup(router interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckIsolationSetup", reflect.TypeOf((*MockMikrotikPort)(nil).CheckIsolationSetup), router)
+}
+
 // RemoveActiveSession mocks base method.
 func (m *MockMikrotikPort) RemoveActiveSession(router *model.MikrotikRouter, id string) error {
 	m.ctrl.T.Helper()

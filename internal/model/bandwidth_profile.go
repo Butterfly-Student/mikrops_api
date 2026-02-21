@@ -19,6 +19,12 @@ type BandwidthProfile struct {
 	// Mikrotik PPP Profile Name
 	PppProfileName string `gorm:"size:100;not null" json:"ppp_profile_name" validate:"required"`
 
+	// PPP Profile Network Configuration
+	LocalAddress  *string `gorm:"size:45" json:"local_address"`  // IP or pool name for server side
+	RemoteAddress *string `gorm:"size:45" json:"remote_address"` // IP or pool name for client side
+	ParentQueue   *string `gorm:"size:100" json:"parent_queue"`  // Parent queue name for hierarchical QoS
+	DNSServer     *string `gorm:"size:100" json:"dns_server"`    // DNS server for PPP clients
+
 	// Speed Configuration (in kbps)
 	DownloadSpeed int64 `gorm:"not null" json:"download_speed" validate:"required,min=1"`
 	UploadSpeed   int64 `gorm:"not null" json:"upload_speed" validate:"required,min=1"`
@@ -62,6 +68,10 @@ type BandwidthProfileInput struct {
 	Description       *string  `json:"description"`
 	Category          string   `json:"category" validate:"required,oneof=residential business corporate promo"`
 	PppProfileName    string   `json:"ppp_profile_name" validate:"required,max=100"`
+	LocalAddress      *string  `json:"local_address" validate:"omitempty,max=45"`
+	RemoteAddress     *string  `json:"remote_address" validate:"omitempty,max=45"`
+	ParentQueue       *string  `json:"parent_queue" validate:"omitempty,max=100"`
+	DNSServer         *string  `json:"dns_server" validate:"omitempty,max=100"`
 	DownloadSpeed     int64    `json:"download_speed" validate:"required,min=1"`
 	UploadSpeed       int64    `json:"upload_speed" validate:"required,min=1"`
 	BurstDownload     *int64   `json:"burst_download" validate:"omitempty,min=1"`
@@ -98,6 +108,10 @@ func (i *BandwidthProfileInput) ToModel() *BandwidthProfile {
 		Description:       i.Description,
 		Category:          i.Category,
 		PppProfileName:    i.PppProfileName,
+		LocalAddress:      i.LocalAddress,
+		RemoteAddress:     i.RemoteAddress,
+		ParentQueue:       i.ParentQueue,
+		DNSServer:         i.DNSServer,
 		DownloadSpeed:     i.DownloadSpeed,
 		UploadSpeed:       i.UploadSpeed,
 		BurstDownload:     i.BurstDownload,

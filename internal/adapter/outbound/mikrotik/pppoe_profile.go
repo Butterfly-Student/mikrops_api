@@ -34,8 +34,35 @@ func (a *mikrotikClientAdapter) CreateProfile(router *model.MikrotikRouter, prof
 	if profile.DNSServer != "" {
 		cmd = append(cmd, "=dns-server="+profile.DNSServer)
 	}
+	if profile.ParentQueue != "" {
+		cmd = append(cmd, "=parent-queue="+profile.ParentQueue)
+	}
+	if profile.QueueType != "" {
+		cmd = append(cmd, "=queue-type="+profile.QueueType)
+	}
+	if profile.InsertQueueBefore != "" {
+		cmd = append(cmd, "=insert-queue-before="+profile.InsertQueueBefore)
+	}
 	if profile.OnlyOne != "" {
 		cmd = append(cmd, "=only-one="+profile.OnlyOne)
+	}
+	if profile.AddressList != "" {
+		cmd = append(cmd, "=address-list="+profile.AddressList)
+	}
+	if profile.InterfaceList != "" {
+		cmd = append(cmd, "=interface-list="+profile.InterfaceList)
+	}
+	if profile.IncomingFilter != "" {
+		cmd = append(cmd, "=incoming-filter="+profile.IncomingFilter)
+	}
+	if profile.OutgoingFilter != "" {
+		cmd = append(cmd, "=outgoing-filter="+profile.OutgoingFilter)
+	}
+	if profile.OnUp != "" {
+		cmd = append(cmd, "=on-up="+profile.OnUp)
+	}
+	if profile.OnDown != "" {
+		cmd = append(cmd, "=on-down="+profile.OnDown)
 	}
 
 	_, err = client.RunArgs(cmd)
@@ -76,6 +103,33 @@ func (a *mikrotikClientAdapter) UpdateProfile(router *model.MikrotikRouter, prof
 	}
 	if profile.DNSServer != "" {
 		cmd = append(cmd, "=dns-server="+profile.DNSServer)
+	}
+	if profile.ParentQueue != "" {
+		cmd = append(cmd, "=parent-queue="+profile.ParentQueue)
+	}
+	if profile.QueueType != "" {
+		cmd = append(cmd, "=queue-type="+profile.QueueType)
+	}
+	if profile.InsertQueueBefore != "" {
+		cmd = append(cmd, "=insert-queue-before="+profile.InsertQueueBefore)
+	}
+	if profile.AddressList != "" {
+		cmd = append(cmd, "=address-list="+profile.AddressList)
+	}
+	if profile.InterfaceList != "" {
+		cmd = append(cmd, "=interface-list="+profile.InterfaceList)
+	}
+	if profile.IncomingFilter != "" {
+		cmd = append(cmd, "=incoming-filter="+profile.IncomingFilter)
+	}
+	if profile.OutgoingFilter != "" {
+		cmd = append(cmd, "=outgoing-filter="+profile.OutgoingFilter)
+	}
+	if profile.OnUp != "" {
+		cmd = append(cmd, "=on-up="+profile.OnUp)
+	}
+	if profile.OnDown != "" {
+		cmd = append(cmd, "=on-down="+profile.OnDown)
 	}
 
 	_, err = client.RunArgs(cmd)
@@ -147,13 +201,22 @@ func (a *mikrotikClientAdapter) ListProfiles(router *model.MikrotikRouter) ([]mo
 
 func parseProfile(re *proto.Sentence) *model.PppoeProfile {
 	return &model.PppoeProfile{
-		ID:            re.Map[".id"],
-		Name:          re.Map["name"],
-		LocalAddress:  re.Map["local-address"],
-		RemoteAddress: re.Map["remote-address"],
-		RateLimit:     re.Map["rate-limit"],
-		OnlyOne:       re.Map["only-one"],
-		DNSServer:     re.Map["dns-server"],
-		Comment:       re.Map["comment"],
+		ID:                re.Map[".id"],
+		Name:              re.Map["name"],
+		LocalAddress:      re.Map["local-address"],
+		RemoteAddress:     re.Map["remote-address"],
+		RateLimit:         re.Map["rate-limit"],
+		ParentQueue:       re.Map["parent-queue"],
+		QueueType:         re.Map["queue-type"],
+		InsertQueueBefore: re.Map["insert-queue-before"],
+		OnlyOne:           re.Map["only-one"],
+		DNSServer:         re.Map["dns-server"],
+		AddressList:       re.Map["address-list"],
+		InterfaceList:     re.Map["interface-list"],
+		IncomingFilter:    re.Map["incoming-filter"],
+		OutgoingFilter:    re.Map["outgoing-filter"],
+		OnUp:              re.Map["on-up"],
+		OnDown:            re.Map["on-down"],
+		Comment:           re.Map["comment"],
 	}
 }

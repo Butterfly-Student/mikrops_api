@@ -12,4 +12,6 @@ type MikrotikRouterHttpPort interface {
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 	TestConnection(c *gin.Context)
+	SetupIsolation(c *gin.Context)
+	CheckIsolationSetup(c *gin.Context)
 }
