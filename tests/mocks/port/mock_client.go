@@ -35,7 +35,7 @@ func (m *MockClientDatabasePort) EXPECT() *MockClientDatabasePortMockRecorder {
 }
 
 // DeleteByFilter mocks base method.
-func (m *MockClientDatabasePort) DeleteByFilter(filter model.ClientFilter) error {
+func (m *MockClientDatabasePort) DeleteByFilter(filter model.AdminUserFilter) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteByFilter", filter)
 	ret0, _ := ret[0].(error)
@@ -49,10 +49,10 @@ func (mr *MockClientDatabasePortMockRecorder) DeleteByFilter(filter interface{})
 }
 
 // FindByFilter mocks base method.
-func (m *MockClientDatabasePort) FindByFilter(filter model.ClientFilter, lock bool) ([]model.Client, error) {
+func (m *MockClientDatabasePort) FindByFilter(filter model.AdminUserFilter, lock bool) ([]model.AdminUser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByFilter", filter, lock)
-	ret0, _ := ret[0].([]model.Client)
+	ret0, _ := ret[0].([]model.AdminUser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,7 +79,7 @@ func (mr *MockClientDatabasePortMockRecorder) IsExists(bearerKey interface{}) *g
 }
 
 // Upsert mocks base method.
-func (m *MockClientDatabasePort) Upsert(datas []model.ClientInput) error {
+func (m *MockClientDatabasePort) Upsert(datas []model.AdminUserInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Upsert", datas)
 	ret0, _ := ret[0].(error)
@@ -116,7 +116,7 @@ func (m *MockClientMessagePort) EXPECT() *MockClientMessagePortMockRecorder {
 }
 
 // PublishUpsert mocks base method.
-func (m *MockClientMessagePort) PublishUpsert(datas []model.ClientInput) error {
+func (m *MockClientMessagePort) PublishUpsert(datas []model.AdminUserInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PublishUpsert", datas)
 	ret0, _ := ret[0].(error)
@@ -153,10 +153,10 @@ func (m *MockClientCachePort) EXPECT() *MockClientCachePortMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockClientCachePort) Get(bearerKey string) (model.Client, error) {
+func (m *MockClientCachePort) Get(bearerKey string) (model.AdminUser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", bearerKey)
-	ret0, _ := ret[0].(model.Client)
+	ret0, _ := ret[0].(model.AdminUser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -168,7 +168,7 @@ func (mr *MockClientCachePortMockRecorder) Get(bearerKey interface{}) *gomock.Ca
 }
 
 // Set mocks base method.
-func (m *MockClientCachePort) Set(data model.Client) error {
+func (m *MockClientCachePort) Set(data model.AdminUser) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", data)
 	ret0, _ := ret[0].(error)
@@ -205,7 +205,7 @@ func (m *MockClientWorkflowPort) EXPECT() *MockClientWorkflowPortMockRecorder {
 }
 
 // StartUpsert mocks base method.
-func (m *MockClientWorkflowPort) StartUpsert(data model.ClientInput) error {
+func (m *MockClientWorkflowPort) StartUpsert(data model.AdminUserInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StartUpsert", data)
 	ret0, _ := ret[0].(error)

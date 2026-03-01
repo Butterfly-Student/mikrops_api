@@ -135,7 +135,7 @@ func (d *domain) Update(ctx context.Context, id string, input model.BandwidthPro
 	profile.ProfileCode = input.ProfileCode
 	profile.Name = input.Name
 	profile.Description = input.Description
-	profile.Category = input.Category
+	profile.Category = model.ProfileCategory(input.Category)
 	profile.PppProfileName = input.PppProfileName
 	profile.DownloadSpeed = input.DownloadSpeed
 	profile.UploadSpeed = input.UploadSpeed
@@ -182,7 +182,7 @@ func (d *domain) UpdateWithRouter(ctx context.Context, routerID string, id strin
 	profile.ProfileCode = input.ProfileCode
 	profile.Name = input.Name
 	profile.Description = input.Description
-	profile.Category = input.Category
+	profile.Category = model.ProfileCategory(input.Category)
 	profile.PppProfileName = input.PppProfileName
 	profile.DownloadSpeed = input.DownloadSpeed
 	profile.UploadSpeed = input.UploadSpeed

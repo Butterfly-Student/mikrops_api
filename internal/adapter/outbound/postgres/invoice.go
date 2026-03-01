@@ -46,7 +46,8 @@ func (a *invoiceAdapter) FindByID(ctx context.Context, id string) (*model.Invoic
 		Preload("Items").
 		Preload("Items.Profile").
 		Preload("Customer").
-		Preload("Customer.Profile").
+		Preload("Subscription").
+		Preload("Subscription.Plan").
 		Where("id = ?", invoiceID).
 		First(&invoice).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -65,7 +66,8 @@ func (a *invoiceAdapter) FindByNumber(ctx context.Context, number string) (*mode
 		Preload("Items").
 		Preload("Items.Profile").
 		Preload("Customer").
-		Preload("Customer.Profile").
+		Preload("Subscription").
+		Preload("Subscription.Plan").
 		Where("invoice_number = ?", number).
 		First(&invoice).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -83,7 +85,7 @@ func (a *invoiceAdapter) FindAll(ctx context.Context, filter *model.InvoiceFilte
 	query := a.db.WithContext(ctx).Model(&model.Invoice{})
 
 	// Preload relations
-	query = query.Preload("Items").Preload("Customer").Preload("Customer.Profile")
+	query = query.Preload("Items").Preload("Items.Profile").Preload("Customer").Preload("Subscription").Preload("Subscription.Plan")
 
 	// Apply filters if provided
 	if filter != nil {

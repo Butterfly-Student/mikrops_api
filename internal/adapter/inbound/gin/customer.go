@@ -33,7 +33,7 @@ func (h *customerAdapter) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: "router context not found; use /mikrotik/:router_id/customers"})
 		return
 	}
-	router, ok := routerRaw.(*model.MikrotikRouter)
+	_, ok := routerRaw.(*model.MikrotikRouter)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: "invalid router context"})
 		return
@@ -48,8 +48,8 @@ func (h *customerAdapter) Create(c *gin.Context) {
 		return
 	}
 
-	// Inject router_id from URL path
-	input.RouterID = &router.ID
+	// Note: Router association is now handled via Subscription, not Customer
+	// TODO: Create subscription separately if router association is needed
 
 	ctx = activity.WithPayload(ctx, input)
 
@@ -143,12 +143,8 @@ func (h *customerAdapter) List(c *gin.Context) {
 		return
 	}
 
-	// If called under /mikrotik/:router_id/customers, auto-filter by that router
-	if routerRaw, exists := c.Get("router"); exists {
-		if router, ok := routerRaw.(*model.MikrotikRouter); ok {
-			filter.RouterID = &router.ID
-		}
-	}
+	// Note: Router filtering is now handled via Subscription domain
+	// Customers are identity-only and not directly linked to routers
 
 	ctx = activity.WithPayload(ctx, filter)
 
@@ -185,7 +181,7 @@ func (h *customerAdapter) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.Response{Success: false, Error: "router context not found; use /mikrotik/:router_id/customers"})
 		return
 	}
-	router, ok := routerRaw.(*model.MikrotikRouter)
+	_, ok := routerRaw.(*model.MikrotikRouter)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, model.Response{Success: false, Error: "invalid router context"})
 		return
@@ -200,8 +196,8 @@ func (h *customerAdapter) Update(c *gin.Context) {
 		return
 	}
 
-	// Inject router_id from URL path
-	input.RouterID = &router.ID
+	// Note: Router association is now handled via Subscription, not Customer
+	// TODO: Update subscription separately if router association needs to change
 
 	ctx = activity.WithPayload(ctx, map[string]interface{}{
 		"id":    id,

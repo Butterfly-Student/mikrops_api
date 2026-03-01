@@ -45,8 +45,11 @@ var inboundMessageDriver string
 var inboundWorkflowDriver string
 
 type App struct {
-	ctx    context.Context
-	domain domain.Domain
+	ctx          context.Context
+	domain       domain.Domain
+	mikrotikPort outbound_port.MikrotikPort
+	hotspotPort  outbound_port.HotspotPort
+	dbPort       outbound_port.DatabasePort
 }
 
 func NewApp() *App {
@@ -62,19 +65,24 @@ func NewApp() *App {
 	inboundMessageDriver = os.Getenv("INBOUND_MESSAGE_DRIVER")
 	inboundWorkflowDriver = os.Getenv("INBOUND_WORKFLOW_DRIVER")
 	dbPort, enforcer := databaseOutbound(ctx)
+	mikrotikPort := mikrotikOutbound()
+	hotspotPort := hotspotOutbound()
 	domain := domain.NewDomain(
 		dbPort,
 		messageOutbound(ctx),
 		cacheOutbound(ctx),
 		workflowOutbound(ctx),
-		mikrotikOutbound(),
-		hotspotOutbound(),
+		mikrotikPort,
+		hotspotPort,
 		enforcer,
 	)
 
 	return &App{
-		ctx:    ctx,
-		domain: domain,
+		ctx:          ctx,
+		domain:       domain,
+		mikrotikPort: mikrotikPort,
+		hotspotPort:  hotspotPort,
+		dbPort:       dbPort,
 	}
 }
 
@@ -199,7 +207,7 @@ func (a *App) messageInbound() {
 
 	switch inboundMessageDriver {
 	case "rabbitmq":
-		inboundMessageAdapter := rabbitmq_inbound_adapter.NewAdapter(a.domain)
+		inboundMessageAdapter := rabbitmq_inbound_adapter.NewAdapter(a.domain, a.mikrotikPort, a.hotspotPort, a.dbPort)
 		rabbitmq_inbound_adapter.InitRoute(ctx, os.Args, inboundMessageAdapter)
 	}
 }

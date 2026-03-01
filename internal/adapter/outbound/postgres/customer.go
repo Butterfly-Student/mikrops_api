@@ -41,8 +41,6 @@ func (a *customerAdapter) FindByID(ctx context.Context, id string) (*model.Custo
 	}
 
 	if err := a.db.WithContext(ctx).
-		Preload("Profile").
-		Preload("Router").
 		Where("id = ?", customerID).
 		First(&customer).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -58,8 +56,6 @@ func (a *customerAdapter) FindByCode(ctx context.Context, code string) (*model.C
 	var customer model.Customer
 
 	if err := a.db.WithContext(ctx).
-		Preload("Profile").
-		Preload("Router").
 		Where("customer_code = ?", code).
 		First(&customer).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -71,29 +67,10 @@ func (a *customerAdapter) FindByCode(ctx context.Context, code string) (*model.C
 	return &customer, nil
 }
 
-func (a *customerAdapter) FindByPppSecretName(ctx context.Context, name string) (*model.Customer, error) {
-	var customer model.Customer
-
-	if err := a.db.WithContext(ctx).
-		Preload("Profile").
-		Preload("Router").
-		Where("ppp_secret_name = ?", name).
-		First(&customer).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, stacktrace.NewError("customer not found")
-		}
-		return nil, stacktrace.Propagate(err, "failed to find customer by ppp secret name")
-	}
-
-	return &customer, nil
-}
-
 func (a *customerAdapter) FindByPortalIdentifier(ctx context.Context, identifier string) (*model.Customer, error) {
 	var customer model.Customer
 
 	if err := a.db.WithContext(ctx).
-		Preload("Profile").
-		Preload("Router").
 		Where("customer_code = ? OR phone = ?", identifier, identifier).
 		First(&customer).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -110,37 +87,14 @@ func (a *customerAdapter) FindAll(ctx context.Context, filter *model.CustomerFil
 
 	query := a.db.WithContext(ctx).Model(&model.Customer{})
 
-	// Preload relations
-	query = query.Preload("Profile").Preload("Router")
-
 	// Apply filters if provided
 	if filter != nil {
 		if filter.Status != nil {
 			query = query.Where("status = ?", *filter.Status)
 		}
 
-		if filter.RouterID != nil {
-			query = query.Where("router_id = ?", *filter.RouterID)
-		}
-
-		if filter.ProfileID != nil {
-			query = query.Where("profile_id = ?", *filter.ProfileID)
-		}
-
-		if filter.BillingCycle != nil {
-			query = query.Where("billing_cycle = ?", *filter.BillingCycle)
-		}
-
 		if filter.AutoIsolate != nil {
 			query = query.Where("auto_isolate = ?", *filter.AutoIsolate)
-		}
-
-		if filter.ExpiryDateFrom != nil {
-			query = query.Where("expiry_date >= ?", *filter.ExpiryDateFrom)
-		}
-
-		if filter.ExpiryDateTo != nil {
-			query = query.Where("expiry_date <= ?", *filter.ExpiryDateTo)
 		}
 
 		if filter.Search != nil && *filter.Search != "" {

@@ -17,26 +17,26 @@ func NewUserAdapter(db *gorm.DB) outbound_port.UserDatabasePort {
 	}
 }
 
-func (r *userAdapter) Create(user *model.User) error {
+func (r *userAdapter) Create(user *model.AdminUser) error {
 	return r.db.Create(user).Error
 }
 
-func (r *userAdapter) FindByEmail(email string) (*model.User, error) {
-	var user model.User
+func (r *userAdapter) FindByEmail(email string) (*model.AdminUser, error) {
+	var user model.AdminUser
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *userAdapter) FindByID(id uint) (*model.User, error) {
-	var user model.User
-	if err := r.db.First(&user, id).Error; err != nil {
+func (r *userAdapter) FindByID(id string) (*model.AdminUser, error) {
+	var user model.AdminUser
+	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (r *userAdapter) Update(user model.User) error {
+func (r *userAdapter) Update(user model.AdminUser) error {
 	return r.db.Save(&user).Error
 }

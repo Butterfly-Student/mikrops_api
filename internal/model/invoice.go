@@ -47,6 +47,10 @@ type Invoice struct {
 	CustomerID    uuid.UUID      `gorm:"type:uuid;not null" json:"customer_id" validate:"required"`
 	Customer      *Customer      `gorm:"foreignKey:CustomerID;constraint:OnDelete:RESTRICT" json:"customer,omitempty"`
 
+	// Link to specific subscription being billed
+	SubscriptionID *uuid.UUID     `gorm:"type:uuid" json:"subscription_id,omitempty"`
+	Subscription   *Subscription  `gorm:"foreignKey:SubscriptionID;constraint:OnDelete:RESTRICT" json:"subscription,omitempty"`
+
 	// Billing Period
 	BillingPeriodStart time.Time `gorm:"type:date;not null" json:"billing_period_start" validate:"required"`
 	BillingPeriodEnd   time.Time `gorm:"type:date;not null" json:"billing_period_end" validate:"required"`
@@ -142,24 +146,25 @@ func (InvoiceItem) TableName() string {
 
 // InvoiceInput for creating/updating invoice
 type InvoiceInput struct {
-	InvoiceNumber      string     `json:"invoice_number" validate:"required,max=50"`
-	CustomerID         uuid.UUID  `json:"customer_id" validate:"required,uuid"`
-	BillingPeriodStart time.Time  `json:"billing_period_start" validate:"required"`
-	BillingPeriodEnd   time.Time  `json:"billing_period_end" validate:"required"`
-	BillingMonth       *int       `json:"billing_month" validate:"omitempty,min=1,max=12"`
-	BillingYear        *int       `json:"billing_year"`
-	IssueDate          *time.Time `json:"issue_date"`
-	DueDate            time.Time  `json:"due_date" validate:"required"`
-	PaymentDeadline    *time.Time `json:"payment_deadline"`
-	Subtotal           float64    `json:"subtotal" validate:"min=0"`
-	TaxAmount          float64    `json:"tax_amount" validate:"min=0"`
-	DiscountAmount     float64    `json:"discount_amount" validate:"min=0"`
-	LateFee            float64    `json:"late_fee" validate:"min=0"`
-	TotalAmount        float64    `json:"total_amount" validate:"required,min=0"`
-	Status             *string    `json:"status" validate:"omitempty,oneof=draft sent partial paid overdue cancelled refunded"`
-	InvoiceType        *string    `json:"invoice_type" validate:"omitempty,oneof=recurring installation additional refund"`
-	Notes              *string    `json:"notes"`
-	InternalNotes      *string    `json:"internal_notes"`
+	InvoiceNumber      string             `json:"invoice_number" validate:"required,max=50"`
+	CustomerID         uuid.UUID          `json:"customer_id" validate:"required,uuid"`
+	SubscriptionID     *uuid.UUID         `json:"subscription_id" validate:"omitempty,uuid"`
+	BillingPeriodStart time.Time          `json:"billing_period_start" validate:"required"`
+	BillingPeriodEnd   time.Time          `json:"billing_period_end" validate:"required"`
+	BillingMonth       *int               `json:"billing_month" validate:"omitempty,min=1,max=12"`
+	BillingYear        *int               `json:"billing_year"`
+	IssueDate          *time.Time         `json:"issue_date"`
+	DueDate            time.Time          `json:"due_date" validate:"required"`
+	PaymentDeadline    *time.Time         `json:"payment_deadline"`
+	Subtotal           float64            `json:"subtotal" validate:"min=0"`
+	TaxAmount          float64            `json:"tax_amount" validate:"min=0"`
+	DiscountAmount     float64            `json:"discount_amount" validate:"min=0"`
+	LateFee            float64            `json:"late_fee" validate:"min=0"`
+	TotalAmount        float64            `json:"total_amount" validate:"required,min=0"`
+	Status             *string            `json:"status" validate:"omitempty,oneof=draft sent partial paid overdue cancelled refunded"`
+	InvoiceType        *string            `json:"invoice_type" validate:"omitempty,oneof=recurring installation additional refund"`
+	Notes              *string            `json:"notes"`
+	InternalNotes      *string            `json:"internal_notes"`
 	Items              []InvoiceItemInput `json:"items"`
 }
 
@@ -200,6 +205,7 @@ func (i *InvoiceInput) ToModel() *Invoice {
 	invoice := &Invoice{
 		InvoiceNumber:      i.InvoiceNumber,
 		CustomerID:         i.CustomerID,
+		SubscriptionID:     i.SubscriptionID,
 		BillingPeriodStart: i.BillingPeriodStart,
 		BillingPeriodEnd:   i.BillingPeriodEnd,
 		BillingMonth:       i.BillingMonth,

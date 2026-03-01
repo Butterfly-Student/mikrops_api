@@ -6,6 +6,8 @@ import (
 	"go-template/internal/model"
 	"go-template/internal/seeds/runner"
 
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -18,40 +20,51 @@ func (s *ClientSeeder) Name() string {
 func (s *ClientSeeder) Seed(db *gorm.DB) error {
 	fmt.Printf("[CLIENT TEST SEED] Starting seeder...\n")
 
-	testClients := []*model.Client{
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("Test@123"), bcrypt.DefaultCost)
+	isActive := true
+
+	testClients := []*model.AdminUser{
 		{
-			ClientInput: model.ClientInput{
-				Name: "test-client-1",
-			},
+			ID:           uuid.New(),
+			FullName:     "test-client-1",
+			Email:        "test-client-1@example.com",
+			PasswordHash: string(hashedPassword),
+			Role:         model.AdminRoleAdmin,
+			IsActive:     &isActive,
 		},
 		{
-			ClientInput: model.ClientInput{
-				Name: "test-client-2",
-			},
+			ID:           uuid.New(),
+			FullName:     "test-client-2",
+			Email:        "test-client-2@example.com",
+			PasswordHash: string(hashedPassword),
+			Role:         model.AdminRoleCS,
+			IsActive:     &isActive,
 		},
 		{
-			ClientInput: model.ClientInput{
-				Name: "integration-test-client",
-			},
+			ID:           uuid.New(),
+			FullName:     "integration-test-client",
+			Email:        "integration-test-client@example.com",
+			PasswordHash: string(hashedPassword),
+			Role:         model.AdminRoleAdmin,
+			IsActive:     &isActive,
 		},
 	}
 
 	for _, client := range testClients {
-		fmt.Printf("[CLIENT TEST SEED] Processing client: %s\n", client.Name)
+		fmt.Printf("[CLIENT TEST SEED] Processing client: %s\n", client.FullName)
 
-		var existingClient model.Client
-		result := db.Where("name = ?", client.Name).First(&existingClient)
+		var existingClient model.AdminUser
+		result := db.Where("email = ?", client.Email).First(&existingClient)
 
 		if result.Error == gorm.ErrRecordNotFound {
-			model.ClientPrepare(&client.ClientInput)
 			if err := db.Create(client).Error; err != nil {
-				return fmt.Errorf("failed to create test client %s: %w", client.Name, err)
+				return fmt.Errorf("failed to create test client %s: %w", client.FullName, err)
 			}
-			fmt.Printf("[CLIENT TEST SEED] Created: %s with bearer key\n", client.Name)
+			fmt.Printf("[CLIENT TEST SEED] Created: %s\n", client.FullName)
 		} else if result.Error != nil {
-			return fmt.Errorf("failed to check existing client %s: %w", client.Name, result.Error)
+			return fmt.Errorf("failed to check existing client %s: %w", client.FullName, result.Error)
 		} else {
-			fmt.Printf("[CLIENT TEST SEED] Already exists: %s\n", client.Name)
+			fmt.Printf("[CLIENT TEST SEED] Already exists: %s\n", client.FullName)
 		}
 	}
 

@@ -90,7 +90,7 @@ func (h *registrationAdapter) Approve(c *gin.Context) {
 	id := c.Param("id")
 
 	approverRaw, _ := c.Get("userID")
-	approverID, _ := approverRaw.(uint)
+	approverID, _ := approverRaw.(string)
 
 	var input model.RegistrationApproveInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -116,7 +116,7 @@ func (h *registrationAdapter) Reject(c *gin.Context) {
 	id := c.Param("id")
 
 	approverRaw, _ := c.Get("userID")
-	approverID, _ := approverRaw.(uint)
+	approverID, _ := approverRaw.(string)
 
 	var input model.RegistrationRejectInput
 	if err := c.ShouldBindJSON(&input); err != nil {

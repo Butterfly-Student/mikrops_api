@@ -1,12 +1,14 @@
 package model
 
-import (
-	"time"
-)
+import "time"
 
+// Variant is a legacy placeholder from the project template.
+// It is kept to avoid breaking existing references but is no longer used in the ISP domain.
+// TODO: remove once all references are cleaned up.
 type Variant struct {
-	ID int `json:"id" db:"id"`
-	ClientInput
+	ID        int       `json:"id" db:"id"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type VariantInput struct {
@@ -18,7 +20,7 @@ type VariantFilter struct {
 	IDs []int `json:"ids"`
 }
 
-func VariantPrepare(v *ClientInput) {
+func VariantPrepare(v *VariantInput) {
 	v.CreatedAt = time.Now()
 	v.UpdatedAt = time.Now()
 }

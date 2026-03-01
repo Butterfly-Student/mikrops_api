@@ -18,4 +18,5 @@ type HttpPort interface {
 	Hotspot() HotspotHttpPort
 	Registration() RegistrationHttpPort
 	CustomerPortal() CustomerPortalHttpPort
+	Gowa() GowaHttpPort
 }

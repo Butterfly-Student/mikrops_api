@@ -1,9 +1,9 @@
 package fixtures
 
 import (
-	"time"
-
 	"go-template/internal/model"
+
+	"github.com/google/uuid"
 )
 
 type ClientTestData struct{}
@@ -12,57 +12,56 @@ func NewClientTestData() *ClientTestData {
 	return &ClientTestData{}
 }
 
-func (c *ClientTestData) ValidClientInput() model.ClientInput {
-	now := time.Now()
-	return model.ClientInput{
-		Name:      "Test Client",
-		BearerKey: "test-bearer-key-" + now.Format("20060102150405"),
-		CreatedAt: now,
-		UpdatedAt: now,
+func (c *ClientTestData) ValidClientInput() model.AdminUserInput {
+	return model.AdminUserInput{
+		FullName: "Test Client",
+		Email:    "test-client@example.com",
+		Password: "Test@123",
+		Role:     string(model.AdminRoleAdmin),
 	}
 }
 
-func (c *ClientTestData) ValidClient() model.Client {
-	return model.Client{
-		ID:          1,
-		ClientInput: c.ValidClientInput(),
+func (c *ClientTestData) ValidClient() model.AdminUser {
+	isActive := true
+	return model.AdminUser{
+		ID:       uuid.New(),
+		FullName: "Test Client",
+		Email:    "test-client@example.com",
+		Role:     model.AdminRoleAdmin,
+		IsActive: &isActive,
 	}
 }
 
-func (c *ClientTestData) ValidClientFilter() model.ClientFilter {
-	return model.ClientFilter{
-		IDs:        []int{1},
-		Names:      []string{"Test Client"},
+func (c *ClientTestData) ValidClientFilter() model.AdminUserFilter {
+	return model.AdminUserFilter{
+		Emails:     []string{"test-client@example.com"},
 		BearerKeys: []string{"test-bearer-key"},
 	}
 }
 
-func (c *ClientTestData) MultipleClients(count int) []model.Client {
-	clients := make([]model.Client, count)
-	now := time.Now()
+func (c *ClientTestData) MultipleClients(count int) []model.AdminUser {
+	clients := make([]model.AdminUser, count)
+	isActive := true
 	for i := 0; i < count; i++ {
-		clients[i] = model.Client{
-			ID: i + 1,
-			ClientInput: model.ClientInput{
-				Name:      "Client " + string(rune('A'+i)),
-				BearerKey: "key-" + string(rune('a'+i)),
-				CreatedAt: now,
-				UpdatedAt: now,
-			},
+		clients[i] = model.AdminUser{
+			ID:       uuid.New(),
+			FullName: "Client " + string(rune('A'+i)),
+			Email:    "client-" + string(rune('a'+i)) + "@example.com",
+			Role:     model.AdminRoleCS,
+			IsActive: &isActive,
 		}
 	}
 	return clients
 }
 
-func (c *ClientTestData) MultipleClientInputs(count int) []model.ClientInput {
-	inputs := make([]model.ClientInput, count)
-	now := time.Now()
+func (c *ClientTestData) MultipleClientInputs(count int) []model.AdminUserInput {
+	inputs := make([]model.AdminUserInput, count)
 	for i := 0; i < count; i++ {
-		inputs[i] = model.ClientInput{
-			Name:      "Client " + string(rune('A'+i)),
-			BearerKey: "key-" + string(rune('a'+i)) + "-" + now.Format("150405"),
-			CreatedAt: now,
-			UpdatedAt: now,
+		inputs[i] = model.AdminUserInput{
+			FullName: "Client " + string(rune('A'+i)),
+			Email:    "client-" + string(rune('a'+i)) + "@example.com",
+			Password: "Test@123",
+			Role:     string(model.AdminRoleCS),
 		}
 	}
 	return inputs

@@ -14,3 +14,7 @@ func NewAdapter() outbound_port.MessagePort {
 func (s *adapter) Client() outbound_port.ClientMessagePort {
 	return NewClientAdapter()
 }
+
+func (s *adapter) MikrotikSync() outbound_port.MikrotikSyncMessagePort {
+	return NewMikrotikSyncAdapter()
+}

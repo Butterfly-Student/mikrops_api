@@ -4,7 +4,6 @@ import (
 	"go.temporal.io/sdk/worker"
 
 	"go-template/internal/domain"
-	"go-template/internal/model"
 	inbound_port "go-template/internal/port/inbound"
 	"go-template/utils/activity"
 	"go-template/utils/log"
@@ -26,7 +25,8 @@ func NewClientAdapter(
 func (a *clientAdapter) Upsert() {
 	ctx := activity.NewContext("upsert_client_worker")
 
-	w, err := temporal.NewWorker(ctx, model.UpsertClientWorkflowName)
+	// TODO: Use proper workflow name for admin user
+	w, err := temporal.NewWorker(ctx, "AdminUserUpsertWorkflow")
 	if err != nil {
 		log.WithContext(ctx).Error("Unable to create worker", err)
 		return

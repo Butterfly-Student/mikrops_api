@@ -20,7 +20,9 @@ type InvoiceDomain interface {
 	Update(ctx context.Context, id string, input model.InvoiceInput) (*model.Invoice, error)
 	Delete(ctx context.Context, id string) error
 	GenerateInvoiceNumber(ctx context.Context) (string, error)
-	GenerateMonthlyInvoice(ctx context.Context, customerID string, month, year int) (*model.Invoice, error)
+	// GenerateMonthlyInvoice generates a monthly invoice for a specific subscription
+	// Note: After model refactoring, invoice is linked to subscription (not directly to customer profile)
+	GenerateMonthlyInvoice(ctx context.Context, subscriptionID string, month, year int) (*model.Invoice, error)
 	CalculateLateFee(ctx context.Context, id string) (*model.Invoice, error)
 	MarkAsPaid(ctx context.Context, id string, paymentID *uuid.UUID) error
 	AddPayment(ctx context.Context, id string, amount float64) (*model.Invoice, error)
@@ -201,22 +203,24 @@ func (d *domain) GenerateInvoiceNumber(ctx context.Context) (string, error) {
 	return invoiceNumber, nil
 }
 
-func (d *domain) GenerateMonthlyInvoice(ctx context.Context, customerID string, month, year int) (*model.Invoice, error) {
-	// Get customer with profile
-	customer, err := d.dbPort.Customer().FindByID(ctx, customerID)
+func (d *domain) GenerateMonthlyInvoice(ctx context.Context, subscriptionID string, month, year int) (*model.Invoice, error) {
+	subscriptionUUID, err := uuid.Parse(subscriptionID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get customer")
+		return nil, stacktrace.Propagate(err, "invalid subscription id format")
 	}
 
-	if customer.ProfileID == nil {
-		return nil, stacktrace.NewError("customer has no profile assigned")
+	// Get subscription with plan info using subscription port
+	subscription, err := d.dbPort.Subscription().FindByID(ctx, subscriptionID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get subscription")
 	}
 
-	// Get profile
-	profile, err := d.dbPort.BandwidthProfile().FindByID(ctx, customer.ProfileID.String())
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get bandwidth profile")
+	if subscription.Plan == nil {
+		return nil, stacktrace.NewError("subscription has no plan assigned")
 	}
+
+	profile := subscription.Plan
+	customerID := subscription.CustomerID
 
 	// Calculate billing period
 	billingPeriodStart := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
@@ -259,7 +263,7 @@ func (d *domain) GenerateMonthlyInvoice(ctx context.Context, customerID string, 
 	}
 
 	// Check if customer has unpaid invoices (add late fee)
-	overdueInvoices, err := d.findOverdueInvoicesByCustomer(ctx, customerID)
+	overdueInvoices, err := d.findOverdueInvoicesByCustomer(ctx, customerID.String())
 	if err == nil && len(overdueInvoices) > 0 {
 		// Add late fee (default 10000)
 		lateFeeAmount := 10000.0
@@ -287,7 +291,8 @@ func (d *domain) GenerateMonthlyInvoice(ctx context.Context, customerID string, 
 	invoice := &model.Invoice{
 		ID:                 uuid.New(),
 		InvoiceNumber:      invoiceNumber,
-		CustomerID:         customer.ID,
+		CustomerID:         customerID,
+		SubscriptionID:     &subscriptionUUID,
 		BillingPeriodStart: billingPeriodStart,
 		BillingPeriodEnd:   billingPeriodEnd,
 		BillingMonth:       &billingMonthInt,

@@ -10,6 +10,7 @@ type DatabasePort interface {
 	Payment() PaymentDatabasePort
 	Invoice() InvoiceDatabasePort
 	Customer() CustomerDatabasePort
+	Subscription() SubscriptionDatabasePort
 	BandwidthProfile() BandwidthProfileDatabasePort
 	Client() ClientDatabasePort
 	User() UserDatabasePort

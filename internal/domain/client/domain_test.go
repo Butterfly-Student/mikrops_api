@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	. "github.com/smartystreets/goconvey/convey"
 
@@ -38,33 +39,38 @@ func TestClient(t *testing.T) {
 
 		clientDomain := domain.NewDomain(mockDatabasePort, mockMessagePort, mockCachePort, mockWorkflowPort, nil, nil, nil)
 
-		inputs := []model.ClientInput{
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+		isActive := true
+
+		inputs := []model.AdminUserInput{
 			{
-				Name: "Test Client",
+				FullName: "Test Client",
+				Email:    "test@example.com",
+				Role:     "cs",
+				IsActive: &isActive,
 			},
 		}
 
-		outputs := []model.Client{
+		outputs := []model.AdminUser{
 			{
-				ID: 1,
-				ClientInput: model.ClientInput{
-					Name:      "Test Client",
-					BearerKey: "test-bearer-key",
-					UpdatedAt: time.Now(),
-					CreatedAt: time.Now(),
-				},
+				ID:        testUUID,
+				FullName:  "Test Client",
+				Email:     "test@example.com",
+				Role:      model.AdminRoleCS,
+				IsActive:  &isActive,
+				UpdatedAt: time.Now(),
+				CreatedAt: time.Now(),
 			},
 		}
 
-		filter := model.ClientFilter{
-			BearerKeys: []string{"test-bearer-key"},
-			IDs:        []int{1},
-			Names:      []string{"Test Client"},
+		filter := model.AdminUserFilter{
+			Emails: []string{"test@example.com"},
+			Roles:  []model.AdminUserRole{model.AdminRoleCS},
 		}
 
 		Convey("Upsert", func() {
 			Convey("Input is empty", func() {
-				_, err := clientDomain.Client().Upsert(context.Background(), []model.ClientInput{})
+				_, err := clientDomain.Client().Upsert(context.Background(), []model.AdminUserInput{})
 				So(err, ShouldNotBeNil)
 			})
 
@@ -90,13 +96,13 @@ func TestClient(t *testing.T) {
 				results, err := clientDomain.Client().Upsert(context.Background(), inputs)
 				So(err, ShouldBeNil)
 				So(results, ShouldNotBeEmpty)
-				So(results[0].Name, ShouldEqual, "Test Client")
+				So(results[0].FullName, ShouldEqual, "Test Client")
 			})
 		})
 
 		Convey("FindByFilter", func() {
 			Convey("Filter is empty", func() {
-				_, err := clientDomain.Client().FindByFilter(context.Background(), model.ClientFilter{})
+				_, err := clientDomain.Client().FindByFilter(context.Background(), model.AdminUserFilter{})
 				So(err, ShouldNotBeNil)
 			})
 
@@ -113,13 +119,13 @@ func TestClient(t *testing.T) {
 				results, err := clientDomain.Client().FindByFilter(context.Background(), filter)
 				So(err, ShouldBeNil)
 				So(results, ShouldNotBeEmpty)
-				So(results[0].Name, ShouldEqual, "Test Client")
+				So(results[0].FullName, ShouldEqual, "Test Client")
 			})
 		})
 
 		Convey("DeleteByFilter", func() {
 			Convey("Filter is empty", func() {
-				err := clientDomain.Client().DeleteByFilter(context.Background(), model.ClientFilter{})
+				err := clientDomain.Client().DeleteByFilter(context.Background(), model.AdminUserFilter{})
 				So(err, ShouldNotBeNil)
 			})
 
@@ -140,7 +146,7 @@ func TestClient(t *testing.T) {
 
 		Convey("PublishUpsert", func() {
 			Convey("Input is empty", func() {
-				err := clientDomain.Client().PublishUpsert(context.Background(), []model.ClientInput{})
+				err := clientDomain.Client().PublishUpsert(context.Background(), []model.AdminUserInput{})
 				So(err, ShouldNotBeNil)
 			})
 
@@ -160,54 +166,54 @@ func TestClient(t *testing.T) {
 		})
 
 		Convey("IsExists", func() {
-			Convey("Bearer key is empty", func() {
+			Convey("Email is empty", func() {
 				_, err := clientDomain.Client().IsExists(context.Background(), "")
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("Cache client get error", func() {
-				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, errors.New("error")).Times(1)
+				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.AdminUser{}, errors.New("error")).Times(1)
 
-				_, err := clientDomain.Client().IsExists(context.Background(), "test-bearer-key")
+				_, err := clientDomain.Client().IsExists(context.Background(), "test@example.com")
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("Database client is exists error", func() {
-				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
+				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.AdminUser{}, redis.Nil).Times(1)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(false, errors.New("error")).Times(1)
 
-				_, err := clientDomain.Client().IsExists(context.Background(), "test-bearer-key")
+				_, err := clientDomain.Client().IsExists(context.Background(), "test@example.com")
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("Database client find by filter error", func() {
-				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
+				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.AdminUser{}, redis.Nil).Times(1)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(true, nil).Times(1)
 
 				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return(nil, errors.New("error")).Times(1)
 
-				_, err := clientDomain.Client().IsExists(context.Background(), "test-bearer-key")
+				_, err := clientDomain.Client().IsExists(context.Background(), "test@example.com")
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("Cache client set error", func() {
-				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
+				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.AdminUser{}, redis.Nil).Times(1)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(true, nil).Times(1)
 
 				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return(outputs, nil).Times(1)
 				mockClientCachePort.EXPECT().Set(gomock.Any()).Return(errors.New("error")).Times(1)
 
-				_, err := clientDomain.Client().IsExists(context.Background(), "test-bearer-key")
+				_, err := clientDomain.Client().IsExists(context.Background(), "test@example.com")
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("Success", func() {
-				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
+				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.AdminUser{}, redis.Nil).Times(1)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(true, nil).Times(1)
 				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return(outputs, nil).Times(1)
 				mockClientCachePort.EXPECT().Set(gomock.Any()).Return(nil).Times(1)
 
-				result, err := clientDomain.Client().IsExists(context.Background(), "test-bearer-key")
+				result, err := clientDomain.Client().IsExists(context.Background(), "test@example.com")
 				So(err, ShouldBeNil)
 				So(result, ShouldBeTrue)
 			})
@@ -215,7 +221,7 @@ func TestClient(t *testing.T) {
 			Convey("Cache client exists", func() {
 				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(outputs[0], nil).Times(1)
 
-				_, err := clientDomain.Client().IsExists(context.Background(), "test-bearer-key")
+				_, err := clientDomain.Client().IsExists(context.Background(), "test@example.com")
 				So(err, ShouldBeNil)
 			})
 		})

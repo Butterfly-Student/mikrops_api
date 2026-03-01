@@ -32,7 +32,7 @@ func TestUserIntegration(t *testing.T) {
 	defer pgContainer.Terminate(ctx)
 
 	// Use GORM AutoMigrate
-	err = pgContainer.DB.AutoMigrate(&model.User{})
+	err = pgContainer.DB.AutoMigrate(&model.AdminUser{})
 	if err != nil {
 		t.Fatalf("Failed to migrate table: %v", err)
 	}
@@ -41,25 +41,27 @@ func TestUserIntegration(t *testing.T) {
 		adapter := postgres_outbound_adapter.NewUserAdapter(pgContainer.DB)
 
 		// Cleanup before test
-		pgContainer.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.User{})
+		pgContainer.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.AdminUser{})
 
 		Convey("Full CRUD cycle", func() {
 			email := "integration-" + time.Now().Format("20060102150405") + "@example.com"
-			user := model.User{
-				Name:     "Integration User",
-				Email:    email,
-				Password: "hashedpassword",
-				Role:     "user",
-				Status:   "active",
+			isActive := true
+			user := model.AdminUser{
+				FullName:     "Integration User",
+				Email:        email,
+				PasswordHash: "hashedpassword",
+				Role:         model.AdminRoleCS,
+				IsActive:     &isActive,
 			}
 
 			Convey("Create creates a new user", func() {
 				err := adapter.Create(&user)
 				So(err, ShouldBeNil)
-				So(user.ID, ShouldBeGreaterThan, 0)
+				// UUID should be set
+				So(user.ID.String(), ShouldNotBeEmpty)
 
 				Convey("FindByID retrieves the user", func() {
-					found, err := adapter.FindByID(user.ID)
+					found, err := adapter.FindByID(user.ID.String())
 					So(err, ShouldBeNil)
 					So(found.Email, ShouldEqual, email)
 				})
@@ -71,13 +73,13 @@ func TestUserIntegration(t *testing.T) {
 				})
 
 				Convey("Update updates the user", func() {
-					user.Name = "Updated Name"
+					user.FullName = "Updated Name"
 					err := adapter.Update(user)
 					So(err, ShouldBeNil)
 
-					found, err := adapter.FindByID(user.ID)
+					found, err := adapter.FindByID(user.ID.String())
 					So(err, ShouldBeNil)
-					So(found.Name, ShouldEqual, "Updated Name")
+					So(found.FullName, ShouldEqual, "Updated Name")
 				})
 			})
 		})
@@ -88,7 +90,7 @@ func TestUserIntegration(t *testing.T) {
 		})
 
 		Convey("FindByID returns error for non-existent user", func() {
-			_, err := adapter.FindByID(99999)
+			_, err := adapter.FindByID("550e8400-e29b-41d4-a716-446655449999")
 			So(err, ShouldNotBeNil)
 		})
 	})

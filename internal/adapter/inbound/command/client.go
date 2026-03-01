@@ -25,7 +25,8 @@ func NewClientAdapter(
 func (h *clientAdapter) PublishUpsert(name string) {
 	ctx := activity.NewContext("command_client_publish_upsert")
 	ctx = context.WithValue(ctx, activity.Payload, name)
-	payload := []model.ClientInput{{Name: name}}
+	// TODO: Adjust payload structure for AdminUserInput
+	payload := []model.AdminUserInput{{FullName: name}}
 
 	err := h.domain.Client().PublishUpsert(ctx, payload)
 	if err != nil {
@@ -37,7 +38,8 @@ func (h *clientAdapter) PublishUpsert(name string) {
 func (h *clientAdapter) StartUpsert(name string) {
 	ctx := activity.NewContext("command_client_start_upsert")
 	ctx = context.WithValue(ctx, activity.Payload, name)
-	payload := model.ClientInput{Name: name}
+	// TODO: Adjust payload structure for AdminUserInput
+	payload := model.AdminUserInput{FullName: name}
 
 	err := h.domain.Client().StartUpsert(ctx, payload)
 	if err != nil {

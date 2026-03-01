@@ -47,8 +47,7 @@ func (s *clientDomain) Upsert(ctx context.Context, inputs []model.ClientInput) (
 
 	var filter model.ClientFilter
 	for i := range inputs {
-		model.ClientPrepare(&inputs[i])
-		filter.Names = append(filter.Names, inputs[i].Name)
+		filter.Emails = append(filter.Emails, inputs[i].Email)
 	}
 
 	databaseClientPort := s.databasePort.Client()

@@ -11,20 +11,14 @@ func init() {
 	goose.AddMigrationContext(upAddPortalFieldsToCustomers, downAddPortalFieldsToCustomers)
 }
 
+// upAddPortalFieldsToCustomers is a no-op — portal_password and portal_last_login
+// were merged into the customers table in migration 2.
 func upAddPortalFieldsToCustomers(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, `
-		ALTER TABLE customers
-		ADD COLUMN IF NOT EXISTS portal_password VARCHAR(255),
-		ADD COLUMN IF NOT EXISTS portal_last_login TIMESTAMPTZ;
-	`)
+	_, err := tx.Exec(`SELECT 1; -- no-op: portal fields merged into customers (migration 2)`)
 	return err
 }
 
 func downAddPortalFieldsToCustomers(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.ExecContext(ctx, `
-		ALTER TABLE customers
-		DROP COLUMN IF EXISTS portal_password,
-		DROP COLUMN IF EXISTS portal_last_login;
-	`)
+	_, err := tx.Exec(`SELECT 1; -- no-op`)
 	return err
 }

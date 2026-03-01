@@ -11,29 +11,17 @@ func init() {
 	goose.AddMigrationContext(upAddNetworkFieldsToBandwidthProfiles, downAddNetworkFieldsToBandwidthProfiles)
 }
 
+// upAddNetworkFieldsToBandwidthProfiles is a no-op — network fields were merged into 6_bandwidth_profiles.go.
 func upAddNetworkFieldsToBandwidthProfiles(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.Exec(`
-	ALTER TABLE bandwidth_profiles
-	ADD COLUMN IF NOT EXISTS local_address VARCHAR(45),
-	ADD COLUMN IF NOT EXISTS remote_address VARCHAR(45),
-	ADD COLUMN IF NOT EXISTS parent_queue VARCHAR(100),
-	ADD COLUMN IF NOT EXISTS dns_server VARCHAR(100);
-
-	COMMENT ON COLUMN bandwidth_profiles.local_address IS 'PPP profile local-address (IP or pool name)';
-	COMMENT ON COLUMN bandwidth_profiles.remote_address IS 'PPP profile remote-address (IP or pool name)';
-	COMMENT ON COLUMN bandwidth_profiles.parent_queue IS 'PPP profile parent-queue for hierarchical QoS';
-	COMMENT ON COLUMN bandwidth_profiles.dns_server IS 'DNS server assigned to PPP clients';
+	-- No-op: local_address, remote_address, parent_queue, dns_server
+	-- already included in bandwidth_profiles table (migration 6).
+	SELECT 1;
 	`)
 	return err
 }
 
 func downAddNetworkFieldsToBandwidthProfiles(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
-	ALTER TABLE bandwidth_profiles
-	DROP COLUMN IF EXISTS local_address,
-	DROP COLUMN IF EXISTS remote_address,
-	DROP COLUMN IF EXISTS parent_queue,
-	DROP COLUMN IF EXISTS dns_server;
-	`)
+	_, err := tx.Exec(`SELECT 1; -- no-op`)
 	return err
 }

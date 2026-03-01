@@ -11,19 +11,18 @@ func init() {
 	goose.AddMigrationContext(upAddPreviousProfileID, downAddPreviousProfileID)
 }
 
+// upAddPreviousProfileID is a no-op — previous_profile_id was merged into 2_user.go.
+// Kept to preserve goose migration history / sequence.
 func upAddPreviousProfileID(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.Exec(`
-	ALTER TABLE customers
-	ADD COLUMN IF NOT EXISTS previous_profile_id UUID REFERENCES bandwidth_profiles(id) ON DELETE SET NULL;
-
-	COMMENT ON COLUMN customers.previous_profile_id IS 'Stores original profile ID when customer is isolated, restored on un-isolation';
+	-- No-op: previous_profile_id already included in customers table (migration 2)
+	-- and FK constraint added in migration 7.
+	SELECT 1;
 	`)
 	return err
 }
 
 func downAddPreviousProfileID(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
-	ALTER TABLE customers DROP COLUMN IF EXISTS previous_profile_id;
-	`)
+	_, err := tx.Exec(`SELECT 1; -- no-op`)
 	return err
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type ClientWorkflow interface {
-	UpsertClientWorkflow(ctx workflow.Context, input model.ClientInput) (string, error)
+	UpsertClientWorkflow(ctx workflow.Context, input model.AdminUserInput) (string, error)
 }
 
 type clientWorkflow struct {
@@ -25,7 +25,7 @@ func NewClientWorkflow(
 	}
 }
 
-func (g *clientWorkflow) UpsertClientWorkflow(ctx workflow.Context, input model.ClientInput) (string, error) {
+func (g *clientWorkflow) UpsertClientWorkflow(ctx workflow.Context, input model.AdminUserInput) (string, error) {
 	logger := workflow.GetLogger(ctx)
 	workflowInfo := workflow.GetInfo(ctx)
 
@@ -36,23 +36,23 @@ func (g *clientWorkflow) UpsertClientWorkflow(ctx workflow.Context, input model.
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	var results []model.Client
+	var results []model.AdminUser
 	err := workflow.ExecuteActivity(
 		ctx,
 		g.domain.Client().Upsert,
-		[]model.ClientInput{input},
+		[]model.AdminUserInput{input},
 	).Get(ctx, &results)
 	if err != nil {
 		logger.Error("UpsertClient activity failed", "Error", err)
 		return "Failed to upsert client", err
 	}
 
-	var bearerKey string
+	var email string
 	if len(results) > 0 {
-		bearerKey = results[0].BearerKey
+		email = results[0].Email
 	}
 
-	successMessage := "Bearer key: " + bearerKey
+	successMessage := "User email: " + email
 	logger.Info(successMessage, "WorkflowID", workflowInfo.WorkflowExecution.ID)
 
 	return successMessage, nil

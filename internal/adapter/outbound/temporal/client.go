@@ -15,9 +15,10 @@ func NewClientWorkflowAdapter() outbound_port.ClientWorkflowPort {
 	return &clientWorkflowAdapter{}
 }
 
-func (g *clientWorkflowAdapter) StartUpsert(input model.ClientInput) error {
+func (g *clientWorkflowAdapter) StartUpsert(input model.AdminUserInput) error {
 	namespace := os.Getenv("WORKFLOW_NAMESPACE")
-	_, err := temporal.ExecuteWorkflow(context.Background(), namespace, model.UpsertClientWorkflowName, input)
+	// TODO: Define proper workflow name for admin user upsert
+	_, err := temporal.ExecuteWorkflow(context.Background(), namespace, "AdminUserUpsertWorkflow", input)
 	if err != nil {
 		return err
 	}

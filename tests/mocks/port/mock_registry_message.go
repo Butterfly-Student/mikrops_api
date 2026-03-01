@@ -47,3 +47,17 @@ func (mr *MockMessagePortMockRecorder) Client() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Client", reflect.TypeOf((*MockMessagePort)(nil).Client))
 }
+
+// MikrotikSync mocks base method.
+func (m *MockMessagePort) MikrotikSync() outbound_port.MikrotikSyncMessagePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MikrotikSync")
+	ret0, _ := ret[0].(outbound_port.MikrotikSyncMessagePort)
+	return ret0
+}
+
+// MikrotikSync indicates an expected call of MikrotikSync.
+func (mr *MockMessagePortMockRecorder) MikrotikSync() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MikrotikSync", reflect.TypeOf((*MockMessagePort)(nil).MikrotikSync))
+}

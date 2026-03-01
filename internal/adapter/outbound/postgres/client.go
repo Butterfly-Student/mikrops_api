@@ -8,7 +8,7 @@ import (
 	outbound_port "go-template/internal/port/outbound"
 )
 
-const tableClient = "clients"
+const tableClient = "admin_users"
 
 type clientAdapter struct {
 	db *gorm.DB
@@ -23,44 +23,50 @@ func NewClientAdapter(
 }
 
 // Upsert inserts or updates client records
-func (adapter *clientAdapter) Upsert(datas []model.ClientInput) error {
+func (adapter *clientAdapter) Upsert(datas []model.AdminUserInput) error {
 	// Build the data structures for GORM
-	clients := make([]map[string]interface{}, len(datas))
+	users := make([]map[string]interface{}, len(datas))
 	for i, data := range datas {
-		clients[i] = map[string]interface{}{
-			"name":       data.Name,
-			"bearer_key": data.BearerKey,
-			"created_at": data.CreatedAt,
-			"updated_at": data.UpdatedAt,
+		users[i] = map[string]interface{}{
+			"full_name": data.FullName,
+			"email":     data.Email,
+			"phone":     data.Phone,
+			"role":      data.Role,
+			"is_active": data.IsActive,
 		}
 	}
 
 	// Use GORM's Clauses for ON CONFLICT handling
 	return adapter.db.Table(tableClient).
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "bearer_key"}},
-			DoUpdates: clause.AssignmentColumns([]string{"name", "updated_at"}),
+			Columns:   []clause.Column{{Name: "email"}},
+			DoUpdates: clause.AssignmentColumns([]string{"full_name", "phone", "role", "is_active", "updated_at"}),
 		}).
-		Create(clients).Error
+		Create(users).Error
 }
 
 // FindByFilter retrieves clients based on filter criteria
-func (adapter *clientAdapter) FindByFilter(filter model.ClientFilter, lock bool) ([]model.Client, error) {
-	var clients []model.Client
+func (adapter *clientAdapter) FindByFilter(filter model.AdminUserFilter, lock bool) ([]model.AdminUser, error) {
+	var users []model.AdminUser
 
 	query := adapter.db.Table(tableClient)
 
 	// Apply filters
-	if len(filter.IDs) > 0 {
-		query = query.Where("id IN ?", filter.IDs)
+	if len(filter.Emails) > 0 {
+		query = query.Where("email IN ?", filter.Emails)
 	}
 
-	if len(filter.Names) > 0 {
-		query = query.Where("name IN ?", filter.Names)
+	if len(filter.Roles) > 0 {
+		query = query.Where("role IN ?", filter.Roles)
 	}
 
-	if len(filter.BearerKeys) > 0 {
-		query = query.Where("bearer_key IN ?", filter.BearerKeys)
+	if filter.IsActive != nil {
+		query = query.Where("is_active = ?", *filter.IsActive)
+	}
+
+	if filter.Search != nil && *filter.Search != "" {
+		searchPattern := "%" + *filter.Search + "%"
+		query = query.Where("full_name ILIKE ? OR email ILIKE ?", searchPattern, searchPattern)
 	}
 
 	// Add row locking if requested
@@ -69,41 +75,41 @@ func (adapter *clientAdapter) FindByFilter(filter model.ClientFilter, lock bool)
 	}
 
 	// Execute query
-	err := query.Find(&clients).Error
+	err := query.Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return clients, nil
+	return users, nil
 }
 
 // DeleteByFilter deletes clients based on filter criteria
-func (adapter *clientAdapter) DeleteByFilter(filter model.ClientFilter) error {
+func (adapter *clientAdapter) DeleteByFilter(filter model.AdminUserFilter) error {
 	query := adapter.db.Table(tableClient)
 
 	// Apply filters
-	if len(filter.IDs) > 0 {
-		query = query.Where("id IN ?", filter.IDs)
+	if len(filter.Emails) > 0 {
+		query = query.Where("email IN ?", filter.Emails)
 	}
 
-	if len(filter.Names) > 0 {
-		query = query.Where("name IN ?", filter.Names)
+	if len(filter.Roles) > 0 {
+		query = query.Where("role IN ?", filter.Roles)
 	}
 
-	if len(filter.BearerKeys) > 0 {
-		query = query.Where("bearer_key IN ?", filter.BearerKeys)
+	if filter.IsActive != nil {
+		query = query.Where("is_active = ?", *filter.IsActive)
 	}
 
 	// Execute delete
-	return query.Delete(&model.Client{}).Error
+	return query.Delete(&model.AdminUser{}).Error
 }
 
-// IsExists checks if a client exists by bearer key
-func (adapter *clientAdapter) IsExists(bearerKey string) (bool, error) {
+// IsExists checks if a user exists by email
+func (adapter *clientAdapter) IsExists(email string) (bool, error) {
 	var count int64
 
 	err := adapter.db.Table(tableClient).
-		Where("bearer_key = ?", bearerKey).
+		Where("email = ?", email).
 		Count(&count).Error
 
 	if err != nil {

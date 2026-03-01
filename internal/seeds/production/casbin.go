@@ -177,13 +177,13 @@ func (s *CasbinSeeder) Seed(db *gorm.DB) error {
 		}
 		gRule := model.CasbinRule{
 			Ptype: "g",
-			V0:    fmt.Sprintf("%d", u.ID),
-			V1:    u.Role,
+			V0:    u.ID.String(),
+			V1:    string(u.Role),
 		}
 		if err := upsertGroupRule(db, gRule); err != nil {
 			return err
 		}
-		fmt.Printf("[CASBIN SEED] Assigned role %q to user %s (id=%d)\n", u.Role, u.Email, u.ID)
+		fmt.Printf("[CASBIN SEED] Assigned role %q to user %s (id=%s)\n", u.Role, u.Email, u.ID.String())
 	}
 
 	fmt.Printf("[CASBIN SEED] Completed successfully\n")

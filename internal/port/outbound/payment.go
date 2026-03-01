@@ -6,6 +6,7 @@ import (
 	"go-template/internal/model"
 )
 
+//go:generate mockgen -source=payment.go -destination=./../../../tests/mocks/port/mock_payment.go
 type PaymentDatabasePort interface {
 	Create(ctx context.Context, payment *model.Payment) error
 	FindByID(ctx context.Context, id string) (*model.Payment, error)

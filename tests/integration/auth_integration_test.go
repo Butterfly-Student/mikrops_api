@@ -11,6 +11,7 @@ import (
 
 	"github.com/casbin/casbin/v3"
 	casbinmodel "github.com/casbin/casbin/v3/model"
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	. "github.com/smartystreets/goconvey/convey"
 	"gorm.io/gorm"
@@ -44,7 +45,7 @@ func TestAuthIntegration(t *testing.T) {
 	defer pgContainer.Terminate(ctx)
 
 	// Use GORM AutoMigrate
-	err = pgContainer.DB.AutoMigrate(&model.User{})
+	err = pgContainer.DB.AutoMigrate(&model.AdminUser{})
 	if err != nil {
 		t.Fatalf("Failed to migrate table: %v", err)
 	}
@@ -56,24 +57,25 @@ func TestAuthIntegration(t *testing.T) {
 
 	Convey("Test Auth Integration with PostgreSQL", t, func() {
 		// Cleanup before test
-		pgContainer.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.User{})
+		pgContainer.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.AdminUser{})
 
 		Convey("Full Authentication Flow", func() {
 			email := "auth-integration-" + time.Now().Format("20060102150405") + "@example.com"
 			password := "TestPassword123!"
 			hashedPassword, _ := hash.HashPassword(password)
+			isActive := true
 
 			Convey("Register creates a new user", func() {
-				user := &model.User{
-					Name:     "Auth Integration User",
-					Email:    email,
-					Password: hashedPassword,
-					Role:     "user",
-					Status:   "active",
+				user := &model.AdminUser{
+					FullName:     "Auth Integration User",
+					Email:        email,
+					PasswordHash: hashedPassword,
+					Role:         model.AdminRoleCS,
+					IsActive:     &isActive,
 				}
 				err := adapter.Create(user)
 				So(err, ShouldBeNil)
-				So(user.ID, ShouldNotEqual, 0)
+				So(user.ID.String(), ShouldNotBeEmpty)
 
 				Convey("Login returns access and refresh tokens", func() {
 					loginReq := model.LoginRequest{
@@ -116,22 +118,22 @@ func TestAuthIntegration(t *testing.T) {
 			})
 
 			Convey("Register with duplicate email returns error", func() {
-				user1 := &model.User{
-					Name:     "User One",
-					Email:    email,
-					Password: hashedPassword,
-					Role:     "user",
-					Status:   "active",
+				user1 := &model.AdminUser{
+					FullName:     "User One",
+					Email:        email,
+					PasswordHash: hashedPassword,
+					Role:         model.AdminRoleCS,
+					IsActive:     &isActive,
 				}
 				err := adapter.Create(user1)
 				So(err, ShouldBeNil)
 
-				user2 := &model.User{
-					Name:     "User Two",
-					Email:    email,
-					Password: hashedPassword,
-					Role:     "user",
-					Status:   "active",
+				user2 := &model.AdminUser{
+					FullName:     "User Two",
+					Email:        email,
+					PasswordHash: hashedPassword,
+					Role:         model.AdminRoleCS,
+					IsActive:     &isActive,
 				}
 				err = adapter.Create(user2)
 				So(err, ShouldNotBeNil)
@@ -147,12 +149,12 @@ func TestAuthIntegration(t *testing.T) {
 			})
 
 			Convey("Change password with wrong old password returns error", func() {
-				user := &model.User{
-					Name:     "Password Change User",
-					Email:    "password-change-" + time.Now().Format("20060102150405") + "@example.com",
-					Password: hashedPassword,
-					Role:     "user",
-					Status:   "active",
+				user := &model.AdminUser{
+					FullName:     "Password Change User",
+					Email:        "password-change-" + time.Now().Format("20060102150405") + "@example.com",
+					PasswordHash: hashedPassword,
+					Role:         model.AdminRoleCS,
+					IsActive:     &isActive,
 				}
 				err := adapter.Create(user)
 				So(err, ShouldBeNil)
@@ -174,22 +176,23 @@ func TestAuthIntegration(t *testing.T) {
 			})
 
 			Convey("Token validation works correctly", func() {
-				accessToken, _ := token.GenerateAccessToken(123, "admin")
+				testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440123")
+				accessToken, _ := token.GenerateAccessToken(testUUID.String(), "admin")
 				So(accessToken, ShouldNotBeEmpty)
 
-				refreshToken, _ := token.GenerateRefreshToken(123)
+				refreshToken, _ := token.GenerateRefreshToken(testUUID.String())
 				So(refreshToken, ShouldNotBeEmpty)
 
 				// Validate access token
 				claims, err := token.ValidateToken(accessToken, false)
 				So(err, ShouldBeNil)
-				So(claims["sub"], ShouldEqual, float64(123))
+				So(claims["sub"], ShouldEqual, testUUID.String())
 				So(claims["role"], ShouldEqual, "admin")
 
 				// Validate refresh token
 				refreshClaims, err := token.ValidateToken(refreshToken, true)
 				So(err, ShouldBeNil)
-				So(refreshClaims["sub"], ShouldEqual, float64(123))
+				So(refreshClaims["sub"], ShouldEqual, testUUID.String())
 
 				// Invalid token
 				_, err = token.ValidateToken("invalid-token", false)

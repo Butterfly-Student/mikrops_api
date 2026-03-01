@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateAccessToken(userID uint, role string) (string, error) {
+func GenerateAccessToken(userID string, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub":  userID,
 		"role": role,
@@ -24,7 +24,7 @@ func GenerateAccessToken(userID uint, role string) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-func GenerateRefreshToken(userID uint) (string, error) {
+func GenerateRefreshToken(userID string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": userID,
 		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 days

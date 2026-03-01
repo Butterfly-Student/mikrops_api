@@ -75,7 +75,7 @@ func (a *registrationAdapter) FindAll(ctx context.Context, filter *model.Registr
 	return registrations, nil
 }
 
-func (a *registrationAdapter) SetApproved(ctx context.Context, id string, approverID uint, customerID string) error {
+func (a *registrationAdapter) SetApproved(ctx context.Context, id string, approverID string, customerID string) error {
 	registrationID, err := uuid.Parse(id)
 	if err != nil {
 		return stacktrace.Propagate(err, "invalid registration id")
@@ -86,10 +86,15 @@ func (a *registrationAdapter) SetApproved(ctx context.Context, id string, approv
 		return stacktrace.Propagate(err, "invalid customer id")
 	}
 
+	approverUUID, err := uuid.Parse(approverID)
+	if err != nil {
+		return stacktrace.Propagate(err, "invalid approver id")
+	}
+
 	now := time.Now()
 	updates := map[string]interface{}{
 		"status":      model.RegistrationStatusApproved,
-		"approved_by": approverID,
+		"approved_by": approverUUID,
 		"approved_at": now,
 		"customer_id": customerUUID,
 		"updated_at":  now,
@@ -105,16 +110,21 @@ func (a *registrationAdapter) SetApproved(ctx context.Context, id string, approv
 	return nil
 }
 
-func (a *registrationAdapter) SetRejected(ctx context.Context, id string, approverID uint, reason string) error {
+func (a *registrationAdapter) SetRejected(ctx context.Context, id string, approverID string, reason string) error {
 	registrationID, err := uuid.Parse(id)
 	if err != nil {
 		return stacktrace.Propagate(err, "invalid registration id")
 	}
 
+	approverUUID, err := uuid.Parse(approverID)
+	if err != nil {
+		return stacktrace.Propagate(err, "invalid approver id")
+	}
+
 	now := time.Now()
 	updates := map[string]interface{}{
 		"status":           model.RegistrationStatusRejected,
-		"approved_by":      approverID,
+		"approved_by":      approverUUID,
 		"rejection_reason": reason,
 		"updated_at":       now,
 	}
@@ -127,27 +137,4 @@ func (a *registrationAdapter) SetRejected(ctx context.Context, id string, approv
 	}
 
 	return nil
-}
-
-func (a *registrationAdapter) ListPppSecretNames(ctx context.Context) ([]string, error) {
-	var names []string
-
-	// Collect from active/pending customers
-	if err := a.db.WithContext(ctx).
-		Model(&model.Customer{}).
-		Where("ppp_secret_name IS NOT NULL").
-		Pluck("ppp_secret_name", &names).Error; err != nil {
-		return nil, stacktrace.Propagate(err, "failed to list customer ppp secret names")
-	}
-
-	// Collect from non-rejected registrations
-	var regNames []string
-	if err := a.db.WithContext(ctx).
-		Model(&model.CustomerRegistration{}).
-		Where("ppp_secret_name IS NOT NULL AND status != ?", model.RegistrationStatusRejected).
-		Pluck("ppp_secret_name", &regNames).Error; err != nil {
-		return nil, stacktrace.Propagate(err, "failed to list registration ppp secret names")
-	}
-
-	return append(names, regNames...), nil
 }

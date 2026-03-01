@@ -3,7 +3,6 @@ package payment
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -197,16 +196,15 @@ func (d *domain) Confirm(ctx context.Context, id string, userID string) (*model.
 		return nil, stacktrace.NewError("payment is not in pending status")
 	}
 
-	// Parse user ID (numeric)
-	userIDUint64, err := strconv.ParseUint(userID, 10, 64)
+	// Parse user ID (UUID)
+	processedByUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "invalid user id")
 	}
-	userIDUint := uint(userIDUint64)
 
 	// Update payment status
 	payment.Status = model.PaymentStatusTypeConfirmed
-	payment.ProcessedBy = &userIDUint
+	payment.ProcessedBy = &processedByUUID
 	now := time.Now()
 	payment.ProcessedAt = &now
 
@@ -271,16 +269,15 @@ func (d *domain) Reject(ctx context.Context, id string, userID string, reason st
 		return nil, stacktrace.NewError("payment is not in pending status")
 	}
 
-	// Parse user ID (numeric)
-	userIDUint64, err := strconv.ParseUint(userID, 10, 64)
+	// Parse user ID (UUID)
+	processedByUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "invalid user id")
 	}
-	userIDUint := uint(userIDUint64)
 
 	// Update payment status
 	payment.Status = model.PaymentStatusTypeRejected
-	payment.ProcessedBy = &userIDUint
+	payment.ProcessedBy = &processedByUUID
 	now := time.Now()
 	payment.ProcessedAt = &now
 	payment.RejectionReason = &reason

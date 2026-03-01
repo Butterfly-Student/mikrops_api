@@ -11,18 +11,14 @@ func init() {
 	goose.AddMigrationContext(upFixPaymentProcessedBy, downFixPaymentProcessedBy)
 }
 
+// upFixPaymentProcessedBy is a no-op — processed_by in payments is now UUID type
+// with FK to admin_users (already set correctly in migration 9).
 func upFixPaymentProcessedBy(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
-	ALTER TABLE payments
-	ALTER COLUMN processed_by TYPE BIGINT USING NULL;
-	`)
+	_, err := tx.Exec(`SELECT 1; -- no-op: processed_by is UUID in migration 9`)
 	return err
 }
 
 func downFixPaymentProcessedBy(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
-	ALTER TABLE payments
-	ALTER COLUMN processed_by TYPE UUID USING NULL;
-	`)
+	_, err := tx.Exec(`SELECT 1; -- no-op`)
 	return err
 }

@@ -7,8 +7,8 @@ import (
 )
 
 type UserDomain interface {
-	GetProfile(userID uint) (*model.User, error)
-	UpdateProfile(userID uint, req model.UserInput) error
+	GetProfile(userID string) (*model.AdminUser, error)
+	UpdateProfile(userID string, req model.AdminUserInput) error
 }
 
 type domain struct {
@@ -21,18 +21,18 @@ func NewUserDomain(dbPort outbound_port.DatabasePort) UserDomain {
 	}
 }
 
-func (d *domain) GetProfile(userID uint) (*model.User, error) {
+func (d *domain) GetProfile(userID string) (*model.AdminUser, error) {
 	return d.dbPort.User().FindByID(userID)
 }
 
-func (d *domain) UpdateProfile(userID uint, req model.UserInput) error {
+func (d *domain) UpdateProfile(userID string, req model.AdminUserInput) error {
 	user, err := d.dbPort.User().FindByID(userID)
 	if err != nil {
 		return err
 	}
 
-	if req.Name != "" {
-		user.Name = req.Name
+	if req.FullName != "" {
+		user.FullName = req.FullName
 	}
 	if req.Email != "" {
 		// Check if email already exists

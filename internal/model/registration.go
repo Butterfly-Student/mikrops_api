@@ -16,7 +16,8 @@ const (
 	RegistrationStatusRejected RegistrationStatus = "rejected"
 )
 
-// CustomerRegistration represents a public registration request from a prospective customer
+// CustomerRegistration represents a public registration request from a prospective customer.
+// This is service-type agnostic - works for PPPoE, Hotspot, Static IP, and VPN.
 type CustomerRegistration struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 
@@ -34,15 +35,12 @@ type CustomerRegistration struct {
 	BandwidthProfile   *BandwidthProfile `gorm:"foreignKey:BandwidthProfileID;constraint:OnDelete:RESTRICT" json:"bandwidth_profile,omitempty"`
 	PreferredRouterID  *uuid.UUID        `gorm:"type:uuid" json:"preferred_router_id"`
 
-	// Auto-generated PPP username (derived from full_name at submit time)
-	PppSecretName *string `gorm:"size:100" json:"ppp_secret_name"`
-
 	// Review status
 	Status          RegistrationStatus `gorm:"size:20;not null;default:pending" json:"status"`
 	RejectionReason *string            `gorm:"type:text" json:"rejection_reason"`
 
 	// Approval tracking
-	ApprovedBy *uint      `gorm:"type:bigint" json:"approved_by"`
+	ApprovedBy *uuid.UUID `gorm:"type:uuid" json:"approved_by"`
 	ApprovedAt *time.Time `json:"approved_at"`
 
 	// Link to created customer (set when approved)
@@ -89,11 +87,18 @@ type RegistrationFilter struct {
 	Search             *string             `json:"search"` // name, email, phone
 }
 
-// RegistrationApprovalResult is the approval response — includes sensitive credentials shown only once
+// RegistrationApprovalResult is the approval response — includes sensitive credentials shown only once.
+// Credentials are generated based on the service type of the selected bandwidth profile.
 type RegistrationApprovalResult struct {
-	Registration         *CustomerRegistration `json:"registration"`
-	Customer             *Customer             `json:"customer"`
-	InitialPortalPassword string               `json:"initial_portal_password"` // plain-text, shown once
-	PppSecretName        string                `json:"ppp_secret_name"`
-	PppSecretPassword    string                `json:"ppp_secret_password"` // plain-text, shown once
+	Registration          *CustomerRegistration `json:"registration"`
+	Customer              *Customer             `json:"customer"`
+	Subscription          *Subscription         `json:"subscription"`
+	InitialPortalPassword string                `json:"initial_portal_password"` // plain-text, shown once
+	// Service credentials - type depends on BandwidthProfile.ServiceType:
+	// - PPPoE: PPP username/password
+	// - Hotspot: Hotspot username/password  
+	// - Static IP: Identifier/IP info
+	// - VPN: VPN username/password
+	ServiceUsername string `json:"service_username"`
+	ServicePassword string `json:"service_password"` // plain-text, shown once
 }

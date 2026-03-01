@@ -13,6 +13,7 @@ import (
 	"github.com/casbin/casbin/v3"
 	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +49,15 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	t.Run("Login success", func(t *testing.T) {
 		req := model.LoginRequest{Email: "test@example.com", Password: "password"}
 		hashedPassword, _ := hash.HashPassword("password")
-		user := &model.User{ID: 1, Email: "test@example.com", Password: hashedPassword, Role: "user", Status: "active"}
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+		isActive := true
+		user := &model.AdminUser{
+			ID:           testUUID,
+			Email:        "test@example.com",
+			PasswordHash: hashedPassword,
+			Role:         model.AdminRoleCS,
+			IsActive:     &isActive,
+		}
 
 		mockDB.EXPECT().User().Return(mockUserDB)
 		mockUserDB.EXPECT().FindByEmail(req.Email).Return(user, nil)
@@ -62,7 +71,15 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	t.Run("Login invalid credentials", func(t *testing.T) {
 		req := model.LoginRequest{Email: "test@example.com", Password: "wrong_password"}
 		hashedPassword, _ := hash.HashPassword("password")
-		user := &model.User{ID: 1, Email: "test@example.com", Password: hashedPassword, Role: "user", Status: "active"}
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+		isActive := true
+		user := &model.AdminUser{
+			ID:           testUUID,
+			Email:        "test@example.com",
+			PasswordHash: hashedPassword,
+			Role:         model.AdminRoleCS,
+			IsActive:     &isActive,
+		}
 
 		mockDB.EXPECT().User().Return(mockUserDB)
 		mockUserDB.EXPECT().FindByEmail(req.Email).Return(user, nil)
@@ -83,14 +100,14 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	})
 
 	t.Run("Register success", func(t *testing.T) {
-		req := model.RegisterRequest{Name: "Test", Email: "new@example.com", Password: "password", Role: "user"}
+		req := model.RegisterRequest{FullName: "Test", Email: "new@example.com", Password: "password", Role: "cs"}
 
 		mockDB.EXPECT().User().Return(mockUserDB)
 		mockUserDB.EXPECT().FindByEmail(req.Email).Return(nil, errors.New("not found"))
 
 		mockDB.EXPECT().User().Return(mockUserDB)
-		mockUserDB.EXPECT().Create(gomock.Any()).DoAndReturn(func(u *model.User) error {
-			u.ID = 1
+		mockUserDB.EXPECT().Create(gomock.Any()).DoAndReturn(func(u *model.AdminUser) error {
+			u.ID = uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
 			return nil
 		})
 
@@ -99,10 +116,10 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	})
 
 	t.Run("Register email exists", func(t *testing.T) {
-		req := model.RegisterRequest{Name: "Test", Email: "existing@example.com", Password: "password"}
+		req := model.RegisterRequest{FullName: "Test", Email: "existing@example.com", Password: "password"}
 
 		mockDB.EXPECT().User().Return(mockUserDB)
-		mockUserDB.EXPECT().FindByEmail(req.Email).Return(&model.User{}, nil)
+		mockUserDB.EXPECT().FindByEmail(req.Email).Return(&model.AdminUser{}, nil)
 
 		err := domain.Register(req)
 		assert.Error(t, err)
@@ -110,12 +127,18 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	})
 
 	t.Run("RefreshToken success", func(t *testing.T) {
-		validToken, _ := token.GenerateRefreshToken(1)
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+		validToken, _ := token.GenerateRefreshToken(testUUID.String())
 		req := model.RefreshTokenRequest{RefreshToken: validToken}
-		user := &model.User{ID: 1, Role: "user", Status: "active"}
+		isActive := true
+		user := &model.AdminUser{
+			ID:       testUUID,
+			Role:     model.AdminRoleCS,
+			IsActive: &isActive,
+		}
 
 		mockDB.EXPECT().User().Return(mockUserDB)
-		mockUserDB.EXPECT().FindByID(uint(1)).Return(user, nil)
+		mockUserDB.EXPECT().FindByID(testUUID.String()).Return(user, nil)
 
 		res, err := domain.RefreshToken(req)
 		assert.NoError(t, err)
@@ -125,16 +148,20 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 
 	t.Run("ChangePassword success", func(t *testing.T) {
 		oldHash, _ := hash.HashPassword("old_password")
-		user := &model.User{ID: 1, Password: oldHash}
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+		user := &model.AdminUser{
+			ID:           testUUID,
+			PasswordHash: oldHash,
+		}
 		req := model.ChangePasswordRequest{OldPassword: "old_password", NewPassword: "new_password"}
 
 		mockDB.EXPECT().User().Return(mockUserDB)
-		mockUserDB.EXPECT().FindByID(uint(1)).Return(user, nil)
+		mockUserDB.EXPECT().FindByID(testUUID.String()).Return(user, nil)
 
 		mockDB.EXPECT().User().Return(mockUserDB)
 		mockUserDB.EXPECT().Update(gomock.Any()).Return(nil)
 
-		err := domain.ChangePassword(1, req)
+		err := domain.ChangePassword(testUUID, req)
 		assert.NoError(t, err)
 	})
 }

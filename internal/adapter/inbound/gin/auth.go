@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"go-template/internal/domain"
 	"go-template/internal/model"
@@ -80,7 +81,19 @@ func (h *authAdapter) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	if err := h.domain.Auth().ChangePassword(userID.(uint), req); err != nil {
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	userUUID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	if err := h.domain.Auth().ChangePassword(userUUID, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -1,4 +1,4 @@
-package gin_inbound_adapter_test
+package gin_adapter_test
 
 import (
 	"net/http"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	. "github.com/smartystreets/goconvey/convey"
 
@@ -103,6 +104,9 @@ func TestMiddlewareAdapter(t *testing.T) {
 				c.String(http.StatusOK, "OK")
 			})
 
+			testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+			isActive := true
+
 			Convey("Missing Authorization header", func() {
 				// Need to set AUTH_DRIVER to non-JWT for this test
 				os.Setenv("AUTH_DRIVER", "database")
@@ -120,7 +124,7 @@ func TestMiddlewareAdapter(t *testing.T) {
 
 				mockClientCachePort.EXPECT().Get(gomock.Any()).Return(model.Client{}, redis.Nil).Times(1)
 				mockClientDatabasePort.EXPECT().IsExists(gomock.Any()).Return(true, nil).Times(1)
-				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return([]model.Client{{ID: 1}}, nil).Times(1)
+				mockClientDatabasePort.EXPECT().FindByFilter(gomock.Any(), gomock.Any()).Return([]model.Client{{ID: testUUID, IsActive: &isActive}}, nil).Times(1)
 				mockClientCachePort.EXPECT().Set(gomock.Any()).Return(nil).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/test", nil)

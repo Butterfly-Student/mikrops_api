@@ -1,4 +1,4 @@
-package gin_inbound_adapter_test
+package gin_adapter_test
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	. "github.com/smartystreets/goconvey/convey"
 
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
@@ -49,24 +50,31 @@ func TestClientAdapter(t *testing.T) {
 		router.POST("/client-find", adapter.Client().Find)
 		router.POST("/client-delete", adapter.Client().Delete)
 
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
+		isActive := true
+		now := time.Now()
+		bearerKey := "test-bearer-key"
+
 		inputs := []model.ClientInput{
-			{Name: "Test Client"},
+			{FullName: "Test Client", Email: "test@example.com", Role: string(model.AdminRoleAdmin), IsActive: &isActive},
 		}
 
 		outputs := []model.Client{
 			{
-				ID: 1,
-				ClientInput: model.ClientInput{
-					Name:      "Test Client",
-					BearerKey: "test-bearer-key",
-					CreatedAt: time.Now(),
-					UpdatedAt: time.Now(),
-				},
+				ID:           testUUID,
+				FullName:     "Test Client",
+				Email:        "test@example.com",
+				Role:         model.AdminRoleAdmin,
+				IsActive:     &isActive,
+				BearerKey:    &bearerKey,
+				PasswordHash: "hashed_password",
+				CreatedAt:    now,
+				UpdatedAt:    now,
 			},
 		}
 
 		filter := model.ClientFilter{
-			IDs: []int{1},
+			Emails: []string{"test@example.com"},
 		}
 
 		Convey("Upsert", func() {

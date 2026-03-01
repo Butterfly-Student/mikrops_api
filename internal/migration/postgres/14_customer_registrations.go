@@ -24,18 +24,23 @@ func upCustomerRegistrations(ctx context.Context, tx *sql.Tx) error {
 			notes                TEXT,
 			bandwidth_profile_id UUID REFERENCES bandwidth_profiles(id) ON DELETE RESTRICT,
 			preferred_router_id  UUID REFERENCES mikrotik_routers(id) ON DELETE SET NULL,
-			ppp_secret_name      VARCHAR(100),
 			status               VARCHAR(20)  NOT NULL DEFAULT 'pending',
 			rejection_reason     TEXT,
-			approved_by          BIGINT,
+			approved_by          UUID REFERENCES admin_users(id) ON DELETE SET NULL,
 			approved_at          TIMESTAMPTZ,
 			customer_id          UUID REFERENCES customers(id) ON DELETE SET NULL,
 			created_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 			updated_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 			deleted_at           TIMESTAMPTZ
 		);
-		CREATE INDEX IF NOT EXISTS idx_customer_registrations_status     ON customer_registrations(status);
-		CREATE INDEX IF NOT EXISTS idx_customer_registrations_deleted_at ON customer_registrations(deleted_at);
+		CREATE INDEX IF NOT EXISTS idx_customer_registrations_status 
+			ON customer_registrations(status);
+		CREATE INDEX IF NOT EXISTS idx_customer_registrations_deleted_at 
+			ON customer_registrations(deleted_at);
+		CREATE INDEX IF NOT EXISTS idx_customer_registrations_customer_id 
+			ON customer_registrations(customer_id);
+		CREATE INDEX IF NOT EXISTS idx_customer_registrations_bandwidth_profile_id 
+			ON customer_registrations(bandwidth_profile_id);
 	`)
 	return err
 }

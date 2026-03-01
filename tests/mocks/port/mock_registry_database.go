@@ -147,6 +147,20 @@ func (mr *MockDatabasePortMockRecorder) Registration() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Registration", reflect.TypeOf((*MockDatabasePort)(nil).Registration))
 }
 
+// Subscription mocks base method.
+func (m *MockDatabasePort) Subscription() outbound_port.SubscriptionDatabasePort {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Subscription")
+	ret0, _ := ret[0].(outbound_port.SubscriptionDatabasePort)
+	return ret0
+}
+
+// Subscription indicates an expected call of Subscription.
+func (mr *MockDatabasePortMockRecorder) Subscription() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscription", reflect.TypeOf((*MockDatabasePort)(nil).Subscription))
+}
+
 // User mocks base method.
 func (m *MockDatabasePort) User() outbound_port.UserDatabasePort {
 	m.ctrl.T.Helper()

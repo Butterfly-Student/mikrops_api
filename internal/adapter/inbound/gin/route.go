@@ -363,4 +363,47 @@ func InitRoute(
 		mikrotikOp.POST("/hotspot/schedulers/:profile", port.Hotspot().CreateExpiryScheduler)
 		mikrotikOp.DELETE("/hotspot/schedulers/:profile", port.Hotspot().RemoveExpiryScheduler)
 	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// WhatsApp Gateway (Gowa)
+	// ─────────────────────────────────────────────────────────────────────────
+	gowaGroup := app.Group("/gowa")
+	gowaGroup.Use(port.Middleware().UserAuth())
+	gowaGroup.Use(port.Middleware().RBAC())
+	{
+		// App / session management (uses default or ?device_id= device)
+		gowaGroup.GET("/app/login", port.Gowa().AppLogin)
+		gowaGroup.GET("/app/login/code", port.Gowa().AppLoginWithCode)
+		gowaGroup.POST("/app/logout", port.Gowa().AppLogout)
+		gowaGroup.POST("/app/reconnect", port.Gowa().AppReconnect)
+		gowaGroup.GET("/app/status", port.Gowa().AppStatus)
+
+		// Device management
+		gowaGroup.GET("/devices", port.Gowa().ListDevices)
+		gowaGroup.POST("/devices", port.Gowa().AddDevice)
+		gowaGroup.GET("/devices/:device_id", port.Gowa().GetDevice)
+		gowaGroup.DELETE("/devices/:device_id", port.Gowa().RemoveDevice)
+		gowaGroup.GET("/devices/:device_id/login", port.Gowa().LoginDevice)
+		gowaGroup.GET("/devices/:device_id/login/code", port.Gowa().LoginDeviceWithCode)
+		gowaGroup.POST("/devices/:device_id/logout", port.Gowa().LogoutDevice)
+		gowaGroup.POST("/devices/:device_id/reconnect", port.Gowa().ReconnectDevice)
+		gowaGroup.GET("/devices/:device_id/status", port.Gowa().GetDeviceStatus)
+
+		// Group management
+		gowaGroup.GET("/groups", port.Gowa().GetMyGroups)
+		gowaGroup.GET("/groups/find", port.Gowa().FindGroupByName)
+		gowaGroup.GET("/groups/info", port.Gowa().GetGroupInfo)
+		gowaGroup.GET("/groups/invite-link", port.Gowa().GetGroupInviteLink)
+
+		// User / contact information
+		gowaGroup.GET("/users/check", port.Gowa().CheckUser)
+		gowaGroup.GET("/users/info", port.Gowa().GetUserInfo)
+		gowaGroup.GET("/users/contacts", port.Gowa().GetMyContacts)
+
+		// Send messages
+		gowaGroup.POST("/send/message", port.Gowa().SendMessage)
+		gowaGroup.POST("/send/image", port.Gowa().SendImageFromURL)
+		gowaGroup.POST("/send/file", port.Gowa().SendFileFromURL)
+		gowaGroup.POST("/send/video", port.Gowa().SendVideoFromURL)
+	}
 }

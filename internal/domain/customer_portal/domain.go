@@ -32,6 +32,7 @@ type UpdateProfileInput struct {
 }
 
 // ChangePppInput for updating PPPoE credentials.
+// TODO: This should be moved to Subscription domain as it deals with service credentials.
 type ChangePppInput struct {
 	NewUsername *string `json:"new_username" validate:"omitempty,min=3,max=100"`
 	NewPassword *string `json:"new_password" validate:"omitempty,min=6,max=255"`
@@ -43,7 +44,9 @@ type CustomerPortalDomain interface {
 	GetProfile(ctx context.Context, customerID string) (*model.Customer, error)
 	UpdateProfile(ctx context.Context, customerID string, input UpdateProfileInput) (*model.Customer, error)
 	ChangePassword(ctx context.Context, customerID, oldPassword, newPassword string) error
-	ChangePppCredentials(ctx context.Context, customerID string, input ChangePppInput) (*model.Customer, error)
+	// TODO: ChangePppCredentials should be moved to Subscription domain.
+	// This method temporarily gets the active subscription and updates credentials there.
+	ChangePppCredentials(ctx context.Context, customerID string, input ChangePppInput) (*model.Subscription, error)
 	ListInvoices(ctx context.Context, customerID string) ([]model.Invoice, error)
 	GetInvoice(ctx context.Context, customerID, invoiceID string) (*model.Invoice, error)
 }
@@ -191,65 +194,43 @@ func (d *domain) ChangePassword(ctx context.Context, customerID, oldPassword, ne
 	return nil
 }
 
-func (d *domain) ChangePppCredentials(ctx context.Context, customerID string, input ChangePppInput) (*model.Customer, error) {
+func (d *domain) ChangePppCredentials(ctx context.Context, customerID string, input ChangePppInput) (*model.Subscription, error) {
 	if input.NewUsername == nil && input.NewPassword == nil {
 		return nil, stacktrace.NewError("at least one of new_username or new_password must be provided")
 	}
 
-	c, err := d.dbPort.Customer().FindByID(ctx, customerID)
+	// Get active subscriptions for this customer
+	subscriptions, err := d.dbPort.Subscription().FindActiveByCustomerID(ctx, customerID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get customer")
+		return nil, stacktrace.Propagate(err, "failed to get customer subscriptions")
 	}
 
-	if c.RouterID == nil {
-		return nil, stacktrace.NewError("customer has no router assigned; cannot update PPPoE credentials")
+	if len(subscriptions) == 0 {
+		return nil, stacktrace.NewError("no active subscription found for this customer")
 	}
 
-	// Build full CustomerInput from existing customer, override only PPP fields
-	routerID := *c.RouterID
-	status := string(c.Status)
-	pppService := string(c.PppService)
+	// Use the first active subscription
+	activeSub := &subscriptions[0]
 
-	newUsername := c.PppSecretName
+	// Check if customer has router assigned
+	if activeSub.RouterID == uuid.Nil {
+		return nil, stacktrace.NewError("subscription has no router assigned; cannot update PPPoE credentials")
+	}
+
+	// Update only the credential fields
 	if input.NewUsername != nil {
-		newUsername = input.NewUsername
+		activeSub.Username = *input.NewUsername
 	}
-	newPassword := c.PppSecretPassword
 	if input.NewPassword != nil {
-		newPassword = input.NewPassword
+		activeSub.Password = *input.NewPassword
 	}
 
-	billingCycle := string(c.BillingCycle)
-	customerInput := model.CustomerInput{
-		CustomerCode:            c.CustomerCode,
-		FullName:                c.FullName,
-		Email:                   c.Email,
-		Phone:                   c.Phone,
-		Address:                 c.Address,
-		Latitude:                c.Latitude,
-		Longitude:               c.Longitude,
-		Status:                  &status,
-		RouterID:                &routerID,
-		PppSecretName:           newUsername,
-		PppSecretPassword:       newPassword,
-		PppService:              &pppService,
-		StaticIP:                c.StaticIP,
-		MacAddress:              c.MacAddress,
-		ProfileID:               c.ProfileID,
-		BillingCycle:            &billingCycle,
-		BillingDay:              c.BillingDay,
-		PaymentMethodPreference: c.PaymentMethodPreference,
-		AutoIsolate:             c.AutoIsolate,
-		GracePeriodDays:         c.GracePeriodDays,
-		Notes:                   c.Notes,
-	}
-
-	updatedCustomer, err := d.customerDomain.Update(ctx, customerID, customerInput)
-	if err != nil {
+	// Save the updated subscription
+	if err := d.dbPort.Subscription().Update(ctx, activeSub); err != nil {
 		return nil, stacktrace.Propagate(err, "failed to update PPPoE credentials")
 	}
 
-	return updatedCustomer, nil
+	return activeSub, nil
 }
 
 func (d *domain) ListInvoices(ctx context.Context, customerID string) ([]model.Invoice, error) {

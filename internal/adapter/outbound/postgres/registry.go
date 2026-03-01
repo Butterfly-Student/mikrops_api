@@ -72,3 +72,7 @@ func (s *adapter) Payment() outbound_port.PaymentDatabasePort {
 func (s *adapter) Registration() outbound_port.RegistrationDatabasePort {
 	return NewRegistrationAdapter(s.db)
 }
+
+func (s *adapter) Subscription() outbound_port.SubscriptionDatabasePort {
+	return NewSubscriptionAdapter(s.db)
+}

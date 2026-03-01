@@ -8,29 +8,42 @@ import (
 )
 
 func init() {
-	goose.AddMigrationContext(upClient, downClient)
+	goose.AddMigrationContext(upAdminUsers, downAdminUsers)
 }
 
-func upClient(ctx context.Context, tx *sql.Tx) error {
-	// This code is executed when the migration is applied.
-	_, err := tx.Exec(`CREATE TABLE IF NOT EXISTS clients (
-		id SERIAL PRIMARY KEY,
-		name VARCHAR(100),
-		bearer_key VARCHAR(255) UNIQUE,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-	);`)
-	if err != nil {
-		return err
-	}
-	return nil
+// upAdminUsers replaces the old generic 'clients' table with ISP-specific admin_users.
+func upAdminUsers(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.Exec(`
+	CREATE TABLE IF NOT EXISTS admin_users (
+		id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		full_name     VARCHAR(100) NOT NULL,
+		email         VARCHAR(100) UNIQUE NOT NULL,
+		phone         VARCHAR(20),
+		password_hash VARCHAR(255) NOT NULL,
+		role          VARCHAR(20)  NOT NULL
+		              CHECK (role IN ('superadmin', 'admin', 'cs', 'billing', 'technician', 'readonly'))
+		              DEFAULT 'cs',
+		is_active     BOOLEAN    DEFAULT true,
+		last_login    TIMESTAMP,
+		last_ip       VARCHAR(45),
+		bearer_key    VARCHAR(255) UNIQUE, -- API key untuk akses programatik
+		created_at    TIMESTAMP  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+		updated_at    TIMESTAMP  DEFAULT CURRENT_TIMESTAMP NOT NULL
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_admin_users_email     ON admin_users(email);
+	CREATE INDEX IF NOT EXISTS idx_admin_users_role      ON admin_users(role);
+	CREATE INDEX IF NOT EXISTS idx_admin_users_is_active ON admin_users(is_active);
+
+	COMMENT ON TABLE  admin_users              IS 'Admin dan operator sistem ISP';
+	COMMENT ON COLUMN admin_users.password_hash IS 'bcrypt hash password';
+	COMMENT ON COLUMN admin_users.bearer_key    IS 'API key untuk akses programatik / integrasi eksternal';
+	COMMENT ON COLUMN admin_users.role          IS 'superadmin=full access, admin=manajemen, cs=customer service, billing=keuangan, technician=lapangan, readonly=lihat saja';
+	`)
+	return err
 }
 
-func downClient(ctx context.Context, tx *sql.Tx) error {
-	// This code is executed when the migration is rolled back.
-	_, err := tx.Exec(`DROP TABLE clients;`)
-	if err != nil {
-		return err
-	}
-	return nil
+func downAdminUsers(ctx context.Context, tx *sql.Tx) error {
+	_, err := tx.Exec(`DROP TABLE IF EXISTS admin_users CASCADE;`)
+	return err
 }

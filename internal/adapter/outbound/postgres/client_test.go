@@ -3,7 +3,6 @@ package postgres_outbound_adapter_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	. "github.com/smartystreets/goconvey/convey"
 	"gorm.io/gorm"
@@ -40,12 +39,11 @@ func TestClientAdapter(t *testing.T) {
 		// Cleanup before each test to ensure clean state
 		pgContainer.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.Client{})
 
-		now := time.Now().Truncate(time.Microsecond)
 		input := model.ClientInput{
-			Name:      "Test Client",
-			BearerKey: "test-key-integration",
-			CreatedAt: now,
-			UpdatedAt: now,
+			FullName: "Test Admin User",
+			Email:    "test@example.com",
+			Password: "password123",
+			Role:     "admin",
 		}
 
 		Convey("Upsert", func() {
@@ -59,25 +57,25 @@ func TestClientAdapter(t *testing.T) {
 
 				var stored model.Client
 				pgContainer.DB.First(&stored)
-				So(stored.Name, ShouldEqual, input.Name)
-				So(stored.BearerKey, ShouldEqual, input.BearerKey)
+				So(stored.FullName, ShouldEqual, input.FullName)
+				So(stored.Email, ShouldEqual, input.Email)
 			})
 
-			Convey("Update existing record (Conflict on BearerKey)", func() {
+			Convey("Update existing record (Conflict on Email)", func() {
 				// First insert
 				adapter.Upsert([]model.ClientInput{input})
 
 				// Update data
 				updatedInput := input
-				updatedInput.Name = "Updated Name"
+				updatedInput.FullName = "Updated Name"
 
-				// Same BearerKey -> Should Update
+				// Same Email -> Should Update
 				err := adapter.Upsert([]model.ClientInput{updatedInput})
 				So(err, ShouldBeNil)
 
 				var stored model.Client
-				pgContainer.DB.First(&stored, "bearer_key = ?", input.BearerKey)
-				So(stored.Name, ShouldEqual, "Updated Name")
+				pgContainer.DB.First(&stored, "email = ?", input.Email)
+				So(stored.FullName, ShouldEqual, "Updated Name")
 
 				var count int64
 				pgContainer.DB.Model(&model.Client{}).Count(&count)
@@ -89,35 +87,35 @@ func TestClientAdapter(t *testing.T) {
 			// Seed data
 			adapter.Upsert([]model.ClientInput{input})
 
-			// Get actual ID
+			// Get actual record
 			var stored model.Client
-			pgContainer.DB.First(&stored, "bearer_key = ?", input.BearerKey)
+			pgContainer.DB.First(&stored, "email = ?", input.Email)
 
-			Convey("Find by ID", func() {
-				filter := model.ClientFilter{IDs: []int{stored.ID}}
+			Convey("Find by Email", func() {
+				filter := model.ClientFilter{Emails: []string{input.Email}}
 				results, err := adapter.FindByFilter(filter, false)
 				So(err, ShouldBeNil)
 				So(len(results), ShouldEqual, 1)
-				So(results[0].ID, ShouldEqual, stored.ID)
+				So(results[0].Email, ShouldEqual, input.Email)
 			})
 
-			Convey("Find by Name", func() {
-				filter := model.ClientFilter{Names: []string{input.Name}}
+			Convey("Find by Role", func() {
+				filter := model.ClientFilter{Roles: []model.AdminUserRole{model.AdminRoleAdmin}}
 				results, err := adapter.FindByFilter(filter, false)
 				So(err, ShouldBeNil)
 				So(len(results), ShouldEqual, 1)
-				So(results[0].Name, ShouldEqual, input.Name)
+				So(results[0].Role, ShouldEqual, model.AdminRoleAdmin)
 			})
 
 			Convey("With Lock", func() {
-				filter := model.ClientFilter{BearerKeys: []string{input.BearerKey}}
+				filter := model.ClientFilter{Emails: []string{input.Email}}
 				results, err := adapter.FindByFilter(filter, true)
 				So(err, ShouldBeNil)
 				So(len(results), ShouldEqual, 1)
 			})
 
 			Convey("Empty Result", func() {
-				filter := model.ClientFilter{Names: []string{"Non Existent"}}
+				filter := model.ClientFilter{Emails: []string{"nonexistent@example.com"}}
 				results, err := adapter.FindByFilter(filter, false)
 				So(err, ShouldBeNil)
 				So(len(results), ShouldEqual, 0)
@@ -128,13 +126,13 @@ func TestClientAdapter(t *testing.T) {
 			adapter.Upsert([]model.ClientInput{input})
 
 			Convey("Exists", func() {
-				exists, err := adapter.IsExists(input.BearerKey)
+				exists, err := adapter.IsExists(input.Email)
 				So(err, ShouldBeNil)
 				So(exists, ShouldBeTrue)
 			})
 
 			Convey("Not Exists", func() {
-				exists, err := adapter.IsExists("non-existent-key")
+				exists, err := adapter.IsExists("nonexistent@example.com")
 				So(err, ShouldBeNil)
 				So(exists, ShouldBeFalse)
 			})
@@ -143,8 +141,8 @@ func TestClientAdapter(t *testing.T) {
 		Convey("DeleteByFilter", func() {
 			adapter.Upsert([]model.ClientInput{input})
 
-			Convey("Delete by BearerKey", func() {
-				filter := model.ClientFilter{BearerKeys: []string{input.BearerKey}}
+			Convey("Delete by Email", func() {
+				filter := model.ClientFilter{Emails: []string{input.Email}}
 				err := adapter.DeleteByFilter(filter)
 				So(err, ShouldBeNil)
 

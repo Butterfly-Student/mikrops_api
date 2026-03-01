@@ -6,6 +6,7 @@ import (
 	"go-template/internal/domain/client"
 	"go-template/internal/domain/customer"
 	customer_portal "go-template/internal/domain/customer_portal"
+	gowa_domain "go-template/internal/domain/gowa"
 	hotspot_domain "go-template/internal/domain/hotspot"
 	"go-template/internal/domain/iface"
 	"go-template/internal/domain/invoice"
@@ -39,6 +40,7 @@ type Domain interface {
 	Hotspot() hotspot_domain.HotspotDomain
 	Registration() registration.RegistrationDomain
 	CustomerPortal() customer_portal.CustomerPortalDomain
+	Gowa() gowa_domain.GowaDomain
 }
 
 type domain struct {
@@ -48,6 +50,7 @@ type domain struct {
 	workflowPort outbound_port.WorkflowPort
 	mikrotikPort outbound_port.MikrotikPort
 	hotspotPort  outbound_port.HotspotPort
+	gowaPort     outbound_port.GowaPort
 	enforcer     *casbin.Enforcer
 }
 
@@ -58,6 +61,7 @@ func NewDomain(
 	workflowPort outbound_port.WorkflowPort,
 	mikrotikPort outbound_port.MikrotikPort,
 	hotspotPort outbound_port.HotspotPort,
+	gowaPort outbound_port.GowaPort,
 	enforcer *casbin.Enforcer,
 ) Domain {
 	return &domain{
@@ -67,6 +71,7 @@ func NewDomain(
 		workflowPort: workflowPort,
 		mikrotikPort: mikrotikPort,
 		hotspotPort:  hotspotPort,
+		gowaPort:     gowaPort,
 		enforcer:     enforcer,
 	}
 }
@@ -128,9 +133,13 @@ func (d *domain) Hotspot() hotspot_domain.HotspotDomain {
 }
 
 func (d *domain) Registration() registration.RegistrationDomain {
-	return registration.NewRegistrationDomain(d.databasePort, d.Customer())
+	return registration.NewRegistrationDomain(d.databasePort, d.Customer(), d.messagePort.MikrotikSync())
 }
 
 func (d *domain) CustomerPortal() customer_portal.CustomerPortalDomain {
 	return customer_portal.NewCustomerPortalDomain(d.databasePort, d.Customer())
+}
+
+func (d *domain) Gowa() gowa_domain.GowaDomain {
+	return gowa_domain.NewGowaDomain(d.gowaPort)
 }

@@ -1,4 +1,4 @@
-package gin_inbound_adapter_test
+package gin_adapter_test
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	casbinmodel "github.com/casbin/casbin/v3/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	. "github.com/smartystreets/goconvey/convey"
 
 	gin_inbound_adapter "go-template/internal/adapter/inbound/gin"
@@ -58,9 +59,10 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		gin.SetMode(gin.TestMode)
 		router := gin.New()
 
+		testUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440001")
 		// Mock auth middleware
 		authMiddleware := func(c *gin.Context) {
-			c.Set("userID", uint(1))
+			c.Set("userID", testUUID.String())
 			c.Next()
 		}
 
@@ -68,10 +70,11 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		router.PUT("/user/profile", authMiddleware, adapter.User().UpdateProfile)
 
 		Convey("GetProfile", func() {
-			user := &model.User{ID: 1, Name: "Test User", Email: "test@example.com", Role: "user"}
+			isActive := true
+			user := &model.User{ID: testUUID, FullName: "Test User", Email: "test@example.com", Role: model.AdminRoleAdmin, IsActive: &isActive}
 
 			Convey("Success", func() {
-				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
+				mockUserDatabasePort.EXPECT().FindByID(testUUID.String()).Return(user, nil).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/user/profile", nil)
 				w := httptest.NewRecorder()
@@ -81,11 +84,11 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 
 				var res model.User
 				json.Unmarshal(w.Body.Bytes(), &res)
-				So(res.Name, ShouldEqual, user.Name)
+				So(res.FullName, ShouldEqual, user.FullName)
 			})
 
 			Convey("User Not Found", func() {
-				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(nil, errors.New("not found")).Times(1)
+				mockUserDatabasePort.EXPECT().FindByID(testUUID.String()).Return(nil, errors.New("not found")).Times(1)
 
 				req := httptest.NewRequest(http.MethodGet, "/user/profile", nil)
 				w := httptest.NewRecorder()
@@ -96,11 +99,12 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 		})
 
 		Convey("UpdateProfile", func() {
-			user := &model.User{ID: 1, Name: "Old Name", Email: "old@example.com"}
-			reqBody := model.UserInput{Name: "New Name", Email: "new@example.com"}
+			isActive := true
+			user := &model.User{ID: testUUID, FullName: "Old Name", Email: "old@example.com", IsActive: &isActive}
+			reqBody := model.UserInput{FullName: "New Name", Email: "new@example.com", Password: "password123", Role: string(model.AdminRoleAdmin)}
 
 			Convey("Success", func() {
-				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
+				mockUserDatabasePort.EXPECT().FindByID(testUUID.String()).Return(user, nil).Times(1)
 				mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(nil, errors.New("not found")).Times(1) // Check email uniqueness
 				mockUserDatabasePort.EXPECT().Update(gomock.Any()).Return(nil).Times(1)
 
@@ -115,8 +119,9 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 			})
 
 			Convey("Email Taken", func() {
-				existingUser := &model.User{ID: 2, Email: "new@example.com"}
-				mockUserDatabasePort.EXPECT().FindByID(uint(1)).Return(user, nil).Times(1)
+				otherUUID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440002")
+				existingUser := &model.User{ID: otherUUID, Email: "new@example.com", IsActive: &isActive}
+				mockUserDatabasePort.EXPECT().FindByID(testUUID.String()).Return(user, nil).Times(1)
 				mockUserDatabasePort.EXPECT().FindByEmail(reqBody.Email).Return(existingUser, nil).Times(1)
 
 				body, _ := json.Marshal(reqBody)

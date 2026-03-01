@@ -17,30 +17,33 @@ func (s *UserSeeder) Name() string {
 }
 
 func (s *UserSeeder) Seed(db *gorm.DB) error {
-	testUsers := []*model.User{
+	isActive := true
+	isInactive := false
+
+	testUsers := []*model.AdminUser{
 		{
-			Name:   "Test Admin",
-			Email:  "test-admin@example.com",
-			Role:   "admin",
-			Status: "active",
+			FullName: "Test Admin",
+			Email:    "test-admin@example.com",
+			Role:     model.AdminRoleAdmin,
+			IsActive: &isActive,
 		},
 		{
-			Name:   "Test User",
-			Email:  "test-user@example.com",
-			Role:   "user",
-			Status: "active",
+			FullName: "Test User",
+			Email:    "test-user@example.com",
+			Role:     model.AdminRoleCS,
+			IsActive: &isActive,
 		},
 		{
-			Name:   "Inactive User",
-			Email:  "inactive-user@example.com",
-			Role:   "user",
-			Status: "inactive",
+			FullName: "Inactive User",
+			Email:    "inactive-user@example.com",
+			Role:     model.AdminRoleCS,
+			IsActive: &isInactive,
 		},
 		{
-			Name:   "Regular User",
-			Email:  "regular@example.com",
-			Role:   "user",
-			Status: "active",
+			FullName: "Regular User",
+			Email:    "regular@example.com",
+			Role:     model.AdminRoleCS,
+			IsActive: &isActive,
 		},
 	}
 
@@ -49,36 +52,36 @@ func (s *UserSeeder) Seed(db *gorm.DB) error {
 		if err != nil {
 			return fmt.Errorf("failed to hash password for %s: %w", user.Email, err)
 		}
-		user.Password = string(hashedPassword)
+		user.PasswordHash = string(hashedPassword)
 
-		var existingUser model.User
+		var existingUser model.AdminUser
 		result := db.Where("email = ?", user.Email).First(&existingUser)
 
-		var targetID uint
+		var targetID string
 		var targetRole string
 
 		if result.Error == gorm.ErrRecordNotFound {
 			if err := db.Create(user).Error; err != nil {
 				return fmt.Errorf("failed to create test user %s: %w", user.Email, err)
 			}
-			fmt.Printf("[USER TEST SEED] Created: %s (id=%d)\n", user.Email, user.ID)
-			targetID = user.ID
-			targetRole = user.Role
+			fmt.Printf("[USER TEST SEED] Created: %s (id=%s)\n", user.Email, user.ID.String())
+			targetID = user.ID.String()
+			targetRole = string(user.Role)
 		} else if result.Error != nil {
 			return fmt.Errorf("failed to check existing user %s: %w", user.Email, result.Error)
 		} else {
 			fmt.Printf("[USER TEST SEED] Already exists: %s\n", user.Email)
-			targetID = existingUser.ID
-			targetRole = existingUser.Role
+			targetID = existingUser.ID.String()
+			targetRole = string(existingUser.Role)
 		}
 
 		// Add Casbin grouping immediately so RBAC works without running the
-		// Casbin seeder separately. The RBAC middleware uses the numeric user ID
+		// Casbin seeder separately. The RBAC middleware uses the user ID
 		// as the Casbin subject.
 		if targetRole != "" {
 			gRule := model.CasbinRule{
 				Ptype: "g",
-				V0:    fmt.Sprintf("%d", targetID),
+				V0:    targetID,
 				V1:    targetRole,
 			}
 			if err := upsertTestGroupRule(db, gRule); err != nil {

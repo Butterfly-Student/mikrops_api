@@ -27,7 +27,13 @@ func (h *userAdapter) GetProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.domain.User().GetProfile(userID.(uint))
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	user, err := h.domain.User().GetProfile(userIDStr)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -43,13 +49,19 @@ func (h *userAdapter) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	var req model.UserInput
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	var req model.AdminUserInput
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.domain.User().UpdateProfile(userID.(uint), req); err != nil {
+	if err := h.domain.User().UpdateProfile(userIDStr, req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

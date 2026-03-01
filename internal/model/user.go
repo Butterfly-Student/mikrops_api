@@ -1,26 +1,14 @@
 package model
 
-import "time"
+// User is a backward-compatibility alias for AdminUser.
+// The old `users` table has been replaced by `admin_users`.
+// Deprecated: use AdminUser instead.
+type User = AdminUser
 
-type User struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email" gorm:"unique"`
-	Password  string    `json:"-"`
-	Role      string    `json:"role"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
+// UserInput is a backward-compatibility alias for AdminUserInput.
+// Deprecated: use AdminUserInput instead.
+type UserInput = AdminUserInput
 
-type UserInput struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
-	Status   string `json:"status"`
-}
-
-type UserFilter struct {
-	Email string
-}
+// UserFilter is a backward-compatibility alias for AdminUserFilter.
+// Deprecated: use AdminUserFilter instead.
+type UserFilter = AdminUserFilter
